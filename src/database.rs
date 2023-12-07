@@ -1,6 +1,8 @@
 use eyre::WrapErr;
 use sqlx::{migrate::MigrateDatabase, PgPool};
 
+pub mod user;
+
 const CONNECTION_ERROR_MESSAGE: &str = "Could not connect to the database.";
 const MIGRATION_ERROR_MESSAGE: &str = "Could not apply database migrations.";
 const CREATION_ERROR_MESSAGE: &str = "Could not create the database.";
