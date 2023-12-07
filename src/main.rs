@@ -1,13 +1,20 @@
-use bit_sync::config::Config;
+use std::sync::Arc;
+
+use bit_sync::{config::Config, connect_and_migrate, AppState};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> eyre::Result<()> {
     let config = Config::from_env();
     let address = config.address();
 
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
 
-    let app = axum::Router::new();
+    let state = Arc::new(AppState {
+        postgres_pool: connect_and_migrate(&config.database_url).await?,
+        config,
+    });
 
-    axum::serve(listener, app).await.unwrap();
+    let app = bit_sync::make_service(state).await;
+
+    Ok(axum::serve(listener, app).await?)
 }
