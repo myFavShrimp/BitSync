@@ -11,6 +11,8 @@ use crate::AppState;
 
 use super::routes;
 
+mod dataloader;
+
 pub async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .route(
