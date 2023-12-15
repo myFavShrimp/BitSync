@@ -6,6 +6,7 @@ use sqlx::PgPool;
 pub mod config;
 mod database;
 mod handler;
+mod helper_macro;
 
 pub use database::connect_and_migrate;
 
