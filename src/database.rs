@@ -1,4 +1,4 @@
-use eyre::WrapErr;
+use color_eyre::eyre::{self, WrapErr};
 use sqlx::{migrate::MigrateDatabase, PgPool};
 
 pub mod user;
