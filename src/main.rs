@@ -28,5 +28,7 @@ async fn main() -> eyre::Result<()> {
 
     let app = bit_sync::make_service(state).await;
 
-    Ok(axum::serve(listener, app).await?)
+    Ok(axum::serve(listener, app)
+        .await
+        .wrap_err("And unrecoverable error occurred")?)
 }
