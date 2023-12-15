@@ -5,6 +5,7 @@ use sqlx::PgPool;
 
 pub mod config;
 mod database;
+mod handler;
 
 pub use database::connect_and_migrate;
 
@@ -15,7 +16,5 @@ pub struct AppState {
 }
 
 pub async fn make_service(state: Arc<AppState>) -> IntoMakeService<Router> {
-    Router::new()
-        .with_state(state.clone())
-        .into_make_service()
+    handler::create_routes(state).await.into_make_service()
 }
