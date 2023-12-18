@@ -6,7 +6,7 @@ use crate::AppState;
 
 use super::routes;
 
-mod graphql;
+pub mod graphql;
 
 pub async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new().merge(graphql::create_routes(state.clone()).await)

@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use bit_sync::{config::Config, connect_and_migrate, AppState};
+use bit_sync::config::Config;
 use color_eyre::eyre::{self, WrapErr};
 
 #[tokio::main]
@@ -21,12 +19,7 @@ async fn main() -> eyre::Result<()> {
         .await
         .wrap_err(format!("Failed to bind to address '{address}'"))?;
 
-    let state = Arc::new(AppState {
-        postgres_pool: connect_and_migrate(&config.database_url).await?,
-        config,
-    });
-
-    let app = bit_sync::make_service(state).await;
+    let app = bit_sync::make_service(config).await?;
 
     axum::serve(listener, app)
         .await

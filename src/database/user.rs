@@ -16,4 +16,17 @@ impl User {
             .fetch_all(connection)
             .await
     }
+
+    pub async fn find_by_username(
+        connection: &PgPool,
+        username: &str,
+    ) -> Result<User, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            r#"SELECT * FROM "user" WHERE username = $1"#,
+            username,
+        )
+        .fetch_one(connection)
+        .await
+    }
 }

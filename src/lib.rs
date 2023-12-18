@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use axum::{routing::IntoMakeService, Router};
+use config::Config;
 use sqlx::PgPool;
 
 pub mod config;
@@ -8,14 +9,24 @@ mod database;
 mod handler;
 mod helper_macro;
 
-pub use database::connect_and_migrate;
-
-#[derive(Debug)]
 pub struct AppState {
     pub config: config::Config,
     pub postgres_pool: PgPool,
+    pub public_graphql_api_schema: handler::api::graphql::PublicRoot,
 }
 
-pub async fn make_service(state: Arc<AppState>) -> IntoMakeService<Router> {
-    handler::create_routes(state).await.into_make_service()
+#[derive(Debug, thiserror::Error)]
+pub enum InitializationError {
+    #[error("Database initialization failed")]
+    Database(#[from] database::DatabaseInitializationError),
+}
+
+pub async fn make_service(config: Config) -> Result<IntoMakeService<Router>, InitializationError> {
+    let state = Arc::new(AppState {
+        postgres_pool: database::connect_and_migrate(&config.database_url).await?,
+        config,
+        public_graphql_api_schema: handler::api::graphql::create_public_root(),
+    });
+
+    Ok(handler::create_routes(state).await.into_make_service())
 }

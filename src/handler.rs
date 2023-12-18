@@ -8,7 +8,7 @@ use tower_http::trace::TraceLayer;
 
 use crate::AppState;
 
-mod api;
+pub mod api;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
