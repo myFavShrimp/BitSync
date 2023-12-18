@@ -1,21 +1,23 @@
-use crate::{database::user::User, handler::api::graphql::schema::public::Context};
+use crate::{
+    database::user::User, handler::api::graphql::schema::public::Context,
+    hash::verify_password_hash,
+};
 
 #[derive(thiserror::Error, Debug)]
 #[error("Username or password wrong")]
-pub struct UsernameOrPasswordWrongError;
+pub enum LoginError {
+    PasswordHash(#[from] argon2::password_hash::Error),
+    DatabaseError(#[from] sqlx::Error),
+}
 
 pub async fn perform_login(
     ctx: &Context,
     username: String,
     password: String,
-) -> async_graphql::Result<()> {
-    let user = User::find_by_username(&ctx.app_state.postgres_pool, &username)
-        .await
-        .map_err(|_| UsernameOrPasswordWrongError)?;
+) -> Result<(), LoginError> {
+    let user = User::find_by_username(&ctx.app_state.postgres_pool, &username).await?;
 
-    if user.password == password {
-        Ok(())
-    } else {
-        Err(UsernameOrPasswordWrongError)?
-    }
+    verify_password_hash(&user.password, &password)?;
+
+    Ok(())
 }

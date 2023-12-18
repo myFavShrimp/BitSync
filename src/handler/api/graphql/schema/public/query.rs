@@ -13,8 +13,9 @@ impl Query {
         password: String,
     ) -> async_graphql::Result<String> {
         let context = context.data::<Context>()?;
-        use_case::login::perform_login(context, username, password)
+
+        Ok(use_case::login::perform_login(context, username, password)
             .await
-            .map(|_| String::from(""))
+            .map(|_| String::from(""))?)
     }
 }

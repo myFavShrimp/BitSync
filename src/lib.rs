@@ -7,6 +7,7 @@ use sqlx::PgPool;
 pub mod config;
 mod database;
 mod handler;
+mod hash;
 mod helper_macro;
 
 pub struct AppState {
