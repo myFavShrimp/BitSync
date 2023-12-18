@@ -17,21 +17,21 @@ async fn create_database_if_not_exists(
 ) -> Result<(), DatabaseInitializationError> {
     if !sqlx::Postgres::database_exists(database_url)
         .await
-        .map_err(|error| DatabaseInitializationError::Creation(error))?
+        .map_err(DatabaseInitializationError::Creation)?
     {
         sqlx::Postgres::create_database(database_url)
             .await
-            .map_err(|error| DatabaseInitializationError::Creation(error))?
+            .map_err(DatabaseInitializationError::Creation)?;
     };
 
     Ok(())
 }
 
 async fn apply_migrations(connection: &PgPool) -> Result<(), DatabaseInitializationError> {
-    Ok(sqlx::migrate!()
+    sqlx::migrate!()
         .run(connection)
         .await
-        .map_err(|error| DatabaseInitializationError::Migration(error))?)
+        .map_err(DatabaseInitializationError::Migration)
 }
 
 pub async fn connect_and_migrate(
@@ -39,8 +39,8 @@ pub async fn connect_and_migrate(
 ) -> Result<PgPool, DatabaseInitializationError> {
     create_database_if_not_exists(database_url).await?;
 
-    let connection = PgPool::connect_lazy(database_url)
-        .map_err(|error| DatabaseInitializationError::Connection(error))?;
+    let connection =
+        PgPool::connect_lazy(database_url).map_err(DatabaseInitializationError::Connection)?;
     apply_migrations(&connection).await?;
 
     Ok(connection)
