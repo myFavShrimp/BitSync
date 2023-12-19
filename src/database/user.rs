@@ -11,6 +11,21 @@ pub struct User {
 }
 
 impl User {
+    pub async fn create(
+        connection: &PgPool,
+        username: &str,
+        password: &str,
+    ) -> Result<User, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            r#"INSERT INTO "user" (username, password) VALUES ($1, $2) RETURNING *"#,
+            username,
+            password
+        )
+        .fetch_one(connection)
+        .await
+    }
+
     pub async fn find_by_ids(connection: &PgPool, ids: &[Uuid]) -> Result<Vec<User>, sqlx::Error> {
         sqlx::query_as!(User, r#"SELECT * FROM "user" WHERE id = ANY($1)"#, ids)
             .fetch_all(connection)
