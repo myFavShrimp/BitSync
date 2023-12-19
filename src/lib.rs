@@ -14,6 +14,7 @@ pub struct AppState {
     pub config: config::Config,
     pub postgres_pool: PgPool,
     pub public_graphql_api_schema: handler::api::graphql::PublicRoot,
+    pub private_graphql_api_schema: handler::api::graphql::PrivateRoot,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -27,6 +28,7 @@ pub async fn make_service(config: Config) -> Result<IntoMakeService<Router>, Ini
         postgres_pool: database::connect_and_migrate(&config.database_url).await?,
         config,
         public_graphql_api_schema: handler::api::graphql::create_public_root(),
+        private_graphql_api_schema: handler::api::graphql::create_private_root(),
     });
 
     Ok(handler::create_routes(state).await.into_make_service())

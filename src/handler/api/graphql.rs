@@ -16,6 +16,9 @@ use super::routes;
 mod dataloader;
 mod schema;
 
+pub use schema::private::{
+    create_root as create_private_root, Context as PrivateContext, Root as PrivateRoot,
+};
 pub use schema::public::{
     create_root as create_public_root, Context as PublicContext, Root as PublicRoot,
 };
