@@ -55,9 +55,10 @@ pub async fn api_graphql_post_handler(
                 .await
                 .into()
         }
-        AuthStatus::User(_user) => {
+        AuthStatus::User(auth_data) => {
             let context = PrivateContext {
                 app_state: state.clone(),
+                current_user: auth_data.user,
             };
 
             state
