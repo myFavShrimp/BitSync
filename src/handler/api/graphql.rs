@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql::{
+    dataloader::{DataLoader, HashMapCache},
+    http::{playground_source, GraphQLPlaygroundConfig},
+};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
     extract::State,
@@ -60,7 +63,11 @@ pub async fn api_graphql_post_handler(
             let context = PrivateContext {
                 app_state: state.clone(),
                 current_user: auth_data.user,
-                _dataloader: PostgresLoader::new(state.postgres_pool.clone()),
+                _dataloader: DataLoader::with_cache(
+                    PostgresLoader::new(state.postgres_pool.clone()),
+                    tokio::spawn,
+                    HashMapCache::new(),
+                ),
             };
 
             state
