@@ -63,7 +63,7 @@ impl AuthStatus {
     async fn for_claims(connection: &PgPool, claims: JwtClaims) -> Self {
         match User::find_by_id(connection, &claims.sub).await {
             Err(_) => Self::Invalid,
-            Ok(user) => Self::User(AuthData { claims, user: user }),
+            Ok(user) => Self::User(AuthData { claims, user }),
         }
     }
 }

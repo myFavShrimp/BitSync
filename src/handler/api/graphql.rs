@@ -43,15 +43,28 @@ pub async fn api_graphql_post_handler(
     auth_status: AuthStatus,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    dbg!(auth_status);
+    match auth_status {
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            let context = PublicContext {
+                app_state: state.clone(),
+            };
 
-    let context = PublicContext {
-        app_state: state.clone(),
-    };
+            state
+                .public_graphql_api_schema
+                .execute(req.into_inner().data(context))
+                .await
+                .into()
+        }
+        AuthStatus::User(_user) => {
+            let context = PrivateContext {
+                app_state: state.clone(),
+            };
 
-    state
-        .public_graphql_api_schema
-        .execute(req.into_inner().data(context))
-        .await
-        .into()
+            state
+                .private_graphql_api_schema
+                .execute(req.into_inner().data(context))
+                .await
+                .into()
+        }
+    }
 }
