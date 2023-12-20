@@ -6,8 +6,14 @@ use uuid::Uuid;
 
 use crate::database::user::User;
 
-struct PostgresLoader {
+pub struct PostgresLoader {
     pool: PgPool,
+}
+
+impl PostgresLoader {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
 }
 
 #[async_trait::async_trait]

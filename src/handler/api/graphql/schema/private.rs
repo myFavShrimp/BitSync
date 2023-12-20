@@ -4,11 +4,13 @@ use crate::{database::user::User, AppState};
 
 // pub mod mutation;
 // mod object;
+pub mod dataloader;
 pub mod query;
 
 pub struct Context {
     pub app_state: Arc<AppState>,
     pub current_user: User,
+    pub _dataloader: dataloader::PostgresLoader,
 }
 
 pub type Root = async_graphql::Schema<

@@ -11,9 +11,10 @@ use axum::{
 
 use crate::{auth::AuthStatus, AppState};
 
+use self::schema::private::dataloader::PostgresLoader;
+
 use super::routes;
 
-mod dataloader;
 mod schema;
 
 pub use schema::private::{
@@ -59,6 +60,7 @@ pub async fn api_graphql_post_handler(
             let context = PrivateContext {
                 app_state: state.clone(),
                 current_user: auth_data.user,
+                _dataloader: PostgresLoader::new(state.postgres_pool.clone()),
             };
 
             state
