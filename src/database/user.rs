@@ -32,6 +32,12 @@ impl User {
             .await
     }
 
+    pub async fn find_by_id(connection: &PgPool, id: &Uuid) -> Result<User, sqlx::Error> {
+        sqlx::query_as!(User, r#"SELECT * FROM "user" WHERE id = $1"#, id)
+            .fetch_one(connection)
+            .await
+    }
+
     pub async fn find_by_username(
         connection: &PgPool,
         username: &str,

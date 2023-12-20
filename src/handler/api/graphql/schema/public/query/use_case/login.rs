@@ -1,5 +1,5 @@
 use crate::{
-    database::user::User, handler::api::graphql::schema::public::Context,
+    auth::JwtClaims, database::user::User, handler::api::graphql::schema::public::Context,
     hash::verify_password_hash,
 };
 
@@ -7,17 +7,22 @@ use crate::{
 #[error("Username or password wrong")]
 pub enum LoginError {
     PasswordHash(#[from] argon2::password_hash::Error),
-    DatabaseError(#[from] sqlx::Error),
+    Database(#[from] sqlx::Error),
+    Jwt(#[from] jsonwebtoken::errors::Error),
 }
 
 pub async fn perform_login(
     ctx: &Context,
     username: String,
     password: String,
-) -> Result<(), LoginError> {
+) -> Result<String, LoginError> {
     let user = User::find_by_username(&ctx.app_state.postgres_pool, &username).await?;
 
     verify_password_hash(&user.password, &password)?;
 
-    Ok(())
+    Ok(JwtClaims {
+        sub: user.id,
+        exp: 0,
+    }
+    .encode(&ctx.app_state.config.jwt_secret)?)
 }

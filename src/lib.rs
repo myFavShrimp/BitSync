@@ -4,6 +4,7 @@ use axum::{routing::IntoMakeService, Router};
 use config::Config;
 use sqlx::PgPool;
 
+mod auth;
 pub mod config;
 mod database;
 mod handler;

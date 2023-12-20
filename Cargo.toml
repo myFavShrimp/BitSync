@@ -26,3 +26,6 @@ uuid = { version = "1.6.1", features = ["serde"] }
 async-trait = "0.1.74"
 thiserror = "1.0.51"
 argon2 = { version = "0.5.2", features = ["std"] }
+jsonwebtoken = "9.2.0"
+axum-extra = { version = "0.9.0", features = ["typed-header"] }
+headers = "0.4.0"

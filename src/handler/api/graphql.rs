@@ -9,7 +9,7 @@ use axum::{
     Router,
 };
 
-use crate::AppState;
+use crate::{auth::AuthStatus, AppState};
 
 use super::routes;
 
@@ -40,8 +40,11 @@ pub async fn api_graphql_get_handler() -> impl IntoResponse {
 
 pub async fn api_graphql_post_handler(
     State(state): State<Arc<AppState>>,
+    auth_status: AuthStatus,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
+    dbg!(auth_status);
+
     let context = PublicContext {
         app_state: state.clone(),
     };
