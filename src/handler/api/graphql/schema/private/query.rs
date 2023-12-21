@@ -1,15 +1,17 @@
+use crate::database::user::User;
+
 use super::Context;
 
 pub struct Query;
 
 #[async_graphql::Object]
 impl Query {
-    async fn hello<'context>(
+    async fn me<'context>(
         &self,
         context: &async_graphql::Context<'context>,
-    ) -> async_graphql::Result<String> {
-        let _context = context.data::<Context>()?;
+    ) -> async_graphql::Result<User> {
+        let context = context.data::<Context>()?;
 
-        Ok(String::from("World"))
+        Ok(context.current_user.clone())
     }
 }
