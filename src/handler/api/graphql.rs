@@ -63,7 +63,7 @@ pub async fn api_graphql_post_handler(
             let context = PrivateContext {
                 app_state: state.clone(),
                 current_user: auth_data.user,
-                _dataloader: DataLoader::with_cache(
+                dataloader: DataLoader::with_cache(
                     UserLoader::new(state.postgres_pool.clone()),
                     tokio::spawn,
                     HashMapCache::new(),

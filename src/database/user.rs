@@ -38,6 +38,12 @@ impl User {
             .await
     }
 
+    pub async fn find_all(connection: &PgPool) -> Result<Vec<User>, sqlx::Error> {
+        sqlx::query_as!(User, r#"SELECT * FROM "user""#)
+            .fetch_all(connection)
+            .await
+    }
+
     pub async fn find_by_username(
         connection: &PgPool,
         username: &str,

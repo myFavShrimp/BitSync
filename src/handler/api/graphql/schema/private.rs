@@ -14,7 +14,7 @@ pub mod query;
 pub struct Context {
     pub app_state: Arc<AppState>,
     pub current_user: User,
-    pub _dataloader: DataLoader<UserLoader, HashMapCache>,
+    pub dataloader: DataLoader<UserLoader, HashMapCache>,
 }
 
 pub type Root = async_graphql::Schema<
