@@ -26,11 +26,9 @@ impl Mutation {
         &self,
         ctx: &async_graphql::Context<'context>,
         path: String,
-        files: Vec<Upload>,
+        mut files: Vec<Upload>,
     ) -> async_graphql::Result<String> {
         let context = ctx.data::<Context>()?;
-
-        let file_name = &files.get(0).unwrap().value(ctx).unwrap().filename;
 
         let mut current_dir = std::env::current_dir().unwrap();
         current_dir.push(context.current_user.id.to_string());
@@ -41,17 +39,18 @@ impl Mutation {
 
         let op = opendal::Operator::new(fs_builder)?.finish();
 
-        let mut data = Vec::new();
-        files
-            .get(0)
-            .unwrap()
-            .value(ctx)
-            .unwrap()
-            .content
-            .read_to_end(&mut data)
-            .unwrap();
+        let files: Result<Vec<async_graphql::UploadValue>, std::io::Error> =
+            files.iter_mut().map(|file| file.value(ctx)).collect();
 
-        op.write(&file_name, data).await.unwrap();
+        for file in files.unwrap() {
+            let file_name = &file.filename;
+            let mut file_content = file.content;
+
+            let mut data = Vec::new();
+            file_content.read_to_end(&mut data).unwrap();
+
+            op.write(&file_name, data).await.unwrap();
+        }
 
         Ok(String::new())
     }
