@@ -56,4 +56,19 @@ impl User {
         .fetch_one(connection)
         .await
     }
+
+    pub async fn update_password(
+        connection: &PgPool,
+        user_id: &Uuid,
+        new_password: &str,
+    ) -> Result<User, sqlx::Error> {
+        sqlx::query_as!(
+            User,
+            r#"UPDATE "user" SET password = $2 WHERE id = $1 RETURNING *"#,
+            user_id,
+            new_password,
+        )
+        .fetch_one(connection)
+        .await
+    }
 }
