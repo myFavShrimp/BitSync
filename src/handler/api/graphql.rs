@@ -14,7 +14,7 @@ use axum::{
 
 use crate::{auth::AuthStatus, AppState};
 
-use self::schema::private::dataloader::PostgresLoader;
+use self::schema::private::dataloader::UserLoader;
 
 use super::routes;
 
@@ -64,7 +64,7 @@ pub async fn api_graphql_post_handler(
                 app_state: state.clone(),
                 current_user: auth_data.user,
                 _dataloader: DataLoader::with_cache(
-                    PostgresLoader::new(state.postgres_pool.clone()),
+                    UserLoader::new(state.postgres_pool.clone()),
                     tokio::spawn,
                     HashMapCache::new(),
                 ),

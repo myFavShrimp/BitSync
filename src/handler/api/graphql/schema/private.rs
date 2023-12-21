@@ -4,7 +4,7 @@ use async_graphql::dataloader::{DataLoader, HashMapCache};
 
 use crate::{database::user::User, AppState};
 
-use dataloader::PostgresLoader;
+use dataloader::UserLoader;
 
 // pub mod mutation;
 // mod object;
@@ -14,7 +14,7 @@ pub mod query;
 pub struct Context {
     pub app_state: Arc<AppState>,
     pub current_user: User,
-    pub _dataloader: DataLoader<PostgresLoader, HashMapCache>,
+    pub _dataloader: DataLoader<UserLoader, HashMapCache>,
 }
 
 pub type Root = async_graphql::Schema<

@@ -6,18 +6,18 @@ use uuid::Uuid;
 
 use crate::database::user::User;
 
-pub struct PostgresLoader {
+pub struct UserLoader {
     pool: PgPool,
 }
 
-impl PostgresLoader {
+impl UserLoader {
     pub fn new(pool: PgPool) -> Self {
         Self { pool }
     }
 }
 
 #[async_trait::async_trait]
-impl Loader<Uuid> for PostgresLoader {
+impl Loader<Uuid> for UserLoader {
     type Value = User;
     type Error = Arc<sqlx::Error>;
 
