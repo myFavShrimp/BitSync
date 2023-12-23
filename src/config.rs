@@ -1,4 +1,4 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, path::PathBuf};
 
 use serde::Deserialize;
 use serde_env::from_env;
@@ -10,6 +10,7 @@ pub struct Config {
     pub database_url: String,
     pub jwt_secret: String,
     pub jwt_expiration_seconds: i64,
+    pub fs_storage_root_dir: PathBuf,
 }
 
 impl Config {

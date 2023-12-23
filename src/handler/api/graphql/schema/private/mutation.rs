@@ -30,12 +30,13 @@ impl Mutation {
     ) -> async_graphql::Result<String> {
         let context = ctx.data::<Context>()?;
 
-        let mut current_dir = std::env::current_dir().unwrap();
-        current_dir.push(context.current_user.id.to_string());
-        current_dir.push(path);
+        let mut fs_storage_dir = context.app_state.config.fs_storage_root_dir.clone();
+        fs_storage_dir.push("user");
+        fs_storage_dir.push(context.current_user.id.to_string());
+        fs_storage_dir.push(path);
 
         let mut fs_builder = opendal::services::Fs::default();
-        fs_builder.root(current_dir.to_str().unwrap());
+        fs_builder.root(fs_storage_dir.to_str().unwrap());
 
         let op = opendal::Operator::new(fs_builder)?.finish();
 
