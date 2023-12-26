@@ -12,6 +12,7 @@ mod dto;
 mod handler;
 mod hash;
 mod helper_macro;
+mod time;
 mod validate;
 
 pub struct AppState {
