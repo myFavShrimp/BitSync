@@ -2,7 +2,7 @@ use std::io::Read;
 
 use async_graphql::Upload;
 
-use crate::database::user::User;
+use crate::{database::user::User, dto::File};
 
 use super::Context;
 
@@ -26,33 +26,10 @@ impl Mutation {
         &self,
         ctx: &async_graphql::Context<'context>,
         path: String,
-        mut files: Vec<Upload>,
-    ) -> async_graphql::Result<String> {
-        let context = ctx.data::<Context>()?;
-
-        let mut fs_storage_dir = context.app_state.config.fs_storage_root_dir.clone();
-        fs_storage_dir.push("user");
-        fs_storage_dir.push(context.current_user.id.to_string());
-        fs_storage_dir.push(path);
-
-        let mut fs_builder = opendal::services::Fs::default();
-        fs_builder.root(fs_storage_dir.to_str().unwrap());
-
-        let op = opendal::Operator::new(fs_builder)?.finish();
-
-        let files: Result<Vec<async_graphql::UploadValue>, std::io::Error> =
-            files.iter_mut().map(|file| file.value(ctx)).collect();
-
-        for file in files.unwrap() {
-            let file_name = &file.filename;
-            let mut file_content = file.content;
-
-            let mut data = Vec::new();
-            file_content.read_to_end(&mut data).unwrap();
-
-            op.write(&file_name, data).await.unwrap();
-        }
-
-        Ok(String::new())
+        files: Vec<Upload>,
+    ) -> async_graphql::Result<Vec<File>> {
+        Ok(use_case::user_files::upload_user_file(ctx, &path, files)
+            .await
+            .unwrap())
     }
 }
