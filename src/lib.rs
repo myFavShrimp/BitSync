@@ -12,6 +12,7 @@ mod dto;
 mod handler;
 mod hash;
 mod helper_macro;
+mod validate;
 
 pub struct AppState {
     pub config: config::Config,

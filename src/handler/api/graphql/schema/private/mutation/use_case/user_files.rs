@@ -2,13 +2,21 @@ use std::{io::Read, path::PathBuf};
 
 use async_graphql::Upload;
 
-use crate::{directory::user_data_directory, dto::File, handler::api::graphql::PrivateContext};
+use crate::{
+    directory::user_data_directory,
+    dto::File,
+    handler::api::graphql::PrivateContext,
+    validate::{validate_file_path, PathValidationError},
+};
 
 #[derive(thiserror::Error, Debug)]
-#[error("An unexpected error occurred")]
 pub enum UserFileUploadError {
+    #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error("An unexpected error occurred")]
     Opendal(#[from] opendal::Error),
+    #[error(transparent)]
+    PathValidation(#[from] PathValidationError),
 }
 
 pub async fn upload_user_file<'context>(
@@ -16,11 +24,16 @@ pub async fn upload_user_file<'context>(
     path: &str,
     mut files: Vec<Upload>,
 ) -> Result<Vec<File>, UserFileUploadError> {
+    validate_file_path(path)?;
+
     let context = ctx
         .data::<PrivateContext>()
         .map_err(|error| UserFileUploadError::Context(error))?;
 
-    let user_directory = user_data_directory(&context.app_state.config, &context.current_user.id);
+    let user_directory = user_data_directory(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        &context.current_user.id,
+    );
     let mut fs_storage_dir = user_directory.clone();
     fs_storage_dir.push(path.strip_prefix("/").unwrap());
 
@@ -36,6 +49,8 @@ pub async fn upload_user_file<'context>(
     for file in files.unwrap() {
         let file_name = &file.filename;
         let mut file_content = file.content;
+
+        validate_file_path(&file_name)?;
 
         let mut data = Vec::new();
         file_content.read_to_end(&mut data).unwrap();
