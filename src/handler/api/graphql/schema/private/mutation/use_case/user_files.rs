@@ -42,14 +42,14 @@ pub async fn upload_user_file<'context>(
 
     let context = ctx
         .data::<PrivateContext>()
-        .map_err(|error| UserFileUploadError::Context(error))?;
+        .map_err(UserFileUploadError::Context)?;
 
     let user_directory = user_data_directory(
         context.app_state.config.fs_storage_root_dir.clone(),
         &context.current_user.id,
     );
     let mut fs_storage_dir = user_directory.clone();
-    fs_storage_dir.push(path.strip_prefix("/").unwrap_or(path));
+    fs_storage_dir.push(path.strip_prefix('/').unwrap_or(path));
 
     let mut fs_builder = opendal::services::Fs::default();
     fs_builder.root(fs_storage_dir.to_str().expect("Path is valid UTF-8"));
@@ -66,7 +66,7 @@ pub async fn upload_user_file<'context>(
         let file_name = &file.filename;
         let mut file_content = file.content;
 
-        validate_file_path(&file_name)?;
+        validate_file_path(file_name)?;
 
         let mut data = Vec::new();
         file_content
@@ -76,7 +76,7 @@ pub async fn upload_user_file<'context>(
                 file_name: file_name.to_string(),
             })?;
 
-        op.write(&file_name, data)
+        op.write(file_name, data)
             .await
             .map_err(|error| UserFileUploadError::FileWriter {
                 source: error,
@@ -89,7 +89,7 @@ pub async fn upload_user_file<'context>(
         result.push(
             (
                 file_path.to_str().expect("Path is valid UTF-8").to_owned(),
-                op.stat(&file_name)
+                op.stat(file_name)
                     .await
                     .map_err(UserFileUploadError::Opendal)?,
             )

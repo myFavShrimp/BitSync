@@ -10,7 +10,7 @@ pub enum UserSettingsError {
 }
 
 pub async fn update_password(ctx: &Context, new_password: &str) -> Result<User, UserSettingsError> {
-    let hashed_password = hash_password(&new_password)?;
+    let hashed_password = hash_password(new_password)?;
 
     Ok(User::update_password(
         &ctx.app_state.postgres_pool,
