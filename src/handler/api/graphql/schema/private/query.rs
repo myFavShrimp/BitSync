@@ -1,6 +1,8 @@
-use crate::database::user::User;
+use crate::{database::user::User, dto::File};
 
 use super::Context;
+
+mod use_case;
 
 pub struct Query;
 
@@ -8,18 +10,26 @@ pub struct Query;
 impl Query {
     async fn me<'context>(
         &self,
-        context: &async_graphql::Context<'context>,
+        ctx: &async_graphql::Context<'context>,
     ) -> async_graphql::Result<User> {
-        let context = context.data::<Context>()?;
+        let context = ctx.data::<Context>()?;
 
         Ok(context.current_user.clone())
     }
 
+    async fn list_my_directory<'context>(
+        &self,
+        ctx: &async_graphql::Context<'context>,
+        path: String,
+    ) -> async_graphql::Result<Vec<File>> {
+        Ok(use_case::user_files::list_my_directory(ctx, &path).await?)
+    }
+
     async fn users<'context>(
         &self,
-        context: &async_graphql::Context<'context>,
+        ctx: &async_graphql::Context<'context>,
     ) -> async_graphql::Result<Vec<User>> {
-        let context = context.data::<Context>()?;
+        let context = ctx.data::<Context>()?;
 
         let users = User::find_all(&context.app_state.postgres_pool).await?;
 

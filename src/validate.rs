@@ -9,3 +9,11 @@ pub fn validate_file_path(path: &str) -> Result<(), PathValidationError> {
         Ok(())
     }
 }
+
+pub fn sanitize_directory_path(path: &str) -> String {
+    if !path.ends_with("/") {
+        format!("{path}/")
+    } else {
+        path.to_string()
+    }
+}
