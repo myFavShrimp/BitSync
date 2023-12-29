@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
-use async_graphql::dataloader::{DataLoader, HashMapCache};
+use async_graphql::{
+    dataloader::{DataLoader, HashMapCache},
+    extensions::Tracing,
+};
 
 use crate::{database::user::User, AppState};
 
 use dataloader::UserLoader;
 
-pub mod mutation;
-// mod object;
 pub mod dataloader;
+pub mod mutation;
 pub mod query;
 
 pub struct Context {
@@ -26,5 +28,6 @@ pub fn create_root() -> Root {
         mutation::Mutation,
         async_graphql::EmptySubscription,
     )
+    .extension(Tracing)
     .finish()
 }

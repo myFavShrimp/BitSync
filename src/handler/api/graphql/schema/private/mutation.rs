@@ -1,6 +1,8 @@
 use async_graphql::Upload;
 
-use crate::{database::user::User, dto::DirectoryEntry};
+use crate::{
+    database::user::User, dto::DirectoryEntry, handler::api::graphql::schema::FormattedStringError,
+};
 
 use super::Context;
 
@@ -26,6 +28,8 @@ impl Mutation {
         path: String,
         files: Vec<Upload>,
     ) -> async_graphql::Result<Vec<DirectoryEntry>> {
-        Ok(use_case::user_files::upload_user_file(ctx, &path, files).await?)
+        Ok(use_case::user_files::upload_user_file(ctx, &path, files)
+            .await
+            .to_formatted_string_error()?)
     }
 }

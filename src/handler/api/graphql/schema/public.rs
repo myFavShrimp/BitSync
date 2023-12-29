@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use async_graphql::extensions::Tracing;
+
 use crate::AppState;
 
 pub mod mutation;
@@ -19,5 +21,6 @@ pub fn create_root() -> Root {
         mutation::Mutation,
         async_graphql::EmptySubscription,
     )
+    .extension(Tracing)
     .finish()
 }

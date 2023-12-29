@@ -10,7 +10,7 @@ use crate::{
 pub enum UserFileUploadError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
-    #[error("Error handling the file upload - {0}")]
+    #[error("Error handling the file upload")]
     Storage(#[from] StorageError),
     #[error("Could not read the file data")]
     FileUploadRead(std::io::Error),

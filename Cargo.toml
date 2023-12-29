@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 # patches for async-graphql axum 0.7 compatibilty
-async-graphql = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c", features = ["time", "tracing", "uuid", "dataloader"] }
+async-graphql = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c", features = ["time", "tracing", "uuid", "dataloader", "tracing"] }
 async-graphql-axum = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c" }
 
 axum = "0.7.2"
