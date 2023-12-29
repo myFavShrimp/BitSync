@@ -1,4 +1,4 @@
-use std::{fs::Metadata, path::PathBuf};
+use std::{fs::Metadata, path::Path};
 
 use time::OffsetDateTime;
 
@@ -22,7 +22,7 @@ impl DirectoryEntry {
     }
 
     pub async fn from_dir_entry(
-        storage_root: &PathBuf,
+        storage_root: &Path,
         value: tokio::fs::DirEntry,
     ) -> Result<Self, std::io::Error> {
         let metadata = value.metadata().await?;
@@ -32,6 +32,6 @@ impl DirectoryEntry {
             .unwrap_or(&path)
             .to_string();
 
-        Self::from_metadata(&path, metadata)
+        Self::from_metadata(path, metadata)
     }
 }

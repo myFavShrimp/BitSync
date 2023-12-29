@@ -100,12 +100,12 @@ impl Storage {
         let mut file_path = PathBuf::from(path);
         file_path.push(file_name);
 
-        Ok(DirectoryEntry::from_metadata(
+        DirectoryEntry::from_metadata(
             file_path.to_string_lossy(),
             tokio::fs::metadata(data_path)
                 .await
                 .map_err(StorageError::MetadataReader)?,
         )
-        .map_err(StorageError::MetadataReader)?)
+        .map_err(StorageError::MetadataReader)
     }
 }

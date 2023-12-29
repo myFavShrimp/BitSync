@@ -42,7 +42,7 @@ pub async fn upload_user_file<'context>(
         let file_name = &file.filename;
         let file_content = file.content;
 
-        result.push(storage.add_file(path, &file_name, file_content).await?);
+        result.push(storage.add_file(path, file_name, file_content).await?);
     }
 
     Ok(result)

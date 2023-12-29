@@ -28,6 +28,6 @@ pub async fn list_my_directory<'context>(
     Ok(Storage {
         storage_root: user_directory,
     }
-    .list_files(&path)
+    .list_files(path)
     .await?)
 }
