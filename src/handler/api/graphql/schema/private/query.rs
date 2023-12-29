@@ -1,4 +1,4 @@
-use crate::{database::user::User, dto::File};
+use crate::{database::user::User, dto::DirectoryEntry};
 
 use super::Context;
 
@@ -21,7 +21,7 @@ impl Query {
         &self,
         ctx: &async_graphql::Context<'context>,
         path: String,
-    ) -> async_graphql::Result<Vec<File>> {
+    ) -> async_graphql::Result<Vec<DirectoryEntry>> {
         Ok(use_case::user_files::list_my_directory(ctx, &path).await?)
     }
 

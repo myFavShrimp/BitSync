@@ -1,20 +1,37 @@
-use time::PrimitiveDateTime;
+use std::{fs::Metadata, path::PathBuf};
 
-use crate::time::datetime_chrono_to_time;
+use time::OffsetDateTime;
 
 #[derive(async_graphql::SimpleObject)]
-pub struct File {
+pub struct DirectoryEntry {
     path: String,
     size: u64,
-    updated_at: Option<PrimitiveDateTime>,
+    updated_at: OffsetDateTime,
 }
 
-impl From<(String, opendal::Metadata)> for File {
-    fn from(value: (String, opendal::Metadata)) -> Self {
-        Self {
-            path: value.0.clone(),
-            size: value.1.content_length(),
-            updated_at: value.1.last_modified().map(datetime_chrono_to_time),
-        }
+impl DirectoryEntry {
+    pub fn from_metadata<P: AsRef<str>>(
+        scoped_path: P,
+        metadata: Metadata,
+    ) -> Result<Self, std::io::Error> {
+        Ok(Self {
+            path: scoped_path.as_ref().to_string(),
+            size: metadata.len(),
+            updated_at: metadata.modified()?.into(),
+        })
+    }
+
+    pub async fn from_dir_entry(
+        storage_root: &PathBuf,
+        value: tokio::fs::DirEntry,
+    ) -> Result<Self, std::io::Error> {
+        let metadata = value.metadata().await?;
+        let path = value.path().to_string_lossy().to_string();
+        let path = path
+            .strip_prefix(&storage_root.to_string_lossy().to_string())
+            .unwrap_or(&path)
+            .to_string();
+
+        Self::from_metadata(&path, metadata)
     }
 }

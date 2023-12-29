@@ -1,6 +1,6 @@
 use async_graphql::Upload;
 
-use crate::{database::user::User, dto::File};
+use crate::{database::user::User, dto::DirectoryEntry};
 
 use super::Context;
 
@@ -25,7 +25,7 @@ impl Mutation {
         ctx: &async_graphql::Context<'context>,
         path: String,
         files: Vec<Upload>,
-    ) -> async_graphql::Result<Vec<File>> {
+    ) -> async_graphql::Result<Vec<DirectoryEntry>> {
         Ok(use_case::user_files::upload_user_file(ctx, &path, files).await?)
     }
 }
