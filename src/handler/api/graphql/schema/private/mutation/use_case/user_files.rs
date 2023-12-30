@@ -2,7 +2,7 @@ use async_graphql::Upload;
 
 use crate::{
     handler::api::graphql::PrivateContext,
-    storage::{user_data_directory, FileItem, Storage, StorageError},
+    storage::{user_data_directory, DirItem, FileItem, Storage, StorageError},
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -117,4 +117,39 @@ pub async fn move_user_file_item<'context>(
     }
 
     Ok(storage.move_item(path, new_path).await?)
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum UserDirectoryCreationError {
+    #[error("An unexpected error occurred")]
+    Context(async_graphql::Error),
+    #[error("Error handling the rename operation")]
+    Storage(#[from] StorageError),
+    #[error("Already exists")]
+    AlreadyExists,
+}
+
+pub async fn create_user_directory<'context>(
+    ctx: &async_graphql::Context<'context>,
+    path: &str,
+) -> Result<DirItem, UserDirectoryCreationError> {
+    let context = ctx
+        .data::<PrivateContext>()
+        .map_err(UserDirectoryCreationError::Context)?;
+
+    let user_directory = user_data_directory(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        &context.current_user.id,
+    );
+
+    let storage = Storage {
+        storage_root: user_directory,
+    };
+
+    match storage.storage_item(path).await? {
+        crate::storage::StorageItem::DirItem(_) => Err(UserDirectoryCreationError::AlreadyExists)?,
+        crate::storage::StorageItem::FileItem(_) => {}
+    }
+
+    Ok(storage.create_directory(path).await?)
 }

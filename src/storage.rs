@@ -127,6 +127,12 @@ pub enum StorageError {
         source: std::io::Error,
         file_path: String,
     },
+    #[error("Could not create the directory '{path}'")]
+    DirectoryCreation {
+        #[source]
+        source: std::io::Error,
+        path: String,
+    },
 }
 
 pub struct Storage {
@@ -134,6 +140,29 @@ pub struct Storage {
 }
 
 impl Storage {
+    pub async fn create_directory(&self, path: &str) -> Result<DirItem, StorageError> {
+        let path = sanitize_directory_path(path);
+        validate_file_path(path)?;
+
+        let mut data_path = self.storage_root.clone();
+        data_path.push(path);
+
+        tokio::fs::create_dir_all(&data_path)
+            .await
+            .map_err(|error| StorageError::DirectoryCreation {
+                source: error,
+                path: path.to_string(),
+            })?;
+
+        DirItem::from_metadata(
+            path,
+            tokio::fs::metadata(data_path)
+                .await
+                .map_err(StorageError::MetadataReader)?,
+        )
+        .map_err(StorageError::MetadataReader)
+    }
+
     pub async fn storage_item(&self, path: &str) -> Result<StorageItem, StorageError> {
         let path = sanitize_directory_path(path);
         validate_file_path(path)?;
