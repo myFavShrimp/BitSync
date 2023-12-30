@@ -17,12 +17,12 @@ impl Query {
         Ok(context.current_user.clone())
     }
 
-    async fn user_storage_items<'context>(
+    async fn user_directory<'context>(
         &self,
         ctx: &async_graphql::Context<'context>,
         path: String,
     ) -> async_graphql::Result<DirItem> {
-        Ok(use_case::user_files::user_storage_items(ctx, &path).await?)
+        Ok(use_case::user_files::user_directory(ctx, &path).await?)
     }
 
     async fn users<'context>(
