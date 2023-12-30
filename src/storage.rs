@@ -42,8 +42,13 @@ impl DirItem {
         scoped_path: P,
         metadata: Metadata,
     ) -> Result<Self, std::io::Error> {
+        let path = match scoped_path.as_ref() {
+            path if path.is_empty() => String::from("/"),
+            path => path.to_string(),
+        };
+
         Ok(Self {
-            path: scoped_path.as_ref().to_string(),
+            path,
             updated_at: metadata.modified()?.into(),
             files: Vec::new(),
             directories: Vec::new(),
