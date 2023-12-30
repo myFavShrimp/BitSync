@@ -11,6 +11,7 @@ use dataloader::UserLoader;
 
 pub mod dataloader;
 pub mod mutation;
+mod object;
 pub mod query;
 
 pub struct Context {

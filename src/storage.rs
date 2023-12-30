@@ -2,14 +2,16 @@ use std::{
     fs::{File, Metadata},
     io::Read,
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 use time::OffsetDateTime;
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 use crate::validate::{sanitize_directory_path, validate_file_path, PathValidationError};
 
-#[derive(async_graphql::SimpleObject)]
+#[derive(async_graphql::SimpleObject, Clone)]
 pub struct FileItem {
     pub path: String,
     pub size: u64,
@@ -29,12 +31,16 @@ impl FileItem {
     }
 }
 
-#[derive(async_graphql::SimpleObject)]
+pub struct DirItemContent {
+    pub files: Vec<FileItem>,
+    pub directories: Vec<DirItem>,
+}
+
+#[derive(Clone)]
 pub struct DirItem {
     pub path: String,
     pub updated_at: OffsetDateTime,
-    pub files: Vec<FileItem>,
-    pub directories: Vec<DirItem>,
+    pub content: Arc<Mutex<Option<DirItemContent>>>,
 }
 
 impl DirItem {
@@ -50,8 +56,7 @@ impl DirItem {
         Ok(Self {
             path,
             updated_at: metadata.modified()?.into(),
-            files: Vec::new(),
-            directories: Vec::new(),
+            content: Arc::new(Mutex::new(None)),
         })
     }
 }
@@ -71,9 +76,7 @@ impl StorageItem {
                 scoped_path,
                 metadata,
             )?))
-        } else
-        // if metadata.is_file()
-        {
+        } else {
             Ok(Self::FileItem(FileItem::from_metadata(
                 scoped_path,
                 metadata,
@@ -139,7 +142,7 @@ impl Storage {
         data_path.push(path);
 
         StorageItem::from_metadata(
-            path.to_string(),
+            path,
             tokio::fs::metadata(data_path)
                 .await
                 .map_err(StorageError::MetadataReader)?,
@@ -229,7 +232,7 @@ impl Storage {
             .map_err(StorageError::DirReader)?;
 
         FileItem::from_metadata(
-            new_path.to_string(),
+            new_path,
             tokio::fs::metadata(new_data_path)
                 .await
                 .map_err(StorageError::MetadataReader)?,

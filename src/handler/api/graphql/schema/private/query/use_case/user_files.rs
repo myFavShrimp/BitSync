@@ -34,30 +34,6 @@ pub async fn list_my_storage_items<'context>(
 
     match storage_item {
         crate::storage::StorageItem::FileItem(_) => Err(UserDirectoryReadError::NotADirectory),
-        crate::storage::StorageItem::DirItem(mut dir_item) => {
-            let is_directories_query = ctx.look_ahead().field("directories").exists();
-            let is_files_query = ctx.look_ahead().field("files").exists();
-
-            if is_directories_query || is_files_query {
-                let dir_content = storage.list_storage_items(path).await?;
-
-                let mut directories = Vec::new();
-                let mut files = Vec::new();
-
-                for item in dir_content {
-                    match item {
-                        crate::storage::StorageItem::DirItem(dir_item) => {
-                            directories.push(dir_item)
-                        }
-                        crate::storage::StorageItem::FileItem(file_item) => files.push(file_item),
-                    }
-                }
-
-                dir_item.directories = directories;
-                dir_item.files = files;
-            }
-
-            Ok(dir_item)
-        }
+        crate::storage::StorageItem::DirItem(dir_item) => Ok(dir_item),
     }
 }
