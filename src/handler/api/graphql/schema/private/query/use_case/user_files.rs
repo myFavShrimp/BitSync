@@ -13,7 +13,7 @@ pub enum UserDirectoryReadError {
     NotADirectory,
 }
 
-pub async fn list_my_storage_items<'context>(
+pub async fn user_storage_items<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
 ) -> Result<DirItem, UserDirectoryReadError> {
