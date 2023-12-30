@@ -1,9 +1,8 @@
 use async_graphql::Upload;
 
 use crate::{
-    dto::DirectoryEntry,
     handler::api::graphql::PrivateContext,
-    storage::{user_data_directory, Storage, StorageError},
+    storage::{user_data_directory, FileItem, Storage, StorageError},
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -20,7 +19,7 @@ pub async fn upload_user_files<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     mut files: Vec<Upload>,
-) -> Result<Vec<DirectoryEntry>, UserFileUploadError> {
+) -> Result<Vec<FileItem>, UserFileUploadError> {
     let context = ctx
         .data::<PrivateContext>()
         .map_err(UserFileUploadError::Context)?;
@@ -60,7 +59,7 @@ pub async fn move_user_storage_item<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     new_path: &str,
-) -> Result<DirectoryEntry, UserFileMoveError> {
+) -> Result<FileItem, UserFileMoveError> {
     let context = ctx
         .data::<PrivateContext>()
         .map_err(UserFileMoveError::Context)?;

@@ -7,7 +7,6 @@ use sqlx::PgPool;
 mod auth;
 pub mod config;
 mod database;
-mod dto;
 mod handler;
 mod hash;
 mod helper_macro;

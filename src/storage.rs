@@ -1,11 +1,94 @@
-use std::{fs::File, io::Read, path::PathBuf};
+use std::{
+    fs::{File, Metadata},
+    io::Read,
+    path::{Path, PathBuf},
+};
 
+use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::{
-    dto::DirectoryEntry,
-    validate::{sanitize_directory_path, validate_file_path, PathValidationError},
-};
+use crate::validate::{sanitize_directory_path, validate_file_path, PathValidationError};
+
+#[derive(async_graphql::SimpleObject)]
+pub struct FileItem {
+    pub path: String,
+    pub size: u64,
+    pub updated_at: OffsetDateTime,
+}
+
+impl FileItem {
+    pub fn from_metadata<P: AsRef<str>>(
+        scoped_path: P,
+        metadata: Metadata,
+    ) -> Result<Self, std::io::Error> {
+        Ok(Self {
+            path: scoped_path.as_ref().to_string(),
+            size: metadata.len(),
+            updated_at: metadata.modified()?.into(),
+        })
+    }
+}
+
+#[derive(async_graphql::SimpleObject)]
+pub struct DirItem {
+    pub path: String,
+    pub updated_at: OffsetDateTime,
+    pub files: Vec<FileItem>,
+    pub directories: Vec<DirItem>,
+}
+
+impl DirItem {
+    pub fn from_metadata<P: AsRef<str>>(
+        scoped_path: P,
+        metadata: Metadata,
+    ) -> Result<Self, std::io::Error> {
+        Ok(Self {
+            path: scoped_path.as_ref().to_string(),
+            updated_at: metadata.modified()?.into(),
+            files: Vec::new(),
+            directories: Vec::new(),
+        })
+    }
+}
+
+pub enum StorageItem {
+    DirItem(DirItem),
+    FileItem(FileItem),
+}
+
+impl StorageItem {
+    pub fn from_metadata<P: AsRef<str>>(
+        scoped_path: P,
+        metadata: Metadata,
+    ) -> Result<Self, std::io::Error> {
+        if metadata.is_dir() {
+            Ok(Self::DirItem(DirItem::from_metadata(
+                scoped_path,
+                metadata,
+            )?))
+        } else
+        // if metadata.is_file()
+        {
+            Ok(Self::FileItem(FileItem::from_metadata(
+                scoped_path,
+                metadata,
+            )?))
+        }
+    }
+    pub async fn from_dir_entry(
+        storage_root: &Path,
+        value: tokio::fs::DirEntry,
+    ) -> Result<Self, std::io::Error> {
+        let metadata = value.metadata().await?;
+        let path = value.path().to_string_lossy().to_string();
+        let path = path
+            .strip_prefix(&storage_root.to_string_lossy().to_string())
+            .unwrap_or(&path)
+            .to_string();
+
+        Self::from_metadata(path, metadata)
+    }
+}
 
 static USER_DATA_DIR: &str = "user";
 
@@ -43,10 +126,23 @@ pub struct Storage {
 }
 
 impl Storage {
-    pub async fn list_storage_items(
-        &self,
-        path: &str,
-    ) -> Result<Vec<DirectoryEntry>, StorageError> {
+    pub async fn storage_item(&self, path: &str) -> Result<StorageItem, StorageError> {
+        let path = sanitize_directory_path(path);
+        validate_file_path(path)?;
+
+        let mut data_path = self.storage_root.clone();
+        data_path.push(path);
+
+        StorageItem::from_metadata(
+            path.to_string(),
+            tokio::fs::metadata(data_path)
+                .await
+                .map_err(StorageError::MetadataReader)?,
+        )
+        .map_err(StorageError::MetadataReader)
+    }
+
+    pub async fn list_storage_items(&self, path: &str) -> Result<Vec<StorageItem>, StorageError> {
         let path = sanitize_directory_path(path);
         validate_file_path(path)?;
 
@@ -64,7 +160,7 @@ impl Storage {
             .map_err(StorageError::DirReader)?
         {
             result.push(
-                DirectoryEntry::from_dir_entry(&self.storage_root, dir_entry)
+                StorageItem::from_dir_entry(&self.storage_root, dir_entry)
                     .await
                     .map_err(StorageError::MetadataReader)?,
             );
@@ -78,7 +174,7 @@ impl Storage {
         path: &str,
         file_name: &str,
         mut file: File,
-    ) -> Result<DirectoryEntry, StorageError> {
+    ) -> Result<FileItem, StorageError> {
         let path = sanitize_directory_path(path);
         validate_file_path(path)?;
 
@@ -103,7 +199,7 @@ impl Storage {
         let mut file_path = PathBuf::from(path);
         file_path.push(file_name);
 
-        DirectoryEntry::from_metadata(
+        FileItem::from_metadata(
             file_path.to_string_lossy(),
             tokio::fs::metadata(data_path)
                 .await
@@ -112,11 +208,7 @@ impl Storage {
         .map_err(StorageError::MetadataReader)
     }
 
-    pub async fn move_item(
-        &self,
-        path: &str,
-        new_path: &str,
-    ) -> Result<DirectoryEntry, StorageError> {
+    pub async fn move_item(&self, path: &str, new_path: &str) -> Result<FileItem, StorageError> {
         let path = sanitize_directory_path(path);
         validate_file_path(path)?;
         let new_path = sanitize_directory_path(new_path);
@@ -131,7 +223,7 @@ impl Storage {
             .await
             .map_err(StorageError::DirReader)?;
 
-        DirectoryEntry::from_metadata(
+        FileItem::from_metadata(
             new_path.to_string(),
             tokio::fs::metadata(new_data_path)
                 .await
