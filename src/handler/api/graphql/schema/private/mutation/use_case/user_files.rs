@@ -16,7 +16,7 @@ pub enum UserFileUploadError {
     FileUploadRead(std::io::Error),
 }
 
-pub async fn upload_user_file<'context>(
+pub async fn upload_user_files<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     mut files: Vec<Upload>,
@@ -46,4 +46,33 @@ pub async fn upload_user_file<'context>(
     }
 
     Ok(result)
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum UserFileMoveError {
+    #[error("An unexpected error occurred")]
+    Context(async_graphql::Error),
+    #[error("Error handling the rename operation")]
+    Storage(#[from] StorageError),
+}
+
+pub async fn move_user_storage_item<'context>(
+    ctx: &async_graphql::Context<'context>,
+    path: &str,
+    new_path: &str,
+) -> Result<DirectoryEntry, UserFileMoveError> {
+    let context = ctx
+        .data::<PrivateContext>()
+        .map_err(UserFileMoveError::Context)?;
+
+    let user_directory = user_data_directory(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        &context.current_user.id,
+    );
+
+    let storage = Storage {
+        storage_root: user_directory,
+    };
+
+    Ok(storage.move_item(path, new_path).await?)
 }

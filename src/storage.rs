@@ -108,4 +108,32 @@ impl Storage {
         )
         .map_err(StorageError::MetadataReader)
     }
+
+    pub async fn move_item(
+        &self,
+        path: &str,
+        new_path: &str,
+    ) -> Result<DirectoryEntry, StorageError> {
+        let path = sanitize_directory_path(path);
+        validate_file_path(path)?;
+        let new_path = sanitize_directory_path(new_path);
+        validate_file_path(new_path)?;
+
+        let mut data_path = self.storage_root.clone();
+        data_path.push(path);
+        let mut new_data_path = self.storage_root.clone();
+        new_data_path.push(new_path);
+
+        tokio::fs::rename(&data_path, &new_data_path)
+            .await
+            .map_err(StorageError::DirReader)?;
+
+        DirectoryEntry::from_metadata(
+            new_path.to_string(),
+            tokio::fs::metadata(new_data_path)
+                .await
+                .map_err(StorageError::MetadataReader)?,
+        )
+        .map_err(StorageError::MetadataReader)
+    }
 }
