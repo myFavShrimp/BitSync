@@ -40,7 +40,7 @@ impl Mutation {
         ctx: &async_graphql::Context<'context>,
         path: String,
         new_path: String,
-    ) -> async_graphql::Result<FileItem> {
+    ) -> async_graphql::Result<DirItem> {
         Ok(
             use_case::user_files::move_user_directory_item(ctx, &path, &new_path)
                 .await

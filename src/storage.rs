@@ -245,7 +245,7 @@ impl Storage {
         .map_err(StorageError::MetadataReader)
     }
 
-    pub async fn move_item(&self, path: &str, new_path: &str) -> Result<FileItem, StorageError> {
+    pub async fn move_item(&self, path: &str, new_path: &str) -> Result<StorageItem, StorageError> {
         let path = sanitize_directory_path(path);
         validate_file_path(path)?;
         let new_path = sanitize_directory_path(new_path);
@@ -260,7 +260,7 @@ impl Storage {
             .await
             .map_err(StorageError::DirReader)?;
 
-        FileItem::from_metadata(
+        StorageItem::from_metadata(
             new_path,
             tokio::fs::metadata(new_data_path)
                 .await

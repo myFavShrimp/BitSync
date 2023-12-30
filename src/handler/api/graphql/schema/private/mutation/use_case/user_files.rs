@@ -61,7 +61,7 @@ pub async fn move_user_directory_item<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     new_path: &str,
-) -> Result<FileItem, UserDirectoryMoveError> {
+) -> Result<DirItem, UserDirectoryMoveError> {
     let context = ctx
         .data::<PrivateContext>()
         .map_err(UserDirectoryMoveError::Context)?;
@@ -80,7 +80,10 @@ pub async fn move_user_directory_item<'context>(
         crate::storage::StorageItem::FileItem(_) => Err(UserDirectoryMoveError::NotADirectory)?,
     }
 
-    Ok(storage.move_item(path, new_path).await?)
+    match storage.move_item(path, new_path).await? {
+        crate::storage::StorageItem::DirItem(dir_item) => Ok(dir_item),
+        crate::storage::StorageItem::FileItem(_) => unreachable!("Should be a drectory"),
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -116,7 +119,10 @@ pub async fn move_user_file_item<'context>(
         crate::storage::StorageItem::FileItem(_) => {}
     }
 
-    Ok(storage.move_item(path, new_path).await?)
+    match storage.move_item(path, new_path).await? {
+        crate::storage::StorageItem::DirItem(_) => unreachable!("Should be a file"),
+        crate::storage::StorageItem::FileItem(file_item) => Ok(file_item),
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -146,9 +152,8 @@ pub async fn create_user_directory<'context>(
         storage_root: user_directory,
     };
 
-    match storage.storage_item(path).await? {
-        crate::storage::StorageItem::DirItem(_) => Err(UserDirectoryCreationError::AlreadyExists)?,
-        crate::storage::StorageItem::FileItem(_) => {}
+    if let Ok(crate::storage::StorageItem::DirItem(_)) = storage.storage_item(path).await {
+        Err(UserDirectoryCreationError::AlreadyExists)?
     }
 
     Ok(storage.create_directory(path).await?)
