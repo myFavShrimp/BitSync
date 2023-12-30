@@ -48,14 +48,52 @@ pub async fn upload_user_files<'context>(
 }
 
 #[derive(thiserror::Error, Debug)]
+pub enum UserDirectoryMoveError {
+    #[error("An unexpected error occurred")]
+    Context(async_graphql::Error),
+    #[error("Error handling the rename operation")]
+    Storage(#[from] StorageError),
+    #[error("Not a directory")]
+    NotADirectory,
+}
+
+pub async fn move_user_directory_item<'context>(
+    ctx: &async_graphql::Context<'context>,
+    path: &str,
+    new_path: &str,
+) -> Result<FileItem, UserDirectoryMoveError> {
+    let context = ctx
+        .data::<PrivateContext>()
+        .map_err(UserDirectoryMoveError::Context)?;
+
+    let user_directory = user_data_directory(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        &context.current_user.id,
+    );
+
+    let storage = Storage {
+        storage_root: user_directory,
+    };
+
+    match storage.storage_item(path).await? {
+        crate::storage::StorageItem::DirItem(_) => {}
+        crate::storage::StorageItem::FileItem(_) => Err(UserDirectoryMoveError::NotADirectory)?,
+    }
+
+    Ok(storage.move_item(path, new_path).await?)
+}
+
+#[derive(thiserror::Error, Debug)]
 pub enum UserFileMoveError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
     #[error("Error handling the rename operation")]
     Storage(#[from] StorageError),
+    #[error("Not a file")]
+    NotAFile,
 }
 
-pub async fn move_user_storage_item<'context>(
+pub async fn move_user_file_item<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     new_path: &str,
@@ -72,6 +110,11 @@ pub async fn move_user_storage_item<'context>(
     let storage = Storage {
         storage_root: user_directory,
     };
+
+    match storage.storage_item(path).await? {
+        crate::storage::StorageItem::DirItem(_) => Err(UserFileMoveError::NotAFile)?,
+        crate::storage::StorageItem::FileItem(_) => {}
+    }
 
     Ok(storage.move_item(path, new_path).await?)
 }
