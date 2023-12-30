@@ -3,7 +3,7 @@ use async_graphql::Upload;
 use crate::{
     database::user::User,
     handler::api::graphql::schema::FormattedStringError,
-    storage::{DirItem, FileItem},
+    storage::{DirItem, FileItem, StorageItem},
 };
 
 use super::Context;
@@ -35,27 +35,14 @@ impl Mutation {
             .to_formatted_string_error()?)
     }
 
-    async fn move_user_directory_item<'context>(
+    async fn move_user_storage_item<'context>(
         &self,
         ctx: &async_graphql::Context<'context>,
         path: String,
         new_path: String,
-    ) -> async_graphql::Result<DirItem> {
+    ) -> async_graphql::Result<StorageItem> {
         Ok(
-            use_case::user_files::move_user_directory_item(ctx, &path, &new_path)
-                .await
-                .to_formatted_string_error()?,
-        )
-    }
-
-    async fn move_user_file_item<'context>(
-        &self,
-        ctx: &async_graphql::Context<'context>,
-        path: String,
-        new_path: String,
-    ) -> async_graphql::Result<FileItem> {
-        Ok(
-            use_case::user_files::move_user_file_item(ctx, &path, &new_path)
+            use_case::user_files::move_user_storage_item(ctx, &path, &new_path)
                 .await
                 .to_formatted_string_error()?,
         )

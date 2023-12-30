@@ -61,6 +61,7 @@ impl DirItem {
     }
 }
 
+#[derive(async_graphql::Union)]
 pub enum StorageItem {
     DirItem(DirItem),
     FileItem(FileItem),

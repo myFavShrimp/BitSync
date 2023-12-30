@@ -2,7 +2,7 @@ use async_graphql::Upload;
 
 use crate::{
     handler::api::graphql::PrivateContext,
-    storage::{user_data_directory, DirItem, FileItem, Storage, StorageError},
+    storage::{user_data_directory, DirItem, FileItem, Storage, StorageError, StorageItem},
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -53,15 +53,13 @@ pub enum UserDirectoryMoveError {
     Context(async_graphql::Error),
     #[error("Error handling the rename operation")]
     Storage(#[from] StorageError),
-    #[error("Not a directory")]
-    NotADirectory,
 }
 
-pub async fn move_user_directory_item<'context>(
+pub async fn move_user_storage_item<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     new_path: &str,
-) -> Result<DirItem, UserDirectoryMoveError> {
+) -> Result<StorageItem, UserDirectoryMoveError> {
     let context = ctx
         .data::<PrivateContext>()
         .map_err(UserDirectoryMoveError::Context)?;
@@ -75,54 +73,7 @@ pub async fn move_user_directory_item<'context>(
         storage_root: user_directory,
     };
 
-    match storage.storage_item(path).await? {
-        crate::storage::StorageItem::DirItem(_) => {}
-        crate::storage::StorageItem::FileItem(_) => Err(UserDirectoryMoveError::NotADirectory)?,
-    }
-
-    match storage.move_item(path, new_path).await? {
-        crate::storage::StorageItem::DirItem(dir_item) => Ok(dir_item),
-        crate::storage::StorageItem::FileItem(_) => unreachable!("Should be a drectory"),
-    }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum UserFileMoveError {
-    #[error("An unexpected error occurred")]
-    Context(async_graphql::Error),
-    #[error("Error handling the rename operation")]
-    Storage(#[from] StorageError),
-    #[error("Not a file")]
-    NotAFile,
-}
-
-pub async fn move_user_file_item<'context>(
-    ctx: &async_graphql::Context<'context>,
-    path: &str,
-    new_path: &str,
-) -> Result<FileItem, UserFileMoveError> {
-    let context = ctx
-        .data::<PrivateContext>()
-        .map_err(UserFileMoveError::Context)?;
-
-    let user_directory = user_data_directory(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
-
-    let storage = Storage {
-        storage_root: user_directory,
-    };
-
-    match storage.storage_item(path).await? {
-        crate::storage::StorageItem::DirItem(_) => Err(UserFileMoveError::NotAFile)?,
-        crate::storage::StorageItem::FileItem(_) => {}
-    }
-
-    match storage.move_item(path, new_path).await? {
-        crate::storage::StorageItem::DirItem(_) => unreachable!("Should be a file"),
-        crate::storage::StorageItem::FileItem(file_item) => Ok(file_item),
-    }
+    Ok(storage.move_item(path, new_path).await?)
 }
 
 #[derive(thiserror::Error, Debug)]
