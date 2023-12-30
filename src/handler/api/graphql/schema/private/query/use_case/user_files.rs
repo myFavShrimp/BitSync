@@ -12,7 +12,7 @@ pub enum UserDirectoryReadError {
     Storage(#[from] StorageError),
 }
 
-pub async fn list_my_directory<'context>(
+pub async fn list_my_storage_items<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
 ) -> Result<Vec<DirectoryEntry>, UserDirectoryReadError> {
@@ -28,6 +28,6 @@ pub async fn list_my_directory<'context>(
     Ok(Storage {
         storage_root: user_directory,
     }
-    .list_files(path)
+    .list_storage_items(path)
     .await?)
 }

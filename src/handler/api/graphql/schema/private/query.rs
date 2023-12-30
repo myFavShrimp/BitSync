@@ -17,12 +17,12 @@ impl Query {
         Ok(context.current_user.clone())
     }
 
-    async fn list_my_directory<'context>(
+    async fn list_my_storage_items<'context>(
         &self,
         ctx: &async_graphql::Context<'context>,
         path: String,
     ) -> async_graphql::Result<Vec<DirectoryEntry>> {
-        Ok(use_case::user_files::list_my_directory(ctx, &path).await?)
+        Ok(use_case::user_files::list_my_storage_items(ctx, &path).await?)
     }
 
     async fn users<'context>(

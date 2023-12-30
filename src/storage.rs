@@ -43,7 +43,10 @@ pub struct Storage {
 }
 
 impl Storage {
-    pub async fn list_files(&self, path: &str) -> Result<Vec<DirectoryEntry>, StorageError> {
+    pub async fn list_storage_items(
+        &self,
+        path: &str,
+    ) -> Result<Vec<DirectoryEntry>, StorageError> {
         let path = sanitize_directory_path(path);
         validate_file_path(path)?;
 
