@@ -95,8 +95,6 @@ pub async fn user_storage_item_search<'context>(
     )
     .match_list(&storage_paths, &mut matcher);
 
-    dbg!(&matches);
-
     let mut storage_item_search_result = UserStorageItemSearchResult {
         directories: Vec::new(),
         files: Vec::new(),
