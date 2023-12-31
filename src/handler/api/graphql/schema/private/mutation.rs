@@ -57,4 +57,14 @@ impl Mutation {
             .await
             .to_formatted_string_error()?)
     }
+
+    async fn remove_user_directory<'context>(
+        &self,
+        ctx: &async_graphql::Context<'context>,
+        path: String,
+    ) -> async_graphql::Result<String> {
+        Ok(use_case::user_files::remove_user_directory(ctx, &path)
+            .await
+            .to_formatted_string_error()?)
+    }
 }
