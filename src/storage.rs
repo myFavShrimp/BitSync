@@ -281,4 +281,19 @@ impl Storage {
             .await
             .map_err(StorageError::DirReader)
     }
+
+    pub async fn remove_file(&self, path: &str) -> Result<(), StorageError> {
+        let path = sanitize_directory_path(path);
+        validate_file_path(path)?;
+
+        let mut data_path = self.storage_root.clone();
+        data_path.push(path);
+
+        tokio::fs::remove_file(&data_path)
+            .await
+            .map_err(|error| StorageError::FileReader {
+                source: error,
+                file_path: path.to_string(),
+            })
+    }
 }

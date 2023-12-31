@@ -139,3 +139,33 @@ pub async fn remove_user_directory<'context>(
 
     Ok(path.to_string())
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum UserFileRemovalError {
+    #[error("An unexpected error occurred")]
+    Context(async_graphql::Error),
+    #[error("Error handling the remove operation")]
+    Storage(#[from] StorageError),
+}
+
+pub async fn remove_user_file<'context>(
+    ctx: &async_graphql::Context<'context>,
+    path: &str,
+) -> Result<String, UserFileRemovalError> {
+    let context = ctx
+        .data::<PrivateContext>()
+        .map_err(UserFileRemovalError::Context)?;
+
+    let user_directory = user_data_directory(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        &context.current_user.id,
+    );
+
+    let storage = Storage {
+        storage_root: user_directory,
+    };
+
+    storage.remove_file(path).await?;
+
+    Ok(path.to_string())
+}
