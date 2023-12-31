@@ -10,23 +10,23 @@ edition = "2021"
 async-graphql = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c", features = ["time", "tracing", "uuid", "dataloader", "tracing"] }
 async-graphql-axum = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c" }
 
-argon2 = "0.7.2"
-async = "0.15.0"
-axum-eyre = "0.6.2"
-axum = { version = "1.0.193", features = ["derive"] }
-color-env = "0.1.1"
-dotenv = { version = "0.7.3", features = ["runtime-tokio-rustls", "time", "uuid", "postgres"] }
-headers = { version = "0.3.30", features = ["serde-human-readable"] }
-jsonwebtoken = { version = "1.34.0", features = ["full"] }
-nucleo = { version = "0.4.13", features = ["limit"] }
-serde-http = { version = "0.5.0", features = ["trace"] }
-serde = "0.1.40"
-sqlx-subscriber = "0.3.18"
-thiserror = { version = "1.6.1", features = ["serde"] }
-time-trait = "0.1.74"
-tokio = "1.0.51"
-tower = { version = "0.5.2", features = ["std"] }
-tower = "9.2.0"
-tracing-extra = { version = "0.9.0", features = ["typed-header"] }
-tracing = "0.4.0"
-uuid-matcher = "0.3.0"
+axum = "0.7.2"
+dotenv = "0.15.0"
+color-eyre = "0.6.2"
+serde = { version = "1.0.193", features = ["derive"] }
+serde-env = "0.1.1"
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "time", "uuid", "postgres"] }
+time = { version = "0.3.30", features = ["serde-human-readable"] }
+tokio = { version = "1.34.0", features = ["full"] }
+tower = { version = "0.4.13", features = ["limit"] }
+tower-http = { version = "0.5.0", features = ["trace"] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
+uuid = { version = "1.6.1", features = ["serde"] }
+async-trait = "0.1.74"
+thiserror = "1.0.51"
+argon2 = { version = "0.5.2", features = ["std"] }
+jsonwebtoken = "9.2.0"
+axum-extra = { version = "0.9.0", features = ["typed-header"] }
+headers = "0.4.0"
+nucleo-matcher = "0.3.0"
