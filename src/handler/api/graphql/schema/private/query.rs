@@ -1,4 +1,8 @@
-use crate::{database::user::User, storage::DirItem};
+use crate::{
+    database::user::User, handler::api::graphql::schema::FormattedStringError, storage::DirItem,
+};
+
+use self::use_case::user_files::UserStorageItemSearchResult;
 
 use super::Context;
 
@@ -23,6 +27,16 @@ impl Query {
         path: String,
     ) -> async_graphql::Result<DirItem> {
         Ok(use_case::user_files::user_directory(ctx, &path).await?)
+    }
+
+    async fn user_search_storage_items<'context>(
+        &self,
+        ctx: &async_graphql::Context<'context>,
+        search: String,
+    ) -> async_graphql::Result<UserStorageItemSearchResult> {
+        Ok(use_case::user_files::user_storage_item_search(ctx, &search)
+            .await
+            .to_formatted_string_error()?)
     }
 
     async fn users<'context>(

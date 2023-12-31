@@ -369,6 +369,7 @@ dependencies = [
  "dotenv",
  "headers",
  "jsonwebtoken",
+ "nucleo-matcher",
  "serde",
  "serde-env",
  "sqlx",
@@ -1318,6 +1319,16 @@ checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
 dependencies = [
  "overload",
  "winapi",
+]
+
+[[package]]
+name = "nucleo-matcher"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25040628aa03c6c5e99690990b2493f5a8043e9144ad9a68c933fe4f82f2654d"
+dependencies = [
+ "memchr",
+ "unicode-segmentation",
 ]
 
 [[package]]

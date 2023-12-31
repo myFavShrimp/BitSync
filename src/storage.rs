@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::validate::{sanitize_directory_path, validate_file_path, PathValidationError};
 
-#[derive(async_graphql::SimpleObject, Clone)]
+#[derive(async_graphql::SimpleObject, Clone, Debug)]
 pub struct FileItem {
     pub path: String,
     pub size: u64,
@@ -31,12 +31,13 @@ impl FileItem {
     }
 }
 
+#[derive(Debug)]
 pub struct DirItemContent {
     pub files: Vec<FileItem>,
     pub directories: Vec<DirItem>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DirItem {
     pub path: String,
     pub updated_at: OffsetDateTime,
@@ -61,13 +62,20 @@ impl DirItem {
     }
 }
 
-#[derive(async_graphql::Union)]
+#[derive(async_graphql::Union, Debug)]
 pub enum StorageItem {
     DirItem(DirItem),
     FileItem(FileItem),
 }
 
 impl StorageItem {
+    pub fn path(&self) -> &str {
+        match self {
+            StorageItem::DirItem(dir_item) => &dir_item.path,
+            StorageItem::FileItem(file_item) => &file_item.path,
+        }
+    }
+
     pub fn from_metadata<P: AsRef<str>>(
         scoped_path: P,
         metadata: Metadata,
@@ -205,6 +213,63 @@ impl Storage {
         }
 
         Ok(result)
+    }
+
+    pub async fn list_storage_items_recursively(
+        &self,
+        path: &str,
+    ) -> Result<Vec<StorageItem>, StorageError> {
+        let path = sanitize_directory_path(path);
+        validate_file_path(path)?;
+
+        let mut data_path = self.storage_root.clone();
+        data_path.push(path);
+
+        let mut dirs_to_process = vec![tokio::fs::read_dir(data_path)
+            .await
+            .map_err(StorageError::DirReader)?];
+
+        let mut storage_items = Vec::new();
+
+        'diriter: loop {
+            dirs_to_process = {
+                let mut new_dirs_to_process = Vec::new();
+
+                for mut dir in dirs_to_process {
+                    while let Some(dir_entry) =
+                        dir.next_entry().await.map_err(StorageError::DirReader)?
+                    {
+                        if dir_entry
+                            .file_type()
+                            .await
+                            .map_err(StorageError::DirReader)?
+                            .is_dir()
+                        {
+                            new_dirs_to_process.push(
+                                tokio::fs::read_dir(dir_entry.path())
+                                    .await
+                                    .map_err(StorageError::DirReader)?,
+                            );
+                        }
+
+                        let storage_item =
+                            StorageItem::from_dir_entry(&self.storage_root, dir_entry)
+                                .await
+                                .map_err(StorageError::MetadataReader)?;
+
+                        storage_items.push(storage_item);
+                    }
+                }
+
+                new_dirs_to_process
+            };
+
+            if dirs_to_process.is_empty() {
+                break 'diriter;
+            }
+        }
+
+        Ok(storage_items)
     }
 
     pub async fn add_file(
