@@ -1,12 +1,16 @@
+use std::path::PathBuf;
+
 use crate::{
     handler::api::graphql::PrivateContext,
-    storage::{user_data_directory, DirItem, FileItem, Storage, StorageError},
+    storage::{DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError},
 };
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryReadError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error(transparent)]
     Storage(#[from] StorageError),
     #[error("Not a directory")]
@@ -21,16 +25,15 @@ pub async fn user_directory<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryReadError::Context)?;
 
-    let user_directory = user_data_directory(
+    let storage = Storage;
+
+    let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
-
-    let storage_item = storage.storage_item(path).await?;
+    let storage_item = storage.storage_item(&path).await?;
 
     match storage_item {
         crate::storage::StorageItem::FileItem(_) => Err(UserDirectoryReadError::NotADirectory),
@@ -61,6 +64,8 @@ pub enum UserStorageItemSearchError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
     #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
+    #[error(transparent)]
     Storage(#[from] StorageError),
 }
 
@@ -72,16 +77,15 @@ pub async fn user_storage_item_search<'context>(
         .data::<PrivateContext>()
         .map_err(UserStorageItemSearchError::Context)?;
 
-    let user_directory = user_data_directory(
+    let storage = Storage;
+
+    let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
+        PathBuf::from("/"),
+        context.current_user.id,
+    )?;
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
-
-    let storage_items = storage.list_storage_items_recursively("/").await?;
+    let storage_items = storage.list_storage_items_recursively(&path).await?;
     let storage_paths: Vec<_> = storage_items
         .iter()
         .map(|item| item.path().to_string())
@@ -102,7 +106,7 @@ pub async fn user_storage_item_search<'context>(
 
     for item in &storage_items {
         for path_match in &matches {
-            if path_match.0 == item.path() {
+            if path_match.0 == &item.path().scoped_path.to_string_lossy().to_string() {
                 match item {
                     crate::storage::StorageItem::DirItem(dir_item) => storage_item_search_result
                         .directories

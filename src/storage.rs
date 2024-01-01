@@ -1,7 +1,8 @@
 use std::{
+    fmt::Display,
     fs::{File, Metadata},
     io::Read,
-    path::{Path, PathBuf},
+    path::{Path, PathBuf, StripPrefixError},
     sync::Arc,
 };
 
@@ -9,22 +10,108 @@ use time::OffsetDateTime;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
-use crate::validate::{sanitize_directory_path, validate_file_path, PathValidationError};
+use crate::validate::{validate_file_path, PathValidationError};
+
+static USER_DATA_DIR: &str = "user";
+
+fn user_data_directory(mut storage_root: PathBuf, user_id: &Uuid) -> PathBuf {
+    storage_root.push(USER_DATA_DIR);
+    storage_root.push(user_id.to_string());
+
+    storage_root
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum StorageItemPathError {
+    #[error(transparent)]
+    StripPrefix(#[from] StripPrefixError),
+    #[error(transparent)]
+    PathValidation(#[from] PathValidationError),
+}
+
+#[derive(Clone, Debug)]
+pub struct StorageItemPath {
+    storage_root: PathBuf,
+    pub scoped_path: PathBuf,
+    user_id: Uuid,
+}
+
+impl StorageItemPath {
+    pub fn new(
+        storage_root: PathBuf,
+        scoped_path: PathBuf,
+        user_id: Uuid,
+    ) -> Result<Self, StorageItemPathError> {
+        validate_file_path(&scoped_path.to_string_lossy())?;
+
+        let mut scoped_root = PathBuf::from("/");
+        scoped_root.push(scoped_path);
+
+        Ok(Self {
+            storage_root,
+            scoped_path: scoped_root,
+            user_id,
+        })
+    }
+
+    pub fn system_data_directory(&self) -> PathBuf {
+        let scoped_path = self.scoped_path.clone();
+
+        let mut user_directory = user_data_directory(self.storage_root.clone(), &self.user_id);
+        user_directory.push(scoped_path.strip_prefix("/").unwrap_or(&scoped_path));
+
+        user_directory
+    }
+
+    pub fn push<P: AsRef<Path>>(&mut self, path: P) {
+        self.scoped_path.push(path);
+    }
+
+    pub fn new_with_stripped_storage_root(
+        &self,
+        path: PathBuf,
+    ) -> Result<Self, StorageItemPathError> {
+        let user_directory = user_data_directory(self.storage_root.clone(), &self.user_id);
+
+        let path = path
+            .strip_prefix(user_directory)
+            .map(|path| path.to_path_buf())?;
+
+        Self::new(self.storage_root.clone(), path, self.user_id)
+    }
+}
+
+impl Display for StorageItemPath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.scoped_path.to_string_lossy())
+    }
+}
+
+#[async_graphql::Scalar]
+impl async_graphql::ScalarType for StorageItemPath {
+    fn parse(_value: async_graphql::Value) -> async_graphql::InputValueResult<Self> {
+        unimplemented!("StorageItemPath GraphQL parsing");
+    }
+
+    fn to_value(&self) -> async_graphql::Value {
+        async_graphql::Value::String(self.scoped_path.to_string_lossy().to_string())
+    }
+}
 
 #[derive(async_graphql::SimpleObject, Clone, Debug)]
 pub struct FileItem {
-    pub path: String,
+    pub path: StorageItemPath,
     pub size: u64,
     pub updated_at: OffsetDateTime,
 }
 
 impl FileItem {
-    pub fn from_metadata<P: AsRef<str>>(
-        scoped_path: P,
+    pub fn from_metadata(
+        path: StorageItemPath,
         metadata: Metadata,
     ) -> Result<Self, std::io::Error> {
         Ok(Self {
-            path: scoped_path.as_ref().to_string(),
+            path,
             size: metadata.len(),
             updated_at: metadata.modified()?.into(),
         })
@@ -39,21 +126,16 @@ pub struct DirItemContent {
 
 #[derive(Clone, Debug)]
 pub struct DirItem {
-    pub path: String,
+    pub path: StorageItemPath,
     pub updated_at: OffsetDateTime,
     pub content: Arc<Mutex<Option<DirItemContent>>>,
 }
 
 impl DirItem {
-    pub fn from_metadata<P: AsRef<str>>(
-        scoped_path: P,
+    pub fn from_metadata(
+        path: StorageItemPath,
         metadata: Metadata,
     ) -> Result<Self, std::io::Error> {
-        let path = match scoped_path.as_ref() {
-            path if path.is_empty() => String::from("/"),
-            path => path.to_string(),
-        };
-
         Ok(Self {
             path,
             updated_at: metadata.modified()?.into(),
@@ -69,57 +151,35 @@ pub enum StorageItem {
 }
 
 impl StorageItem {
-    pub fn path(&self) -> &str {
+    pub fn path(&self) -> &StorageItemPath {
         match self {
             StorageItem::DirItem(dir_item) => &dir_item.path,
             StorageItem::FileItem(file_item) => &file_item.path,
         }
     }
 
-    pub fn from_metadata<P: AsRef<str>>(
-        scoped_path: P,
+    pub fn from_metadata(
+        path: StorageItemPath,
         metadata: Metadata,
     ) -> Result<Self, std::io::Error> {
         if metadata.is_dir() {
-            Ok(Self::DirItem(DirItem::from_metadata(
-                scoped_path,
-                metadata,
-            )?))
+            Ok(Self::DirItem(DirItem::from_metadata(path, metadata)?))
         } else {
-            Ok(Self::FileItem(FileItem::from_metadata(
-                scoped_path,
-                metadata,
-            )?))
+            Ok(Self::FileItem(FileItem::from_metadata(path, metadata)?))
         }
     }
     pub async fn from_dir_entry(
-        storage_root: &Path,
+        path: StorageItemPath,
         value: tokio::fs::DirEntry,
     ) -> Result<Self, std::io::Error> {
         let metadata = value.metadata().await?;
-        let path = value.path().to_string_lossy().to_string();
-        let path = path
-            .strip_prefix(&storage_root.to_string_lossy().to_string())
-            .unwrap_or(&path)
-            .to_string();
 
         Self::from_metadata(path, metadata)
     }
 }
 
-static USER_DATA_DIR: &str = "user";
-
-pub fn user_data_directory(mut storage_root: PathBuf, user_id: &Uuid) -> PathBuf {
-    storage_root.push(USER_DATA_DIR);
-    storage_root.push(user_id.to_string());
-
-    storage_root
-}
-
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
-    #[error(transparent)]
-    InvalidPath(#[from] PathValidationError),
     #[error(transparent)]
     DirReader(std::io::Error),
     #[error(transparent)]
@@ -128,74 +188,59 @@ pub enum StorageError {
     FileReader {
         #[source]
         source: std::io::Error,
-        file_path: String,
+        file_path: StorageItemPath,
     },
     #[error("Could not write the data of '{file_path}'")]
     FileWriter {
         #[source]
         source: std::io::Error,
-        file_path: String,
+        file_path: StorageItemPath,
     },
     #[error("Could not create the directory '{path}'")]
     DirectoryCreation {
         #[source]
         source: std::io::Error,
-        path: String,
+        path: StorageItemPath,
     },
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
 }
 
-pub struct Storage {
-    pub storage_root: PathBuf,
-}
+pub struct Storage;
 
 impl Storage {
-    pub async fn create_directory(&self, path: &str) -> Result<DirItem, StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-
-        tokio::fs::create_dir_all(&data_path)
+    pub async fn create_directory(&self, path: &StorageItemPath) -> Result<DirItem, StorageError> {
+        tokio::fs::create_dir_all(path.system_data_directory())
             .await
             .map_err(|error| StorageError::DirectoryCreation {
                 source: error,
-                path: path.to_string(),
+                path: path.clone(),
             })?;
 
         DirItem::from_metadata(
-            path,
-            tokio::fs::metadata(data_path)
+            path.clone(),
+            tokio::fs::metadata(path.system_data_directory())
                 .await
                 .map_err(StorageError::MetadataReader)?,
         )
         .map_err(StorageError::MetadataReader)
     }
 
-    pub async fn storage_item(&self, path: &str) -> Result<StorageItem, StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-
+    pub async fn storage_item(&self, path: &StorageItemPath) -> Result<StorageItem, StorageError> {
         StorageItem::from_metadata(
-            path,
-            tokio::fs::metadata(data_path)
+            path.clone(),
+            tokio::fs::metadata(path.system_data_directory())
                 .await
                 .map_err(StorageError::MetadataReader)?,
         )
         .map_err(StorageError::MetadataReader)
     }
 
-    pub async fn list_storage_items(&self, path: &str) -> Result<Vec<StorageItem>, StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-
-        let mut dir_entries = tokio::fs::read_dir(data_path)
+    pub async fn list_storage_items(
+        &self,
+        path: &StorageItemPath,
+    ) -> Result<Vec<StorageItem>, StorageError> {
+        let mut dir_entries = tokio::fs::read_dir(path.system_data_directory())
             .await
             .map_err(StorageError::DirReader)?;
 
@@ -205,8 +250,11 @@ impl Storage {
             .await
             .map_err(StorageError::DirReader)?
         {
+            let path = path
+                .new_with_stripped_storage_root(dir_entry.path())
+                .map_err(StorageError::StorageItemPathCreation)?;
             result.push(
-                StorageItem::from_dir_entry(&self.storage_root, dir_entry)
+                StorageItem::from_dir_entry(path, dir_entry)
                     .await
                     .map_err(StorageError::MetadataReader)?,
             );
@@ -217,15 +265,9 @@ impl Storage {
 
     pub async fn list_storage_items_recursively(
         &self,
-        path: &str,
+        path: &StorageItemPath,
     ) -> Result<Vec<StorageItem>, StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-
-        let mut dirs_to_process = vec![tokio::fs::read_dir(data_path)
+        let mut dirs_to_process = vec![tokio::fs::read_dir(path.system_data_directory())
             .await
             .map_err(StorageError::DirReader)?];
 
@@ -252,10 +294,11 @@ impl Storage {
                             );
                         }
 
-                        let storage_item =
-                            StorageItem::from_dir_entry(&self.storage_root, dir_entry)
-                                .await
-                                .map_err(StorageError::MetadataReader)?;
+                        let path = path.new_with_stripped_storage_root(dir_entry.path())?;
+
+                        let storage_item = StorageItem::from_dir_entry(path, dir_entry)
+                            .await
+                            .map_err(StorageError::MetadataReader)?;
 
                         storage_items.push(storage_item);
                     }
@@ -274,91 +317,65 @@ impl Storage {
 
     pub async fn add_file(
         &self,
-        path: &str,
-        file_name: &str,
+        path: &StorageItemPath,
         mut file: File,
     ) -> Result<FileItem, StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-        data_path.push(file_name);
-
         let mut data = Vec::new();
         file.read_to_end(&mut data)
             .map_err(|error| StorageError::FileReader {
                 source: error,
-                file_path: format!("{path}/{file_name}"),
+                file_path: path.clone(),
             })?;
 
-        tokio::fs::write(&data_path, data)
+        tokio::fs::write(path.system_data_directory(), data)
             .await
             .map_err(|error| StorageError::FileWriter {
                 source: error,
-                file_path: format!("{path}/{file_name}"),
+                file_path: path.clone(),
             })?;
 
-        let mut file_path = PathBuf::from(path);
-        file_path.push(file_name);
-
         FileItem::from_metadata(
-            file_path.to_string_lossy(),
-            tokio::fs::metadata(data_path)
+            path.clone(),
+            tokio::fs::metadata(path.system_data_directory())
                 .await
                 .map_err(StorageError::MetadataReader)?,
         )
         .map_err(StorageError::MetadataReader)
     }
 
-    pub async fn move_item(&self, path: &str, new_path: &str) -> Result<StorageItem, StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-        let new_path = sanitize_directory_path(new_path);
-        validate_file_path(new_path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-        let mut new_data_path = self.storage_root.clone();
-        new_data_path.push(new_path);
-
-        tokio::fs::rename(&data_path, &new_data_path)
-            .await
-            .map_err(StorageError::DirReader)?;
+    pub async fn move_item(
+        &self,
+        path: &StorageItemPath,
+        new_path: &StorageItemPath,
+    ) -> Result<StorageItem, StorageError> {
+        tokio::fs::rename(
+            &path.system_data_directory(),
+            &new_path.system_data_directory(),
+        )
+        .await
+        .map_err(StorageError::DirReader)?;
 
         StorageItem::from_metadata(
-            new_path,
-            tokio::fs::metadata(new_data_path)
+            new_path.clone(),
+            tokio::fs::metadata(new_path.system_data_directory())
                 .await
                 .map_err(StorageError::MetadataReader)?,
         )
         .map_err(StorageError::MetadataReader)
     }
 
-    pub async fn remove_directory(&self, path: &str) -> Result<(), StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-
-        tokio::fs::remove_dir_all(&data_path)
+    pub async fn remove_directory(&self, path: &StorageItemPath) -> Result<(), StorageError> {
+        tokio::fs::remove_dir_all(path.system_data_directory())
             .await
             .map_err(StorageError::DirReader)
     }
 
-    pub async fn remove_file(&self, path: &str) -> Result<(), StorageError> {
-        let path = sanitize_directory_path(path);
-        validate_file_path(path)?;
-
-        let mut data_path = self.storage_root.clone();
-        data_path.push(path);
-
-        tokio::fs::remove_file(&data_path)
+    pub async fn remove_file(&self, path: &StorageItemPath) -> Result<(), StorageError> {
+        tokio::fs::remove_file(path.system_data_directory())
             .await
             .map_err(|error| StorageError::FileReader {
                 source: error,
-                file_path: path.to_string(),
+                file_path: path.clone(),
             })
     }
 }

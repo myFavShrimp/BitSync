@@ -9,7 +9,3 @@ pub fn validate_file_path(path: &str) -> Result<(), PathValidationError> {
         Ok(())
     }
 }
-
-pub fn sanitize_directory_path(path: &str) -> &str {
-    path.trim_start_matches('/')
-}

@@ -1,16 +1,21 @@
-use std::sync::Arc;
+use std::{path::PathBuf, sync::Arc};
 
 use tokio::sync::Mutex;
 
 use crate::{
     handler::api::graphql::PrivateContext,
-    storage::{user_data_directory, DirItem, DirItemContent, FileItem, Storage, StorageError},
+    storage::{
+        DirItem, DirItemContent, FileItem, Storage, StorageError, StorageItemPath,
+        StorageItemPathError,
+    },
 };
 
 #[derive(thiserror::Error, Debug)]
 pub enum DirectoryReadError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error(transparent)]
     Storage(#[from] StorageError),
 }
@@ -29,15 +34,14 @@ pub async fn list_directories<'context>(
                 .data::<PrivateContext>()
                 .map_err(DirectoryReadError::Context)?;
 
-            let user_directory = user_data_directory(
+            let path = StorageItemPath::new(
                 context.app_state.config.fs_storage_root_dir.clone(),
-                &context.current_user.id,
-            );
+                PathBuf::from(path),
+                context.current_user.id,
+            )?;
 
-            let storage = Storage {
-                storage_root: user_directory,
-            };
-            let dir_content = storage.list_storage_items(path).await?;
+            let storage = Storage;
+            let dir_content = storage.list_storage_items(&path).await?;
 
             let mut directories = Vec::new();
             let mut files = Vec::new();
@@ -74,15 +78,14 @@ pub async fn list_files<'context>(
                 .data::<PrivateContext>()
                 .map_err(DirectoryReadError::Context)?;
 
-            let user_directory = user_data_directory(
+            let path = StorageItemPath::new(
                 context.app_state.config.fs_storage_root_dir.clone(),
-                &context.current_user.id,
-            );
+                PathBuf::from(path),
+                context.current_user.id,
+            )?;
 
-            let storage = Storage {
-                storage_root: user_directory,
-            };
-            let dir_content = storage.list_storage_items(path).await?;
+            let storage = Storage;
+            let dir_content = storage.list_storage_items(&path).await?;
 
             let mut directories = Vec::new();
             let mut files = Vec::new();

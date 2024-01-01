@@ -1,14 +1,21 @@
+use std::path::PathBuf;
+
 use async_graphql::Upload;
 
 use crate::{
     handler::api::graphql::PrivateContext,
-    storage::{user_data_directory, DirItem, FileItem, Storage, StorageError, StorageItem},
+    storage::{
+        DirItem, FileItem, Storage, StorageError, StorageItem, StorageItemPath,
+        StorageItemPathError,
+    },
 };
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserFileUploadError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error("Error handling the file upload")]
     Storage(#[from] StorageError),
     #[error("Could not read the file data")]
@@ -24,24 +31,25 @@ pub async fn upload_user_files<'context>(
         .data::<PrivateContext>()
         .map_err(UserFileUploadError::Context)?;
 
-    let user_directory = user_data_directory(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
-
     let files: Result<Vec<async_graphql::UploadValue>, std::io::Error> =
         files.iter_mut().map(|file| file.value(ctx)).collect();
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
+    let path = StorageItemPath::new(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
+
+    let storage = Storage;
 
     let mut result = Vec::new();
     for file in files.map_err(UserFileUploadError::FileUploadRead)? {
-        let file_name = &file.filename;
         let file_content = file.content;
 
-        result.push(storage.add_file(path, file_name, file_content).await?);
+        let mut file_path = path.clone();
+        file_path.push(&file.filename);
+
+        result.push(storage.add_file(&file_path, file_content).await?);
     }
 
     Ok(result)
@@ -51,6 +59,8 @@ pub async fn upload_user_files<'context>(
 pub enum UserDirectoryMoveError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error("Error handling the rename operation")]
     Storage(#[from] StorageError),
 }
@@ -64,22 +74,29 @@ pub async fn move_user_storage_item<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryMoveError::Context)?;
 
-    let user_directory = user_data_directory(
+    let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
+    let new_path = StorageItemPath::new(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        PathBuf::from(new_path),
+        context.current_user.id,
+    )?;
 
-    Ok(storage.move_item(path, new_path).await?)
+    let storage = Storage;
+
+    Ok(storage.move_item(&path, &new_path).await?)
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryCreationError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error("Error handling the rename operation")]
     Storage(#[from] StorageError),
     #[error("Already exists")]
@@ -94,26 +111,27 @@ pub async fn create_user_directory<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryCreationError::Context)?;
 
-    let user_directory = user_data_directory(
+    let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
+    let storage = Storage;
 
-    if let Ok(crate::storage::StorageItem::DirItem(_)) = storage.storage_item(path).await {
+    if let Ok(crate::storage::StorageItem::DirItem(_)) = storage.storage_item(&path).await {
         Err(UserDirectoryCreationError::AlreadyExists)?
     }
 
-    Ok(storage.create_directory(path).await?)
+    Ok(storage.create_directory(&path).await?)
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryRemovalError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error("Error handling the remove operation")]
     Storage(#[from] StorageError),
 }
@@ -121,29 +139,30 @@ pub enum UserDirectoryRemovalError {
 pub async fn remove_user_directory<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
-) -> Result<String, UserDirectoryRemovalError> {
+) -> Result<StorageItemPath, UserDirectoryRemovalError> {
     let context = ctx
         .data::<PrivateContext>()
         .map_err(UserDirectoryRemovalError::Context)?;
 
-    let user_directory = user_data_directory(
+    let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
+    let storage = Storage;
 
-    storage.remove_directory(path).await?;
+    storage.remove_directory(&path).await?;
 
-    Ok(path.to_string())
+    Ok(path)
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserFileRemovalError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
     #[error("Error handling the remove operation")]
     Storage(#[from] StorageError),
 }
@@ -151,21 +170,20 @@ pub enum UserFileRemovalError {
 pub async fn remove_user_file<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
-) -> Result<String, UserFileRemovalError> {
+) -> Result<StorageItemPath, UserFileRemovalError> {
     let context = ctx
         .data::<PrivateContext>()
         .map_err(UserFileRemovalError::Context)?;
 
-    let user_directory = user_data_directory(
+    let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
-        &context.current_user.id,
-    );
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
 
-    let storage = Storage {
-        storage_root: user_directory,
-    };
+    let storage = Storage;
 
-    storage.remove_file(path).await?;
+    storage.remove_file(&path).await?;
 
-    Ok(path.to_string())
+    Ok(path)
 }
