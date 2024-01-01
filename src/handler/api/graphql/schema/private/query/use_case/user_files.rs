@@ -104,8 +104,8 @@ pub async fn user_storage_item_search<'context>(
         files: Vec::new(),
     };
 
-    for item in &storage_items {
-        for path_match in &matches {
+    for path_match in &matches {
+        for item in &storage_items {
             if path_match.0 == &item.path().scoped_path.to_string_lossy().to_string() {
                 match item {
                     crate::storage::StorageItem::DirItem(dir_item) => storage_item_search_result
