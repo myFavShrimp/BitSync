@@ -29,7 +29,7 @@ impl Query {
         Ok(use_case::user_files::user_directory(ctx, &path).await?)
     }
 
-    async fn user_search_storage_items<'context>(
+    async fn search_user_storage_items<'context>(
         &self,
         ctx: &async_graphql::Context<'context>,
         search: String,
