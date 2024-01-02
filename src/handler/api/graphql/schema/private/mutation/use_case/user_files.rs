@@ -56,7 +56,7 @@ pub async fn upload_user_files<'context>(
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum UserDirectoryMoveError {
+pub enum UserStorageItemMoveError {
     #[error("An unexpected error occurred")]
     Context(async_graphql::Error),
     #[error(transparent)]
@@ -69,10 +69,10 @@ pub async fn move_user_storage_item<'context>(
     ctx: &async_graphql::Context<'context>,
     path: &str,
     new_path: &str,
-) -> Result<StorageItem, UserDirectoryMoveError> {
+) -> Result<StorageItem, UserStorageItemMoveError> {
     let context = ctx
         .data::<PrivateContext>()
-        .map_err(UserDirectoryMoveError::Context)?;
+        .map_err(UserStorageItemMoveError::Context)?;
 
     let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
@@ -89,6 +89,42 @@ pub async fn move_user_storage_item<'context>(
     let storage = Storage;
 
     Ok(storage.move_item(&path, &new_path).await?)
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum UserFileCopyError {
+    #[error("An unexpected error occurred")]
+    Context(async_graphql::Error),
+    #[error(transparent)]
+    StorageItemPathCreation(#[from] StorageItemPathError),
+    #[error("Error handling the copy operation")]
+    Storage(#[from] StorageError),
+}
+
+pub async fn copy_user_file<'context>(
+    ctx: &async_graphql::Context<'context>,
+    path: &str,
+    new_path: &str,
+) -> Result<FileItem, UserFileCopyError> {
+    let context = ctx
+        .data::<PrivateContext>()
+        .map_err(UserFileCopyError::Context)?;
+
+    let path = StorageItemPath::new(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        PathBuf::from(path),
+        context.current_user.id,
+    )?;
+
+    let new_path = StorageItemPath::new(
+        context.app_state.config.fs_storage_root_dir.clone(),
+        PathBuf::from(new_path),
+        context.current_user.id,
+    )?;
+
+    let storage = Storage;
+
+    Ok(storage.copy_file(&path, &new_path).await?)
 }
 
 #[derive(thiserror::Error, Debug)]

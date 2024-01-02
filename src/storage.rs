@@ -364,6 +364,30 @@ impl Storage {
         .map_err(StorageError::MetadataReader)
     }
 
+    pub async fn copy_file(
+        &self,
+        path: &StorageItemPath,
+        new_path: &StorageItemPath,
+    ) -> Result<FileItem, StorageError> {
+        tokio::fs::copy(
+            &path.system_data_directory(),
+            &new_path.system_data_directory(),
+        )
+        .await
+        .map_err(|error| StorageError::FileWriter {
+            source: error,
+            file_path: new_path.clone(),
+        })?;
+
+        FileItem::from_metadata(
+            new_path.clone(),
+            tokio::fs::metadata(new_path.system_data_directory())
+                .await
+                .map_err(StorageError::MetadataReader)?,
+        )
+        .map_err(StorageError::MetadataReader)
+    }
+
     pub async fn remove_directory(&self, path: &StorageItemPath) -> Result<(), StorageError> {
         tokio::fs::remove_dir_all(path.system_data_directory())
             .await
