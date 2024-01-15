@@ -75,7 +75,8 @@ impl StorageItemPath {
 
         let path = path
             .strip_prefix(user_directory)
-            .map(|path| path.to_path_buf())?;
+            .map(|path| path.to_path_buf())
+            .unwrap_or(path);
 
         Self::new(self.storage_root.clone(), path, self.user_id)
     }
@@ -204,6 +205,8 @@ pub enum StorageError {
     },
     #[error(transparent)]
     StorageItemPathCreation(#[from] StorageItemPathError),
+    #[error(transparent)]
+    StripPrefix(#[from] StripPrefixError),
 }
 
 pub struct Storage;
@@ -380,6 +383,95 @@ impl Storage {
         })?;
 
         FileItem::from_metadata(
+            new_path.clone(),
+            tokio::fs::metadata(new_path.system_data_directory())
+                .await
+                .map_err(StorageError::MetadataReader)?,
+        )
+        .map_err(StorageError::MetadataReader)
+    }
+
+    pub async fn copy_directory(
+        &self,
+        path: &StorageItemPath,
+        new_path: &StorageItemPath,
+    ) -> Result<DirItem, StorageError> {
+        let mut dirs_to_process = vec![tokio::fs::read_dir(path.system_data_directory())
+            .await
+            .map_err(StorageError::DirReader)?];
+
+        let mut storage_items = Vec::new();
+
+        'diriter: loop {
+            dirs_to_process = {
+                let mut new_dirs_to_process = Vec::new();
+
+                for mut dir in dirs_to_process {
+                    while let Some(dir_entry) =
+                        dir.next_entry().await.map_err(StorageError::DirReader)?
+                    {
+                        let file_type = dir_entry
+                            .file_type()
+                            .await
+                            .map_err(StorageError::DirReader)?;
+
+                        if file_type.is_dir() {
+                            new_dirs_to_process.push(
+                                tokio::fs::read_dir(dir_entry.path())
+                                    .await
+                                    .map_err(StorageError::DirReader)?,
+                            );
+                            // todo create dir
+                            // tokio::fs::create_dir_all()
+                        } else if file_type.is_file() {
+                            let entry_path = dir_entry.path();
+                            let entry_path_from_new_dir =
+                                entry_path.strip_prefix(path.system_data_directory())?;
+
+                            let mut new_file_path = new_path.scoped_path.clone();
+                            new_file_path.push(entry_path_from_new_dir);
+
+                            let new_path = path.new_with_stripped_storage_root(new_file_path)?;
+
+                            tokio::fs::copy(
+                                path.system_data_directory(),
+                                new_path.system_data_directory(),
+                            )
+                            .await
+                            .map_err(|error| {
+                                StorageError::FileWriter {
+                                    source: error,
+                                    file_path: new_path.clone(),
+                                }
+                            })?;
+
+                            new_dirs_to_process.push(
+                                tokio::fs::read_dir(dir_entry.path())
+                                    .await
+                                    .map_err(StorageError::DirReader)?,
+                            );
+                        }
+
+                        let path = path.new_with_stripped_storage_root(dir_entry.path())?;
+
+                        // tokio::
+                        let storage_item = StorageItem::from_dir_entry(path, dir_entry)
+                            .await
+                            .map_err(StorageError::MetadataReader)?;
+
+                        storage_items.push(storage_item);
+                    }
+                }
+
+                new_dirs_to_process
+            };
+
+            if dirs_to_process.is_empty() {
+                break 'diriter;
+            }
+        }
+
+        DirItem::from_metadata(
             new_path.clone(),
             tokio::fs::metadata(new_path.system_data_directory())
                 .await

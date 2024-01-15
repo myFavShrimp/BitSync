@@ -59,6 +59,19 @@ impl Mutation {
             .to_formatted_string_error()?)
     }
 
+    async fn copy_user_directory<'context>(
+        &self,
+        ctx: &async_graphql::Context<'context>,
+        path: String,
+        new_path: String,
+    ) -> async_graphql::Result<DirItem> {
+        Ok(
+            use_case::user_files::copy_user_directory(ctx, &path, &new_path)
+                .await
+                .to_formatted_string_error()?,
+        )
+    }
+
     async fn create_user_directory<'context>(
         &self,
         ctx: &async_graphql::Context<'context>,
