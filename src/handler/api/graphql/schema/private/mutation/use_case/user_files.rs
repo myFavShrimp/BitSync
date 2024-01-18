@@ -160,7 +160,7 @@ pub async fn copy_user_directory<'context>(
 
     let storage = Storage;
 
-    Ok(storage.copy_file(&path, &new_path).await?)
+    Ok(storage.copy_directory(&path, &new_path).await?)
 }
 
 #[derive(thiserror::Error, Debug)]
