@@ -6,7 +6,7 @@ use crate::{
     handler::api::graphql::PrivateContext,
     storage::{
         DirItem, FileItem, Storage, StorageError, StorageItem, StorageItemPath,
-        StorageItemPathError,
+        StorageItemPathError, StorageKind,
     },
 };
 
@@ -40,7 +40,7 @@ pub async fn upload_user_files<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     let mut result = Vec::new();
     for file in files.map_err(UserFileUploadError::FileUploadRead)? {
@@ -86,7 +86,7 @@ pub async fn move_user_storage_item<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     Ok(storage.move_item(&path, &new_path).await?)
 }
@@ -122,7 +122,7 @@ pub async fn copy_user_file<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     Ok(storage.copy_file(&path, &new_path).await?)
 }
@@ -158,7 +158,7 @@ pub async fn copy_user_directory<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     Ok(storage.copy_directory(&path, &new_path).await?)
 }
@@ -189,7 +189,7 @@ pub async fn create_user_directory<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     if let Ok(crate::storage::StorageItem::DirItem(_)) = storage.storage_item(&path).await {
         Err(UserDirectoryCreationError::AlreadyExists)?
@@ -222,7 +222,7 @@ pub async fn remove_user_directory<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     storage.remove_directory(&path).await?;
 
@@ -253,7 +253,7 @@ pub async fn remove_user_file<'context>(
         context.current_user.id,
     )?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     storage.remove_file(&path).await?;
 

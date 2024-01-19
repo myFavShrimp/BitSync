@@ -6,7 +6,7 @@ use crate::{
     handler::api::graphql::PrivateContext,
     storage::{
         DirItem, DirItemContent, FileItem, Storage, StorageError, StorageItemPath,
-        StorageItemPathError,
+        StorageItemPathError, StorageKind,
     },
 };
 
@@ -40,7 +40,7 @@ pub async fn list_directories<'context>(
                 context.current_user.id,
             )?;
 
-            let storage = Storage;
+            let storage = StorageKind::create(&context.app_state.config).await;
             let dir_content = storage.list_storage_items(&path).await?;
 
             let mut directories = Vec::new();
@@ -84,7 +84,7 @@ pub async fn list_files<'context>(
                 context.current_user.id,
             )?;
 
-            let storage = Storage;
+            let storage = StorageKind::create(&context.app_state.config).await;
             let dir_content = storage.list_storage_items(&path).await?;
 
             let mut directories = Vec::new();

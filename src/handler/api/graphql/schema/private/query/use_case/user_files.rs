@@ -2,7 +2,10 @@ use std::path::PathBuf;
 
 use crate::{
     handler::api::graphql::PrivateContext,
-    storage::{DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError},
+    storage::{
+        DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError,
+        StorageKind,
+    },
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -25,7 +28,7 @@ pub async fn user_directory<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryReadError::Context)?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
@@ -77,7 +80,7 @@ pub async fn user_storage_item_search<'context>(
         .data::<PrivateContext>()
         .map_err(UserStorageItemSearchError::Context)?;
 
-    let storage = Storage;
+    let storage = StorageKind::create(&context.app_state.config).await;
 
     let path = StorageItemPath::new(
         context.app_state.config.fs_storage_root_dir.clone(),
