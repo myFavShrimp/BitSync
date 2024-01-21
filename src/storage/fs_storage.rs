@@ -1,8 +1,27 @@
-use std::{fs::File, io::Read};
+use std::{fs::File, io::Read, path::PathBuf};
+
+use tokio::fs::DirEntry;
 
 use super::{DirItem, FileItem, Storage, StorageError, StorageItem, StorageItemPath};
 
 pub struct FsStorage;
+
+#[async_recursion::async_recursion]
+pub async fn dir_items(dir: PathBuf, recursive: bool) -> Result<Vec<DirEntry>, std::io::Error> {
+    let mut dir_entries = tokio::fs::read_dir(&dir).await?;
+
+    let mut result = Vec::new();
+
+    while let Some(dir_entry) = dir_entries.next_entry().await? {
+        if recursive && dir_entry.file_type().await?.is_dir() {
+            result.extend(dir_items(dir_entry.path(), true).await?);
+        }
+
+        result.push(dir_entry);
+    }
+
+    Ok(result)
+}
 
 impl Storage for FsStorage {
     async fn create_directory(&self, path: &StorageItemPath) -> Result<DirItem, StorageError> {
@@ -63,50 +82,61 @@ impl Storage for FsStorage {
         &self,
         path: &StorageItemPath,
     ) -> Result<Vec<StorageItem>, StorageError> {
-        let mut dirs_to_process = vec![tokio::fs::read_dir(path.system_data_directory())
-            .await
-            .map_err(StorageError::DirReader)?];
+        // let mut dirs_to_process = vec![tokio::fs::read_dir(path.system_data_directory())
+        //     .await
+        //     .map_err(StorageError::DirReader)?];
 
         let mut storage_items = Vec::new();
 
-        'diriter: loop {
-            dirs_to_process = {
-                let mut new_dirs_to_process = Vec::new();
+        for entry in dir_items(path.system_data_directory(), true)
+            .await
+            .map_err(StorageError::DirReader)?
+        {
+            let storage_item = StorageItem::from_dir_entry(path.clone(), entry)
+                .await
+                .map_err(StorageError::MetadataReader)?;
 
-                for mut dir in dirs_to_process {
-                    while let Some(dir_entry) =
-                        dir.next_entry().await.map_err(StorageError::DirReader)?
-                    {
-                        if dir_entry
-                            .file_type()
-                            .await
-                            .map_err(StorageError::DirReader)?
-                            .is_dir()
-                        {
-                            new_dirs_to_process.push(
-                                tokio::fs::read_dir(dir_entry.path())
-                                    .await
-                                    .map_err(StorageError::DirReader)?,
-                            );
-                        }
-
-                        let path = path.new_with_stripped_storage_root(dir_entry.path())?;
-
-                        let storage_item = StorageItem::from_dir_entry(path, dir_entry)
-                            .await
-                            .map_err(StorageError::MetadataReader)?;
-
-                        storage_items.push(storage_item);
-                    }
-                }
-
-                new_dirs_to_process
-            };
-
-            if dirs_to_process.is_empty() {
-                break 'diriter;
-            }
+            storage_items.push(storage_item);
         }
+
+        // 'diriter: loop {
+        //     dirs_to_process = {
+        //         let mut new_dirs_to_process = Vec::new();
+
+        //         for mut dir in dirs_to_process {
+        //             while let Some(dir_entry) =
+        //                 dir.next_entry().await.map_err(StorageError::DirReader)?
+        //             {
+        //                 if dir_entry
+        //                     .file_type()
+        //                     .await
+        //                     .map_err(StorageError::DirReader)?
+        //                     .is_dir()
+        //                 {
+        //                     new_dirs_to_process.push(
+        //                         tokio::fs::read_dir(dir_entry.path())
+        //                             .await
+        //                             .map_err(StorageError::DirReader)?,
+        //                     );
+        //                 }
+
+        //                 let path = path.new_with_stripped_storage_root(dir_entry.path())?;
+
+        //                 let storage_item = StorageItem::from_dir_entry(path, dir_entry)
+        //                     .await
+        //                     .map_err(StorageError::MetadataReader)?;
+
+        //                 storage_items.push(storage_item);
+        //             }
+        //         }
+
+        //         new_dirs_to_process
+        //     };
+
+        //     if dirs_to_process.is_empty() {
+        //         break 'diriter;
+        //     }
+        // }
 
         Ok(storage_items)
     }
