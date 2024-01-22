@@ -154,7 +154,7 @@ pub enum UserDirectoryCreationError {
     Context(async_graphql::Error),
     #[error(transparent)]
     StorageItemPathCreation(#[from] StorageItemPathError),
-    #[error("Error handling the rename operation")]
+    #[error("Error handling the create operation")]
     Storage(#[from] StorageError),
     #[error("Already exists")]
     AlreadyExists,
