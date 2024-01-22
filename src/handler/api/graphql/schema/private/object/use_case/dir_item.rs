@@ -6,7 +6,7 @@ use crate::{
     handler::api::graphql::PrivateContext,
     storage::{
         DirItem, DirItemContent, FileItem, Storage, StorageError, StorageItemPath,
-        StorageItemPathError, StorageKind,
+        StorageItemPathError, StorageKind, UserStorage,
     },
 };
 
@@ -34,11 +34,11 @@ pub async fn list_directories<'context>(
                 .data::<PrivateContext>()
                 .map_err(DirectoryReadError::Context)?;
 
-            let path = StorageItemPath::new(
-                context.app_state.config.fs_storage_root_dir.clone(),
-                PathBuf::from(path),
-                context.current_user.id,
-            )?;
+            let user_storage = UserStorage {
+                user: context.current_user.clone(),
+                storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+            };
+            let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
             let storage = StorageKind::create(&context.app_state.config).await;
             let dir_content = storage.list_storage_items(&path).await?;
@@ -78,11 +78,11 @@ pub async fn list_files<'context>(
                 .data::<PrivateContext>()
                 .map_err(DirectoryReadError::Context)?;
 
-            let path = StorageItemPath::new(
-                context.app_state.config.fs_storage_root_dir.clone(),
-                PathBuf::from(path),
-                context.current_user.id,
-            )?;
+            let user_storage = UserStorage {
+                user: context.current_user.clone(),
+                storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+            };
+            let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
             let storage = StorageKind::create(&context.app_state.config).await;
             let dir_content = storage.list_storage_items(&path).await?;

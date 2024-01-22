@@ -7,10 +7,10 @@ use std::{
 
 use time::OffsetDateTime;
 use tokio::sync::Mutex;
-use uuid::Uuid;
 
 use crate::{
     config::Config,
+    database::user::User,
     validate::{validate_file_path, PathValidationError},
 };
 
@@ -19,13 +19,6 @@ use fs_storage::FsStorage;
 mod fs_storage;
 
 static USER_DATA_DIR: &str = "user";
-
-pub fn user_data_directory(mut storage_root: PathBuf, user_id: &Uuid) -> PathBuf {
-    storage_root.push(USER_DATA_DIR);
-    storage_root.push(user_id.to_string());
-
-    storage_root
-}
 
 #[derive(thiserror::Error, Debug)]
 pub enum StorageItemPathError {
@@ -36,34 +29,51 @@ pub enum StorageItemPathError {
 }
 
 #[derive(Clone, Debug)]
+pub struct UserStorage {
+    pub user: User,
+    pub storage_root: PathBuf,
+}
+
+impl UserStorage {
+    pub fn data_directory(&self) -> PathBuf {
+        let mut storage_path = self.storage_root.clone();
+
+        storage_path.push(USER_DATA_DIR);
+        storage_path.push(self.user.id.to_string());
+
+        storage_path
+    }
+
+    pub fn strip_data_dir(&self, path: PathBuf) -> PathBuf {
+        path.strip_prefix(self.data_directory())
+            .map(|path| path.to_path_buf())
+            .unwrap_or(path)
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct StorageItemPath {
-    storage_root: PathBuf,
+    storage: UserStorage,
     pub scoped_path: PathBuf,
-    user_id: Uuid,
 }
 
 impl StorageItemPath {
-    pub fn new(
-        storage_root: PathBuf,
-        scoped_path: PathBuf,
-        user_id: Uuid,
-    ) -> Result<Self, StorageItemPathError> {
+    pub fn new(storage: UserStorage, scoped_path: PathBuf) -> Result<Self, StorageItemPathError> {
         validate_file_path(&scoped_path.to_string_lossy())?;
 
         let mut scoped_root = PathBuf::from("/");
         scoped_root.push(scoped_path);
 
         Ok(Self {
-            storage_root,
+            storage,
             scoped_path: scoped_root,
-            user_id,
         })
     }
 
-    pub fn system_data_directory(&self) -> PathBuf {
+    pub fn data_directory(&self) -> PathBuf {
         let scoped_path = self.scoped_path.clone();
 
-        let mut user_directory = user_data_directory(self.storage_root.clone(), &self.user_id);
+        let mut user_directory = self.storage.data_directory();
         user_directory.push(scoped_path.strip_prefix("/").unwrap_or(&scoped_path));
 
         user_directory
@@ -73,18 +83,10 @@ impl StorageItemPath {
         self.scoped_path.push(path);
     }
 
-    pub fn new_with_stripped_storage_root(
-        &self,
-        path: PathBuf,
-    ) -> Result<Self, StorageItemPathError> {
-        let user_directory = user_data_directory(self.storage_root.clone(), &self.user_id);
-
-        let path = path
-            .strip_prefix(user_directory)
+    pub fn strip_data_dir(&self, path: PathBuf) -> PathBuf {
+        path.strip_prefix(self.data_directory())
             .map(|path| path.to_path_buf())
-            .unwrap_or(path);
-
-        Self::new(self.storage_root.clone(), path, self.user_id)
+            .unwrap_or(path)
     }
 }
 

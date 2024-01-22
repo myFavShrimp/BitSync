@@ -6,7 +6,7 @@ use crate::{
     handler::api::graphql::PrivateContext,
     storage::{
         DirItem, FileItem, Storage, StorageError, StorageItem, StorageItemPath,
-        StorageItemPathError, StorageKind,
+        StorageItemPathError, StorageKind, UserStorage,
     },
 };
 
@@ -34,11 +34,11 @@ pub async fn upload_user_files<'context>(
     let files: Result<Vec<async_graphql::UploadValue>, std::io::Error> =
         files.iter_mut().map(|file| file.value(ctx)).collect();
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
@@ -74,17 +74,12 @@ pub async fn move_user_storage_item<'context>(
         .data::<PrivateContext>()
         .map_err(UserStorageItemMoveError::Context)?;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
-
-    let new_path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(new_path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
+    let new_path = StorageItemPath::new(user_storage, PathBuf::from(new_path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
@@ -110,17 +105,12 @@ pub async fn copy_user_file<'context>(
         .data::<PrivateContext>()
         .map_err(UserFileCopyError::Context)?;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
-
-    let new_path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(new_path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
+    let new_path = StorageItemPath::new(user_storage, PathBuf::from(new_path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
@@ -146,17 +136,12 @@ pub async fn copy_user_directory<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryCopyError::Context)?;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
-
-    let new_path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(new_path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
+    let new_path = StorageItemPath::new(user_storage, PathBuf::from(new_path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
@@ -183,11 +168,11 @@ pub async fn create_user_directory<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryCreationError::Context)?;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
@@ -216,11 +201,11 @@ pub async fn remove_user_directory<'context>(
         .data::<PrivateContext>()
         .map_err(UserDirectoryRemovalError::Context)?;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
@@ -247,11 +232,11 @@ pub async fn remove_user_file<'context>(
         .data::<PrivateContext>()
         .map_err(UserFileRemovalError::Context)?;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
 
     let storage = StorageKind::create(&context.app_state.config).await;
 

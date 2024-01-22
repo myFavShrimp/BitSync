@@ -4,7 +4,7 @@ use crate::{
     handler::api::graphql::PrivateContext,
     storage::{
         DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError,
-        StorageKind,
+        StorageKind, UserStorage,
     },
 };
 
@@ -30,11 +30,11 @@ pub async fn user_directory<'context>(
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from(path),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
     let storage_item = storage.storage_item(&path).await?;
 
@@ -82,11 +82,11 @@ pub async fn user_storage_item_search<'context>(
 
     let storage = StorageKind::create(&context.app_state.config).await;
 
-    let path = StorageItemPath::new(
-        context.app_state.config.fs_storage_root_dir.clone(),
-        PathBuf::from("/"),
-        context.current_user.id,
-    )?;
+    let user_storage = UserStorage {
+        user: context.current_user.clone(),
+        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+    };
+    let path = StorageItemPath::new(user_storage, PathBuf::from("/"))?;
 
     let storage_items = storage.list_storage_items_recursively(&path).await?;
     let storage_paths: Vec<_> = storage_items
