@@ -89,7 +89,11 @@ impl Storage for FsStorage {
             .await
             .map_err(StorageError::DirReader)?
         {
-            let storage_item = StorageItem::from_dir_entry(path.clone(), entry)
+            let dir_entry_path_part = path.storage.strip_data_dir(entry.path());
+            let dir_entry_path = StorageItemPath::new(path.storage.clone(), dir_entry_path_part)
+                .map_err(StorageError::StorageItemPathCreation)?;
+
+            let storage_item = StorageItem::from_dir_entry(dir_entry_path.clone(), entry)
                 .await
                 .map_err(StorageError::MetadataReader)?;
 
