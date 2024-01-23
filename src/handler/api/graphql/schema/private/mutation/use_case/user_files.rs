@@ -207,6 +207,10 @@ pub async fn remove_user_directory<'context>(
     };
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
 
+    if path.data_directory() == user_storage.data_directory() {
+        todo!("deleting the user's directory should not be allowed")
+    }
+
     let storage = StorageKind::create(&context.app_state.config).await;
 
     storage.remove_directory(&path).await?;
