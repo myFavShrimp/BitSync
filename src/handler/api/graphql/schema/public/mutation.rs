@@ -1,7 +1,5 @@
 use crate::database::user::User;
 
-use super::Context;
-
 mod use_case;
 
 pub struct Mutation;
@@ -14,8 +12,6 @@ impl Mutation {
         username: String,
         password: String,
     ) -> async_graphql::Result<User> {
-        let context = context.data::<Context>()?;
-
         Ok(use_case::register::perform_registration(context, username, password).await?)
     }
 }
