@@ -1,3 +1,6 @@
+[workspace]
+members = ["bitsync-frontend"]
+
 [package]
 name = "bit_sync"
 version = "0.1.0"
