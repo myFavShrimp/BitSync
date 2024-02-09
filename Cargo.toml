@@ -9,11 +9,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# patches for async-graphql axum 0.7 compatibilty
-async-graphql = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c", features = ["time", "tracing", "uuid", "dataloader", "tracing"] }
-async-graphql-axum = { git = "https://github.com/myFavShrimp/async-graphql.git", rev = "cbca0e8a1a678dafde03dc8da0ba73cf308aca3c" }
-
 argon2 = { version = "0.5.2", features = ["std"] }
+async-graphql = { version = "7.0.1", features = ["time", "tracing", "uuid", "dataloader", "tracing"] }
+async-graphql-axum = "7.0.1"
+async-recursion = "1.0.5"
 async-trait = "0.1.74"
 axum = "0.7.2"
 axum-extra = { version = "0.9.0", features = ["typed-header"] }
@@ -33,4 +32,3 @@ tower-http = { version = "0.5.0", features = ["trace"] }
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 uuid = { version = "1.6.1", features = ["serde"] }
-async-recursion = "1.0.5"
