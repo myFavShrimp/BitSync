@@ -11,3 +11,4 @@ console_log = { version = "1.0.0", features = ["color"] }
 leptos = { version = "0.6.3", features = ["csr", "tracing"] }
 leptos_router = { version = "0.6.3", features = ["csr"] }
 tracing = { version = "0.1.40", features = ["log"] }
+turf = "0.7.1"
