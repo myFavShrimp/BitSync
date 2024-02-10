@@ -7,7 +7,7 @@ thiserror = "1.0.51"
 uuid = { version = "1.6.1", features = ["serde"] }
 
 [package]
-name = "bit_sync"
+name = "bitsync"
 version = "0.1.0"
 edition = "2021"
 

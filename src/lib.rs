@@ -36,3 +36,10 @@ pub async fn make_service(config: Config) -> Result<IntoMakeService<Router>, Ini
 
     Ok(handler::create_routes(state).await.into_make_service())
 }
+
+pub fn public_graphql_schema_string() -> String {
+    handler::api::graphql::create_public_root().sdl()
+}
+pub fn private_graphql_schema_string() -> String {
+    handler::api::graphql::create_private_root().sdl()
+}

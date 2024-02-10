@@ -14,3 +14,6 @@ leptos-use = { version = "0.10.2", features = ["serde"] }
 leptos_router = { version = "0.6.3", features = ["csr"] }
 tracing = { version = "0.1.40", features = ["log"] }
 turf = "0.7.1"
+
+[build-dependencies]
+bitsync = { path = "../" }
