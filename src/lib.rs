@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::{routing::IntoMakeService, Router};
 use config::Config;
 use sqlx::PgPool;
+use tower_http::cors::CorsLayer;
 
 mod auth;
 pub mod config;
@@ -34,7 +35,10 @@ pub async fn make_service(config: Config) -> Result<IntoMakeService<Router>, Ini
         private_graphql_api_schema: handler::api::graphql::create_private_root(),
     });
 
-    Ok(handler::create_routes(state).await.into_make_service())
+    Ok(handler::create_routes(state)
+        .await
+        .layer(CorsLayer::permissive())
+        .into_make_service())
 }
 
 pub fn public_graphql_schema_string() -> String {
