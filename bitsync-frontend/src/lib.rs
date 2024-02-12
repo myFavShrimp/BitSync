@@ -10,22 +10,24 @@ mod global_storage;
 pub fn app() -> impl IntoView {
     let login = use_login();
 
-    let (start, set_start) = create_signal(true);
+    let vars = api::public::query::LoginQueryVariables {
+        username: String::from("test"),
+        password: String::from("test"),
+    };
 
-    let res = create_resource(
-        move || start.get(),
-        |_| async move { api::query::login().await },
-    );
+    let res = create_action(|input: &api::public::query::LoginQueryVariables| {
+        api::public::query::login(input.clone())
+    });
 
     view! {
         <Router>
             "Hello, World!"
-            <h1 on:click=move |_| {set_start.set(false)}>"go"</h1>
+            <h1 on:click=move |_| {res.dispatch(vars.clone())}>"go"</h1>
             {match login.get() {
                 global_storage::LoginState::Invalid => String::from("Invalid"),
                 global_storage::LoginState::Set(state) => state.sub.to_string(),
             }}
-            {move || format!("{:?}", res.get())}
+            {move || format!("{:?}", res.value().get())}
         </Router>
     }
 }
