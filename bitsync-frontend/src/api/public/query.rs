@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use cynic::{GraphQlResponse, QueryBuilder};
 
-use crate::api::API_PATH;
+use crate::api::{ApiError, API_PATH};
 
 use super::super::schema::public as schema;
 
@@ -10,7 +12,7 @@ pub struct LoginQueryVariables {
     pub password: String,
 }
 
-#[derive(cynic::QueryFragment, Debug)]
+#[derive(cynic::QueryFragment, Debug, Clone)]
 #[cynic(
     schema = "public",
     graphql_type = "Query",
@@ -21,19 +23,20 @@ pub struct LoginQuery {
     pub login: String,
 }
 
-pub async fn login(vars: LoginQueryVariables) -> Result<String, String> {
+pub async fn login(vars: LoginQueryVariables) -> Result<LoginQuery, ApiError> {
     let operation = LoginQuery::build(vars.clone());
 
-    match gloo_net::http::Request::post(API_PATH)
+    let response = gloo_net::http::Request::post(API_PATH)
         .json(&operation)
-        .unwrap()
+        .map_err(Arc::new)?
         .send()
         .await
-    {
-        Ok(val) => Ok(format!(
-            "{:#?}",
-            val.json::<GraphQlResponse<LoginQuery>>().await.unwrap()
-        )),
-        Err(e) => Err(e.to_string()),
-    }
+        .map_err(Arc::new)?;
+
+    Ok(response
+        .json::<GraphQlResponse<LoginQuery>>()
+        .await
+        .map_err(Arc::new)?
+        .data
+        .unwrap())
 }

@@ -23,11 +23,15 @@ pub fn app() -> impl IntoView {
         <Router>
             "Hello, World!"
             <h1 on:click=move |_| {res.dispatch(vars.clone())}>"go"</h1>
-            {match login.get() {
-                global_storage::LoginState::Invalid => String::from("Invalid"),
-                global_storage::LoginState::Set(state) => state.sub.to_string(),
-            }}
+            <p>
+                {match login.get() {
+                    global_storage::LoginState::Invalid => String::from("Invalid"),
+                    global_storage::LoginState::Set(state) => state.sub.to_string(),
+                }}
+            </p>
+            <p>
             {move || format!("{:?}", res.value().get())}
+            </p>
         </Router>
     }
 }

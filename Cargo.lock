@@ -469,6 +469,9 @@ dependencies = [
  "leptos",
  "leptos-use",
  "leptos_router",
+ "serde",
+ "serde_json",
+ "thiserror",
  "tracing",
  "turf",
 ]
