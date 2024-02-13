@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 static API_PATH: &str = "http://localhost:8080/api/graphql";
 
@@ -12,9 +12,9 @@ mod schema {
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum ApiError {
     #[error(transparent)]
-    Gloo(#[from] Arc<gloo_net::Error>),
+    Gloo(#[from] Rc<gloo_net::Error>),
     #[error(transparent)]
-    Json(#[from] Arc<serde_json::Error>),
+    Json(#[from] Rc<serde_json::Error>),
 }
 
 pub mod public;

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use cynic::{GraphQlResponse, QueryBuilder};
 
@@ -28,15 +28,15 @@ pub async fn login(vars: LoginQueryVariables) -> Result<LoginQuery, ApiError> {
 
     let response = gloo_net::http::Request::post(API_PATH)
         .json(&operation)
-        .map_err(Arc::new)?
+        .map_err(Rc::new)?
         .send()
         .await
-        .map_err(Arc::new)?;
+        .map_err(Rc::new)?;
 
     Ok(response
         .json::<GraphQlResponse<LoginQuery>>()
         .await
-        .map_err(Arc::new)?
+        .map_err(Rc::new)?
         .data
         .unwrap())
 }
