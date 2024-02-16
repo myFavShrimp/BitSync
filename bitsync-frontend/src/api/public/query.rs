@@ -1,10 +1,8 @@
-use std::rc::Rc;
+use cynic::QueryBuilder;
 
-use cynic::{GraphQlResponse, QueryBuilder};
+use crate::api::post_graphql_operation;
 
-use crate::api::{ApiError, API_PATH};
-
-use super::super::schema::public as schema;
+use super::super::{schema::public as schema, ApiError};
 
 #[derive(cynic::QueryVariables, Clone)]
 pub struct LoginQueryVariables {
@@ -23,20 +21,18 @@ pub struct LoginQuery {
     pub login: String,
 }
 
-pub async fn login(vars: LoginQueryVariables) -> Result<LoginQuery, ApiError> {
+pub type LoginQueryResult = Result<LoginQuery, ApiError>;
+
+pub async fn login(vars: LoginQueryVariables) -> LoginQueryResult {
     let operation = LoginQuery::build(vars.clone());
 
-    let response = gloo_net::http::Request::post(API_PATH)
-        .json(&operation)
-        .map_err(Rc::new)?
-        .send()
-        .await
-        .map_err(Rc::new)?;
+    let graphql_response = post_graphql_operation(operation);
 
-    Ok(response
-        .json::<GraphQlResponse<LoginQuery>>()
-        .await
-        .map_err(Rc::new)?
-        .data
-        .unwrap())
+    return if let Some(errors) = graphql_response.errors {
+        todo!("Not implemented")
+    } else if let Some(data) = graphql_response.data {
+        todo!("Not implemented")
+    } else {
+        todo!("Not implemented")
+    };
 }
