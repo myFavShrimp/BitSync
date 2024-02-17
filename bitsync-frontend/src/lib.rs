@@ -12,6 +12,9 @@ mod global_storage;
 pub fn app() -> impl IntoView {
     provide_login_storage();
     let login_state = use_login_state();
+
+    // login
+
     let (_login, set_login) = use_login_token();
 
     let vars = api::public::query::LoginQueryVariables {
@@ -29,10 +32,15 @@ pub fn app() -> impl IntoView {
         }
     });
 
+    // me
+
+    let res_2 = create_action(|()| api::private::query::me());
+
     view! {
         <Router>
             "Hello, World!"
-            <h1 on:click=move |_| {res.dispatch(vars.clone())}>"go"</h1>
+            <h1 on:click=move |_| {res.dispatch(vars.clone())}>"login"</h1>
+            <h1 on:click=move |_| {res_2.dispatch(())}>"me"</h1>
             <p>
                 {move || match login_state.get() {
                     global_storage::LoginState::Invalid => String::from("Invalid"),
@@ -41,7 +49,10 @@ pub fn app() -> impl IntoView {
                 }}
             </p>
             <p>
-            {move || format!("{:?}", res.value().get())}
+                {move || format!("{:?}", res.value().get())}
+            </p>
+            <p>
+                {move || format!("{:?}", res_2.value().get())}
             </p>
         </Router>
     }

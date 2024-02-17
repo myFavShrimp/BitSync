@@ -3,6 +3,7 @@ use self::http::{GraphQlError, RequestError};
 static API_PATH: &str = "http://localhost:8080/api/graphql";
 
 mod http;
+pub mod private;
 pub mod public;
 
 mod schema {

@@ -1,8 +1,12 @@
 use std::rc::Rc;
 
-use crate::api::API_PATH;
+use leptos::SignalGetUntracked;
+
+use crate::{api::API_PATH, global_storage::use_login_token};
 
 use super::GraphQlResult;
+
+static API_AUTH_HEADER: &str = "AUTHORIZATION";
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum RequestError {
@@ -19,11 +23,18 @@ where
     F: for<'de> serde::Deserialize<'de>,
     V: serde::Serialize,
 {
+    let login_token = use_login_token().0.get_untracked();
     let json_operation = serde_json::to_value(operation).map_err(Rc::new)?;
 
     tracing::debug!("Sending GraphQL query `{:#?}`", json_operation);
 
-    let response = gloo_net::http::Request::post(API_PATH)
+    let mut request_builder = gloo_net::http::Request::post(API_PATH);
+    if login_token != "" {
+        request_builder =
+            request_builder.header(API_AUTH_HEADER, &format!("Bearer {}", login_token));
+    }
+
+    let response = request_builder
         .json(&json_operation)
         .map_err(Rc::new)?
         .send()
