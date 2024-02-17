@@ -1,13 +1,18 @@
 use cynic::QueryBuilder;
+use uuid::Uuid;
 
 use crate::api::{http::post_graphql_operation, GraphQlResult};
 
 use super::super::schema::private as schema;
 
+cynic::impl_scalar!(Uuid, schema::UUID);
+
 #[derive(Clone, Debug, cynic::QueryFragment)]
 #[cynic(schema = "private", graphql_type = "User")]
 pub struct User {
-    username: String,
+    pub id: Uuid,
+    pub username: String,
+    pub is_admin: bool,
 }
 
 #[derive(cynic::QueryFragment, Debug, Clone)]
