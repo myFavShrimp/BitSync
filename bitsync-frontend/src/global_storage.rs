@@ -1,5 +1,5 @@
 use jwt::JwtClaims;
-use leptos::{create_effect, signal_prelude::*};
+use leptos::{provide_context, signal_prelude::*, use_context};
 use leptos_use::{storage::use_local_storage, utils::FromToStringCodec};
 
 static JWT_STORAGE_KEY: &str = "JWT";
@@ -10,17 +10,31 @@ pub enum LoginState {
     Set(JwtClaims),
 }
 
-pub fn use_login() -> Memo<LoginState> {
-    let (login, _set_login, _) = use_local_storage::<String, FromToStringCodec>(JWT_STORAGE_KEY);
+type LoginStateSignals = (Memo<LoginState>, WriteSignal<String>);
 
-    let login_state = create_memo(move |_| match JwtClaims::decode(&login.get()) {
-        Ok(claims) => LoginState::Set(claims),
-        Err(_) => LoginState::Invalid,
-    });
+#[derive(Clone)]
+pub struct GlobalLoginStorage(LoginStateSignals);
 
-    create_effect(move |_| {
-        tracing::debug!("{:#?}", login.get());
-    });
+impl GlobalLoginStorage {
+    pub fn provide() {
+        provide_context(Self(Self::initialize_signals()))
+    }
 
-    login_state
+    fn initialize_signals() -> LoginStateSignals {
+        let (login, set_login, _) = use_local_storage::<String, FromToStringCodec>(JWT_STORAGE_KEY);
+
+        let login_state = create_memo(move |_| match JwtClaims::decode(&login.get()) {
+            Ok(claims) => LoginState::Set(claims),
+            Err(_) => LoginState::Invalid,
+        });
+
+        (login_state, set_login)
+    }
+}
+
+pub fn use_login_state() -> LoginStateSignals {
+    let login_storage =
+        use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
+
+    login_storage.0
 }
