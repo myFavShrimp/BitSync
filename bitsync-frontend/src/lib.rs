@@ -3,7 +3,10 @@ use leptos_router::Router;
 
 use global_storage::{provide_login_storage, use_login_state};
 
-use crate::global_storage::use_login_token;
+use crate::{
+    api::{private::query::MeQuery, public::query::LoginQuery, GraphQlOperationHelper},
+    global_storage::use_login_token,
+};
 
 mod api;
 mod global_storage;
@@ -22,9 +25,7 @@ pub fn app() -> impl IntoView {
         password: String::from("test"),
     };
 
-    let res = create_action(|input: &api::public::query::LoginQueryVariables| {
-        api::public::query::login(input.clone())
-    });
+    let res = LoginQuery::action();
 
     create_effect(move |_| {
         if let Some(Ok(value)) = res.value().get() {
@@ -34,7 +35,7 @@ pub fn app() -> impl IntoView {
 
     // me
 
-    let res_2 = create_action(|()| api::private::query::me());
+    let res_2 = MeQuery::action();
 
     view! {
         <Router>
@@ -42,11 +43,7 @@ pub fn app() -> impl IntoView {
             <h1 on:click=move |_| {res.dispatch(vars.clone())}>"login"</h1>
             <h1 on:click=move |_| {res_2.dispatch(())}>"me"</h1>
             <p>
-                {move || match login_state.get() {
-                    global_storage::LoginState::Invalid => String::from("Invalid"),
-                    global_storage::LoginState::NotSet => String::from("Not Set"),
-                    global_storage::LoginState::Set(state) => state.sub.to_string(),
-                }}
+                {move || format!("{:?}", login_state.get())}
             </p>
             <p>
                 {move || format!("{:?}", res.value().get())}
