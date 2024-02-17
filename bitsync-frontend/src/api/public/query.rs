@@ -26,7 +26,7 @@ pub type LoginQueryResult = Result<LoginQuery, ApiError>;
 pub async fn login(vars: LoginQueryVariables) -> LoginQueryResult {
     let operation = LoginQuery::build(vars.clone());
 
-    let graphql_response = post_graphql_operation(operation);
+    let graphql_response = post_graphql_operation(operation).await?;
 
     return if let Some(errors) = graphql_response.errors {
         todo!("Not implemented")
