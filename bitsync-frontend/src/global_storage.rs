@@ -7,34 +7,56 @@ static JWT_STORAGE_KEY: &str = "JWT";
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum LoginState {
     Invalid,
+    NotSet,
     Set(JwtClaims),
 }
 
-type LoginStateSignals = (Memo<LoginState>, WriteSignal<String>);
-
 #[derive(Clone)]
-pub struct GlobalLoginStorage(LoginStateSignals);
+struct GlobalLoginStorage {
+    login_state: Memo<LoginState>,
+    login: Signal<String>,
+    set_login: WriteSignal<String>,
+}
 
 impl GlobalLoginStorage {
-    pub fn provide() {
-        provide_context(Self(Self::initialize_signals()))
-    }
-
-    fn initialize_signals() -> LoginStateSignals {
+    fn new() -> Self {
         let (login, set_login, _) = use_local_storage::<String, FromToStringCodec>(JWT_STORAGE_KEY);
 
-        let login_state = create_memo(move |_| match JwtClaims::decode(&login.get()) {
-            Ok(claims) => LoginState::Set(claims),
-            Err(_) => LoginState::Invalid,
+        let login_state = create_memo(move |_| {
+            let login_token = login.get();
+
+            if login_token == "" {
+                LoginState::NotSet
+            } else {
+                match JwtClaims::decode(&login.get()) {
+                    Ok(claims) => LoginState::Set(claims),
+                    Err(_) => LoginState::Invalid,
+                }
+            }
         });
 
-        (login_state, set_login)
+        Self {
+            login_state,
+            login,
+            set_login,
+        }
     }
 }
 
-pub fn use_login_state() -> LoginStateSignals {
+pub fn provide_login_storage() {
+    provide_context(GlobalLoginStorage::new())
+}
+
+pub fn use_login_state() -> Memo<LoginState> {
     let login_storage =
         use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
 
-    login_storage.0
+    login_storage.login_state
+}
+
+pub fn use_login_token() -> (Signal<String>, WriteSignal<String>) {
+    let login_storage =
+        use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
+
+    (login_storage.login, login_storage.set_login)
 }

@@ -1,16 +1,18 @@
-use global_storage::use_login_state;
 use leptos::*;
 use leptos_router::Router;
 
-use crate::global_storage::GlobalLoginStorage;
+use global_storage::{provide_login_storage, use_login_state};
+
+use crate::global_storage::use_login_token;
 
 mod api;
 mod global_storage;
 
 #[component]
 pub fn app() -> impl IntoView {
-    GlobalLoginStorage::provide();
-    let (login, set_login) = use_login_state();
+    provide_login_storage();
+    let login_state = use_login_state();
+    let (_login, set_login) = use_login_token();
 
     let vars = api::public::query::LoginQueryVariables {
         username: String::from("test"),
@@ -32,8 +34,9 @@ pub fn app() -> impl IntoView {
             "Hello, World!"
             <h1 on:click=move |_| {res.dispatch(vars.clone())}>"go"</h1>
             <p>
-                {move || match login.get() {
+                {move || match login_state.get() {
                     global_storage::LoginState::Invalid => String::from("Invalid"),
+                    global_storage::LoginState::NotSet => String::from("Not Set"),
                     global_storage::LoginState::Set(state) => state.sub.to_string(),
                 }}
             </p>
