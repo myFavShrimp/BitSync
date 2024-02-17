@@ -39,6 +39,6 @@ impl JwtClaims {
         let encoding_key = EncodingKey::from_secret(secret.as_bytes());
 
         let encoded_token = jsonwebtoken::encode::<Self>(&header, self, &encoding_key)?;
-        Ok(format!("Bearer {encoded_token}"))
+        Ok(encoded_token)
     }
 }
