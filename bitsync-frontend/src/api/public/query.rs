@@ -1,6 +1,6 @@
 use cynic::QueryBuilder;
 
-use crate::api::post_graphql_operation;
+use crate::api::{post_graphql_operation, GraphQlResponseIntoResult};
 
 use super::super::{schema::public as schema, ApiError};
 
@@ -28,11 +28,5 @@ pub async fn login(vars: LoginQueryVariables) -> LoginQueryResult {
 
     let graphql_response = post_graphql_operation(operation).await?;
 
-    return if let Some(errors) = graphql_response.errors {
-        todo!("Not implemented")
-    } else if let Some(data) = graphql_response.data {
-        todo!("Not implemented")
-    } else {
-        todo!("Not implemented")
-    };
+    graphql_response.into_result()
 }
