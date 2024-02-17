@@ -19,3 +19,5 @@ pub enum ApiError {
     #[error(transparent)]
     GraphQl(#[from] GraphQlError),
 }
+
+pub type GraphQlResult<T, E = ApiError> = core::result::Result<T, E>;

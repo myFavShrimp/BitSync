@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::api::API_PATH;
 
-use super::ApiError;
+use super::GraphQlResult;
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum RequestError {
@@ -63,7 +63,7 @@ impl<F> GraphQlResponseIntoResult<F> for cynic::GraphQlResponse<F> {
     }
 }
 
-pub async fn post_graphql_operation<F, V>(operation: cynic::Operation<F, V>) -> Result<F, ApiError>
+pub async fn post_graphql_operation<F, V>(operation: cynic::Operation<F, V>) -> GraphQlResult<F>
 where
     F: for<'de> serde::Deserialize<'de>,
     V: serde::Serialize,

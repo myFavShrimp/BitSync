@@ -1,8 +1,8 @@
 use cynic::QueryBuilder;
 
-use crate::api::http::post_graphql_operation;
+use crate::api::{http::post_graphql_operation, GraphQlResult};
 
-use super::super::{schema::public as schema, ApiError};
+use super::super::schema::public as schema;
 
 #[derive(cynic::QueryVariables, Clone)]
 pub struct LoginQueryVariables {
@@ -21,9 +21,7 @@ pub struct LoginQuery {
     pub login: String,
 }
 
-pub type LoginQueryResult = Result<LoginQuery, ApiError>;
-
-pub async fn login(vars: LoginQueryVariables) -> LoginQueryResult {
+pub async fn login(vars: LoginQueryVariables) -> GraphQlResult<LoginQuery> {
     let operation = LoginQuery::build(vars.clone());
 
     post_graphql_operation(operation).await
