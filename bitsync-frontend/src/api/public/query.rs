@@ -1,6 +1,6 @@
 use cynic::QueryBuilder;
 
-use crate::api::{post_graphql_operation, GraphQlResponseIntoResult};
+use crate::api::http::post_graphql_operation;
 
 use super::super::{schema::public as schema, ApiError};
 
@@ -26,7 +26,5 @@ pub type LoginQueryResult = Result<LoginQuery, ApiError>;
 pub async fn login(vars: LoginQueryVariables) -> LoginQueryResult {
     let operation = LoginQuery::build(vars.clone());
 
-    let graphql_response = post_graphql_operation(operation).await?;
-
-    graphql_response.into_result()
+    post_graphql_operation(operation).await
 }
