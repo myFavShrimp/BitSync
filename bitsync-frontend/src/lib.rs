@@ -60,7 +60,7 @@ pub fn app() -> impl IntoView {
         }
         let vars = api::private::mutation::UploadUserFilesMutationVariables {
             path: "/".to_string(),
-            files: api::private::mutation::UploadFiles(files),
+            files: api::private::mutation::upload_files::UploadFiles(files),
         };
         action_3.dispatch(vars);
     });
