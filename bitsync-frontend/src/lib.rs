@@ -10,7 +10,7 @@ use crate::{
         public::query::LoginQuery,
         GraphQlSendMutationOperationHelper, GraphQlSendQueryOperationHelper,
     },
-    global_storage::use_login_token,
+    global_storage::{use_current_user, use_login_token},
 };
 
 mod api;
@@ -40,7 +40,7 @@ pub fn app() -> impl IntoView {
 
     // me
 
-    let action_2 = MeQuery::action();
+    let current_user = use_current_user();
 
     // file
 
@@ -80,7 +80,6 @@ pub fn app() -> impl IntoView {
         <Router>
             "Hello, World!"
             <h1 on:click=move |_| {action_1.dispatch(vars.clone())}>"login"</h1>
-            <h1 on:click=move |_| {action_2.dispatch(())}>"me"</h1>
             <p>
                 {move || format!("{:?}", login_state.get())}
             </p>
@@ -88,7 +87,7 @@ pub fn app() -> impl IntoView {
                 {move || format!("{:?}", action_1.value().get())}
             </p>
             <p>
-                {move || format!("{:?}", action_2.value().get())}
+                {move || format!("{:?}", current_user.get())}
             </p>
 
             <div style=drop_zone_style node_ref=drop_zone_el>

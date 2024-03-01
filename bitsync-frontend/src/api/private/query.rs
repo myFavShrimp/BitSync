@@ -4,7 +4,7 @@ use crate::api::schema::private as schema;
 
 cynic::impl_scalar!(Uuid, schema::UUID);
 
-#[derive(Clone, Debug, cynic::QueryFragment)]
+#[derive(Clone, Debug, cynic::QueryFragment, PartialEq)]
 #[cynic(schema = "private", graphql_type = "User")]
 pub struct User {
     pub id: Uuid,
