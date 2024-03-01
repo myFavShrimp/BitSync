@@ -469,6 +469,7 @@ dependencies = [
  "leptos",
  "leptos-use",
  "leptos_router",
+ "material-colors",
  "serde",
  "serde_json",
  "thiserror",
@@ -2068,6 +2069,16 @@ name = "matchit"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e7465ac9959cc2b1404e8e2367b43684a6d13790fe23056cc8c6c5a6b7bcb94"
+
+[[package]]
+name = "material-colors"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad4586e7fe5c38f2a0522c58977b9f07b4f47e3d5f6acb778e816e02c7397be5"
+dependencies = [
+ "ahash 0.8.7",
+ "indexmap 2.2.2",
+]
 
 [[package]]
 name = "md-5"
