@@ -10,6 +10,7 @@ pub struct User {
     pub id: Uuid,
     pub username: String,
     pub is_admin: bool,
+    pub color_palette: Option<String>,
 }
 
 #[derive(cynic::QueryFragment, Debug, Clone)]

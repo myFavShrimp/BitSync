@@ -15,4 +15,8 @@ impl User {
     async fn is_admin(&self) -> bool {
         self.is_admin
     }
+
+    async fn color_palette(&self) -> Option<String> {
+        self.color_palette.clone()
+    }
 }
