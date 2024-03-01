@@ -6,8 +6,7 @@ use leptos_use::{use_drop_zone_with_options, UseDropZoneOptions, UseDropZoneRetu
 
 use crate::{
     api::{
-        private::{mutation::UploadUserFilesMutation, query::MeQuery},
-        public::query::LoginQuery,
+        private::mutation::UploadUserFilesMutation, public::query::LoginQuery,
         GraphQlSendMutationOperationHelper, GraphQlSendQueryOperationHelper,
     },
     global_storage::{use_current_user, use_login_token},
@@ -87,6 +86,7 @@ pub fn app() -> impl IntoView {
                 {move || format!("{:?}", action_1.value().get())}
             </p>
             <p>
+                {move || format!("{:?}", if current_user.loading().get() {"loading"} else {"loaded"})}
                 {move || format!("{:?}", current_user.get())}
             </p>
 
