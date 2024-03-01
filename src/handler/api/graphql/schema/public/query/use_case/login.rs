@@ -1,4 +1,4 @@
-use jwt::JwtClaims;
+use bitsync_jwt::JwtClaims;
 
 use crate::{
     database::user::User, handler::api::graphql::schema::public::Context,
@@ -10,7 +10,7 @@ use crate::{
 pub enum LoginError {
     PasswordHash(#[from] argon2::password_hash::Error),
     Database(#[from] sqlx::Error),
-    Jwt(#[from] jwt::jsonwebtoken::errors::Error),
+    Jwt(#[from] bitsync_jwt::jsonwebtoken::errors::Error),
 }
 
 pub async fn perform_login(

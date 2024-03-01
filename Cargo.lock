@@ -437,10 +437,10 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-extra",
+ "bitsync-jwt",
  "color-eyre",
  "dotenv",
  "headers",
- "jwt",
  "nucleo-matcher",
  "serde",
  "serde-env",
@@ -460,12 +460,12 @@ name = "bitsync-frontend"
 version = "0.1.0"
 dependencies = [
  "bitsync",
+ "bitsync-jwt",
  "console_error_panic_hook",
  "console_log",
  "cynic",
  "cynic-codegen",
  "gloo-net 0.5.0",
- "jwt",
  "leptos",
  "leptos-use",
  "leptos_router",
@@ -476,6 +476,16 @@ dependencies = [
  "turf",
  "uuid",
  "web-sys",
+]
+
+[[package]]
+name = "bitsync-jwt"
+version = "0.1.0"
+dependencies = [
+ "jsonwebtoken",
+ "serde",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -1717,16 +1727,6 @@ dependencies = [
  "serde",
  "serde_json",
  "simple_asn1",
-]
-
-[[package]]
-name = "jwt"
-version = "0.1.0"
-dependencies = [
- "jsonwebtoken",
- "serde",
- "thiserror",
- "uuid",
 ]
 
 [[package]]

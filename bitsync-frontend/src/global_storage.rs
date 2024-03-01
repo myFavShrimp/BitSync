@@ -1,4 +1,4 @@
-use jwt::JwtClaims;
+use bitsync_jwt::JwtClaims;
 use leptos::{provide_context, signal_prelude::*, use_context};
 use leptos_use::{storage::use_local_storage, utils::FromToStringCodec};
 

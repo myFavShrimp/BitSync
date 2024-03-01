@@ -5,8 +5,8 @@ use axum::{
     http::request::Parts,
 };
 use axum_extra::TypedHeader;
+use bitsync_jwt::JwtClaims;
 use headers::{authorization::Bearer, Authorization};
-use jwt::JwtClaims;
 use sqlx::PgPool;
 
 use crate::{database::user::User, AppState};
