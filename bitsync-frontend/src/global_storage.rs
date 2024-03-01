@@ -4,6 +4,7 @@ use leptos::{
     use_context, Resource, Trigger,
 };
 use leptos_use::{storage::use_local_storage, utils::FromToStringCodec};
+use material_colors::{argb_from_hex, theme_from_source_color, utils::theme::Theme};
 
 use crate::api::{
     private::query::{MeQuery, User},
@@ -17,6 +18,25 @@ pub enum LoginState {
     Invalid,
     NotSet,
     Set(JwtClaims),
+}
+
+#[derive(Debug)]
+pub struct ColorPalette {
+    pub theme: Theme,
+}
+
+impl Clone for ColorPalette {
+    fn clone(&self) -> Self {
+        Self {
+            theme: theme_from_source_color(self.theme.source, Vec::new()),
+        }
+    }
+}
+
+impl PartialEq for ColorPalette {
+    fn eq(&self, other: &Self) -> bool {
+        other.theme.source == self.theme.source
+    }
 }
 
 #[derive(Clone)]
@@ -104,4 +124,26 @@ pub fn use_current_user() -> Resource<String, Option<Result<User, ApiError>>> {
         use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
 
     login_storage.current_user
+}
+
+pub fn use_color_palette() -> Memo<ColorPalette> {
+    let login_storage =
+        use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
+
+    create_memo(move |_| match login_storage.current_user.get() {
+        Some(Some(Ok(user))) => match user
+            .color_palette
+            .and_then(|color_palette_string| argb_from_hex(color_palette_string).ok())
+        {
+            Some(argb_color) => ColorPalette {
+                theme: theme_from_source_color(argb_color, Vec::new()),
+            },
+            None => ColorPalette {
+                theme: theme_from_source_color([1, 2, 3, 4], Vec::new()),
+            },
+        },
+        _ => ColorPalette {
+            theme: theme_from_source_color([1, 2, 3, 4], Vec::new()),
+        },
+    })
 }

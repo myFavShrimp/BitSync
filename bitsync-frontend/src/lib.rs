@@ -9,7 +9,7 @@ use crate::{
         private::mutation::UploadUserFilesMutation, public::query::LoginQuery,
         GraphQlSendMutationOperationHelper, GraphQlSendQueryOperationHelper,
     },
-    global_storage::{use_current_user, use_login_token, use_logout},
+    global_storage::{use_color_palette, use_current_user, use_login_token, use_logout},
 };
 
 mod api;
@@ -19,6 +19,7 @@ mod global_storage;
 pub fn app() -> impl IntoView {
     provide_login_storage();
     let login_state = use_login_state();
+    let color_palette = use_color_palette();
 
     // login
 
@@ -91,6 +92,7 @@ pub fn app() -> impl IntoView {
             <p>
                 {move || format!("{:?}", if current_user.loading().get() {"loading"} else {"loaded"})}
                 {move || format!("{:?}", current_user.get())}
+                {move || format!("{:?}", color_palette.get().theme.source)}
             </p>
 
             <div style=drop_zone_style node_ref=drop_zone_el>
