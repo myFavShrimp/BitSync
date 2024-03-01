@@ -1,6 +1,7 @@
 use bitsync_jwt::JwtClaims;
 use leptos::{
-    create_effect, create_local_resource, provide_context, signal_prelude::*, use_context, Resource,
+    create_effect, create_local_resource, create_trigger, provide_context, signal_prelude::*,
+    use_context, Resource, Trigger,
 };
 use leptos_use::{storage::use_local_storage, utils::FromToStringCodec};
 
@@ -23,12 +24,14 @@ struct GlobalLoginStorage {
     login_state: Memo<LoginState>,
     login: Signal<String>,
     set_login: WriteSignal<String>,
-    current_user: Resource<String, Result<MeQuery, ApiError>>,
+    logout: Trigger,
+    current_user: Resource<String, Option<Result<User, ApiError>>>,
 }
 
 impl GlobalLoginStorage {
     fn new() -> Self {
-        let (login, set_login, _) = use_local_storage::<String, FromToStringCodec>(JWT_STORAGE_KEY);
+        let (login, set_login, unset_login) =
+            use_local_storage::<String, FromToStringCodec>(JWT_STORAGE_KEY);
 
         let login_state = create_memo(move |_| {
             let login_token = login.get();
@@ -43,15 +46,29 @@ impl GlobalLoginStorage {
             }
         });
 
+        let logout_trigger = create_trigger();
+
+        create_effect(move |_| {
+            logout_trigger.track();
+            unset_login();
+        });
+
         let current_user_resource = create_local_resource(
             move || login.get(),
-            |_| async move { MeQuery::send(()).await },
+            move |_| async move {
+                if login.get().is_empty() {
+                    None
+                } else {
+                    Some(MeQuery::send(()).await.map(|me_query| me_query.me))
+                }
+            },
         );
 
         Self {
             login_state,
             login,
             set_login,
+            logout: logout_trigger,
             current_user: current_user_resource,
         }
     }
@@ -75,7 +92,14 @@ pub fn use_login_token() -> (Signal<String>, WriteSignal<String>) {
     (login_storage.login, login_storage.set_login)
 }
 
-pub fn use_current_user() -> Resource<String, Result<MeQuery, ApiError>> {
+pub fn use_logout() -> Trigger {
+    let login_storage =
+        use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
+
+    login_storage.logout
+}
+
+pub fn use_current_user() -> Resource<String, Option<Result<User, ApiError>>> {
     let login_storage =
         use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
 

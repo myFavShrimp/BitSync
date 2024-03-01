@@ -9,7 +9,7 @@ use crate::{
         private::mutation::UploadUserFilesMutation, public::query::LoginQuery,
         GraphQlSendMutationOperationHelper, GraphQlSendQueryOperationHelper,
     },
-    global_storage::{use_current_user, use_login_token},
+    global_storage::{use_current_user, use_login_token, use_logout},
 };
 
 mod api;
@@ -36,6 +36,8 @@ pub fn app() -> impl IntoView {
             set_login.set(value.login);
         }
     });
+
+    let logout = use_logout();
 
     // me
 
@@ -79,6 +81,7 @@ pub fn app() -> impl IntoView {
         <Router>
             "Hello, World!"
             <h1 on:click=move |_| {action_1.dispatch(vars.clone())}>"login"</h1>
+            <h1 on:click=move |_| {logout.notify()}>"logout"</h1>
             <p>
                 {move || format!("{:?}", login_state.get())}
             </p>
