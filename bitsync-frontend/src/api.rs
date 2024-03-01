@@ -1,6 +1,4 @@
-use self::http::{GraphQlError, RequestError};
-
-static API_PATH: &str = "http://localhost:8080/api/graphql";
+use self::http::WithOptionalFileMapper;
 
 mod http;
 pub mod private;
@@ -15,15 +13,15 @@ mod schema {
 
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum ApiError {
-    #[error(transparent)]
-    Request(#[from] RequestError),
-    #[error(transparent)]
-    GraphQl(#[from] GraphQlError),
+    #[error("Sending the GraphQL query failed")]
+    Request(#[from] http::RequestError),
+    #[error("Handling the GraphQL response failed")]
+    Response(#[from] http::ResponseError),
 }
 
-pub type GraphQlResult<T, E = ApiError> = core::result::Result<T, E>;
+pub type GraphQlResult<T> = core::result::Result<T, ApiError>;
 
-pub trait GraphQlOperationHelper<V>
+pub trait GraphQlSendQueryOperationHelper<V>
 where
     Self: Sized,
 {
@@ -31,15 +29,39 @@ where
     fn action() -> leptos::Action<V, GraphQlResult<Self>>;
 }
 
-impl<T, V> GraphQlOperationHelper<V> for T
+impl<T, V> GraphQlSendQueryOperationHelper<V> for T
 where
     T: cynic::QueryBuilder<V> + for<'de> serde::Deserialize<'de>,
-    V: serde::Serialize + Clone,
+    V: serde::Serialize + Clone + WithOptionalFileMapper,
 {
     async fn send(variables: V) -> GraphQlResult<Self> {
-        let operation = Self::build(variables);
+        let operation = T::build(variables);
 
-        http::post_graphql_operation(operation).await
+        http::post_multipart_graphql_operation(&operation).await
+    }
+
+    fn action() -> leptos::Action<V, GraphQlResult<Self>> {
+        leptos::create_action(|vars: &V| Self::send(vars.clone()))
+    }
+}
+
+pub trait GraphQlSendMutationOperationHelper<V>
+where
+    Self: Sized,
+{
+    async fn send(variables: V) -> GraphQlResult<Self>;
+    fn action() -> leptos::Action<V, GraphQlResult<Self>>;
+}
+
+impl<T, V> GraphQlSendMutationOperationHelper<V> for T
+where
+    T: cynic::MutationBuilder<V> + for<'de> serde::Deserialize<'de>,
+    V: serde::Serialize + Clone + WithOptionalFileMapper,
+{
+    async fn send(variables: V) -> GraphQlResult<Self> {
+        let operation = T::build(variables);
+
+        http::post_multipart_graphql_operation(&operation).await
     }
 
     fn action() -> leptos::Action<V, GraphQlResult<Self>> {

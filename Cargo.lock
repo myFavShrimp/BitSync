@@ -475,6 +475,7 @@ dependencies = [
  "tracing",
  "turf",
  "uuid",
+ "web-sys",
 ]
 
 [[package]]

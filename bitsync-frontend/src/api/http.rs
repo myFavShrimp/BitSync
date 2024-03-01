@@ -1,83 +1,44 @@
 use std::rc::Rc;
 
-use leptos::SignalGetUntracked;
-
-use crate::{api::API_PATH, global_storage::use_login_token};
-
 use super::GraphQlResult;
 
-static API_AUTH_HEADER: &str = "AUTHORIZATION";
+mod request;
+mod response;
 
-#[derive(thiserror::Error, Debug, Clone)]
-pub enum RequestError {
-    #[error(transparent)]
-    Gloo(#[from] Rc<gloo_net::Error>),
-    #[error(transparent)]
-    Json(#[from] Rc<serde_json::Error>),
-}
+use cynic::Operation;
+use leptos::SignalGetUntracked;
+pub use request::{FileMapper, MultipartGraphqlOperation, RequestError, WithOptionalFileMapper};
+pub use response::ResponseError;
 
-async fn send_graphql_post_request<F, V>(
-    operation: cynic::Operation<F, V>,
-) -> Result<cynic::GraphQlResponse<F>, RequestError>
+pub async fn post_multipart_graphql_operation<T, V>(operation: &Operation<T, V>) -> GraphQlResult<T>
 where
-    F: for<'de> serde::Deserialize<'de>,
-    V: serde::Serialize,
+    T: for<'de> serde::Deserialize<'de>,
+    V: serde::Serialize + Clone + WithOptionalFileMapper,
 {
-    let login_token = use_login_token().0.get_untracked();
-    let json_operation = serde_json::to_value(operation).map_err(Rc::new)?;
+    let (login_token, _) = crate::global_storage::use_login_token();
 
-    tracing::debug!("Sending GraphQL query `{:#?}`", json_operation);
-
-    let mut request_builder = gloo_net::http::Request::post(API_PATH);
-    if login_token != "" {
-        request_builder =
-            request_builder.header(API_AUTH_HEADER, &format!("Bearer {}", login_token));
-    }
-
-    let response = request_builder
-        .json(&json_operation)
-        .map_err(Rc::new)?
-        .send()
-        .await
-        .map_err(Rc::new)?;
-
-    tracing::debug!("Got GraphQL response `{:#?}`", response);
-
-    Ok(response
-        .json::<cynic::GraphQlResponse<F>>()
-        .await
-        .map_err(Rc::new)?)
+    let multipart_operation = operation.try_into()?;
+    let api_response =
+        request::send_form_data(Some(login_token.get_untracked()), multipart_operation).await?;
+    Ok(response::handle_graphql_response(api_response).await?)
 }
 
-#[derive(thiserror::Error, Debug, Clone)]
-pub enum GraphQlError {
-    #[error("A GraphQL api error occurred")]
-    GraphQlApi(Vec<cynic::GraphQlError>),
-    #[error("Received an invalid GraphQL response")]
-    InvalidResponse,
-}
-
-trait GraphQlResponseIntoResult<F> {
-    fn into_result(self) -> Result<F, GraphQlError>;
-}
-
-impl<F> GraphQlResponseIntoResult<F> for cynic::GraphQlResponse<F> {
-    fn into_result(self) -> Result<F, GraphQlError> {
-        if let Some(errors) = self.errors {
-            Err(errors).map_err(GraphQlError::GraphQlApi)?
-        } else if let Some(data) = self.data {
-            Ok(data)
-        } else {
-            tracing::error!("GraphQL response is invalid");
-            Err(GraphQlError::InvalidResponse)?
-        }
-    }
-}
-
-pub async fn post_graphql_operation<F, V>(operation: cynic::Operation<F, V>) -> GraphQlResult<F>
+impl<T, V> TryFrom<&cynic::Operation<T, V>> for MultipartGraphqlOperation
 where
-    F: for<'de> serde::Deserialize<'de>,
-    V: serde::Serialize,
+    V: WithOptionalFileMapper + serde::Serialize,
 {
-    Ok(send_graphql_post_request(operation).await?.into_result()?)
+    type Error = RequestError;
+
+    fn try_from(value: &cynic::Operation<T, V>) -> Result<Self, Self::Error> {
+        let operation = serde_json::to_string(value)
+            .map_err(Rc::new)
+            .map_err(request::FormCreationError::Serialization)?;
+
+        let file_mapper = value.variables.file_mapper();
+
+        Ok(Self {
+            operation,
+            file_mapper,
+        })
+    }
 }

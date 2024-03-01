@@ -25,7 +25,7 @@ impl GlobalLoginStorage {
         let login_state = create_memo(move |_| {
             let login_token = login.get();
 
-            if login_token == "" {
+            if login_token.is_empty() {
                 LoginState::NotSet
             } else {
                 match JwtClaims::decode(&login.get()) {
