@@ -1,4 +1,4 @@
-use self::http::WithOptionalFileMapper;
+use self::http::FileMapper;
 
 mod http;
 pub mod private;
@@ -19,6 +19,16 @@ pub enum ApiError {
     Response(#[from] http::ResponseError),
 }
 
+pub trait GraphQlVariablesHelper {
+    const ADD_LOGIN: bool = true;
+
+    fn file_mapper(&self) -> Option<FileMapper> {
+        None
+    }
+}
+
+impl GraphQlVariablesHelper for () {}
+
 pub type GraphQlResult<T> = core::result::Result<T, ApiError>;
 
 pub trait GraphQlSendQueryOperationHelper<V>
@@ -32,7 +42,7 @@ where
 impl<T, V> GraphQlSendQueryOperationHelper<V> for T
 where
     T: cynic::QueryBuilder<V> + for<'de> serde::Deserialize<'de>,
-    V: serde::Serialize + Clone + WithOptionalFileMapper,
+    V: serde::Serialize + Clone + GraphQlVariablesHelper,
 {
     async fn send(variables: V) -> GraphQlResult<Self> {
         let operation = T::build(variables);
@@ -56,7 +66,7 @@ where
 impl<T, V> GraphQlSendMutationOperationHelper<V> for T
 where
     T: cynic::MutationBuilder<V> + for<'de> serde::Deserialize<'de>,
-    V: serde::Serialize + Clone + WithOptionalFileMapper,
+    V: serde::Serialize + Clone + GraphQlVariablesHelper,
 {
     async fn send(variables: V) -> GraphQlResult<Self> {
         let operation = T::build(variables);

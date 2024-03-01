@@ -3,10 +3,7 @@ use std::path::PathBuf;
 use cynic::{coercions::CoercesTo, schema::NamedType, variables::VariableType};
 use serde::ser::SerializeSeq;
 
-use crate::api::{
-    http::{FileMapper, WithOptionalFileMapper},
-    schema::private as schema,
-};
+use crate::api::{http::FileMapper, schema::private as schema, GraphQlVariablesHelper};
 
 cynic::impl_scalar!(PathBuf, schema::StorageItemPath);
 
@@ -40,7 +37,7 @@ pub struct UploadUserFilesMutationVariables {
     pub files: UploadFiles,
 }
 
-impl WithOptionalFileMapper for UploadUserFilesMutationVariables {
+impl GraphQlVariablesHelper for UploadUserFilesMutationVariables {
     fn file_mapper(&self) -> Option<FileMapper> {
         Some(FileMapper {
             path_prefix: "files",

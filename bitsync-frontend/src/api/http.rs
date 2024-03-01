@@ -1,31 +1,33 @@
 use std::rc::Rc;
 
-use super::GraphQlResult;
+use super::{GraphQlResult, GraphQlVariablesHelper};
 
 mod request;
 mod response;
 
 use cynic::Operation;
 use leptos::SignalGetUntracked;
-pub use request::{FileMapper, MultipartGraphqlOperation, RequestError, WithOptionalFileMapper};
+pub use request::{FileMapper, MultipartGraphqlOperation, RequestError};
 pub use response::ResponseError;
 
 pub async fn post_multipart_graphql_operation<T, V>(operation: &Operation<T, V>) -> GraphQlResult<T>
 where
     T: for<'de> serde::Deserialize<'de>,
-    V: serde::Serialize + Clone + WithOptionalFileMapper,
+    V: serde::Serialize + Clone + GraphQlVariablesHelper,
 {
-    let (login_token, _) = crate::global_storage::use_login_token();
+    let login_token = match V::ADD_LOGIN {
+        true => Some(crate::global_storage::use_login_token().0.get_untracked()),
+        false => None,
+    };
 
     let multipart_operation = operation.try_into()?;
-    let api_response =
-        request::send_form_data(Some(login_token.get_untracked()), multipart_operation).await?;
+    let api_response = request::send_form_data(login_token, multipart_operation).await?;
     Ok(response::handle_graphql_response(api_response).await?)
 }
 
 impl<T, V> TryFrom<&cynic::Operation<T, V>> for MultipartGraphqlOperation
 where
-    V: WithOptionalFileMapper + serde::Serialize,
+    V: GraphQlVariablesHelper + serde::Serialize,
 {
     type Error = RequestError;
 

@@ -1,4 +1,4 @@
-use crate::api::http::WithOptionalFileMapper;
+use crate::api::GraphQlVariablesHelper;
 
 use super::super::schema::public as schema;
 
@@ -8,7 +8,9 @@ pub struct LoginQueryVariables {
     pub password: String,
 }
 
-impl WithOptionalFileMapper for LoginQueryVariables {}
+impl GraphQlVariablesHelper for LoginQueryVariables {
+    const ADD_LOGIN: bool = false;
+}
 
 #[derive(cynic::QueryFragment, Debug, Clone)]
 #[cynic(

@@ -29,14 +29,6 @@ impl FileMapper {
     }
 }
 
-pub trait WithOptionalFileMapper {
-    fn file_mapper(&self) -> Option<FileMapper> {
-        None
-    }
-}
-
-impl WithOptionalFileMapper for () {}
-
 #[derive(thiserror::Error, Debug, Clone)]
 pub enum FormCreationError {
     #[error("Form creation failed")]
