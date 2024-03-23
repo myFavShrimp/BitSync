@@ -1,4 +1,4 @@
-use bitsync::config::Config;
+use bitsync_core::config::Config;
 use color_eyre::eyre::{self, WrapErr};
 
 #[tokio::main]
@@ -19,7 +19,7 @@ async fn main() -> eyre::Result<()> {
         .await
         .wrap_err(format!("Failed to bind to address '{address}'"))?;
 
-    let app = bitsync::make_service(config).await?;
+    let app = bitsync_core::make_service(config).await?;
 
     axum::serve(listener, app)
         .await

@@ -25,5 +25,4 @@ web-sys = "0.3.68"
 material-colors = "0.1.6"
 
 [build-dependencies]
-bitsync = { path = "../" }
 cynic-codegen = "3.4.3"

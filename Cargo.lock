@@ -430,6 +430,18 @@ dependencies = [
 name = "bitsync"
 version = "0.1.0"
 dependencies = [
+ "axum",
+ "bitsync-core",
+ "color-eyre",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "bitsync-core"
+version = "0.1.0"
+dependencies = [
  "argon2",
  "async-graphql",
  "async-graphql-axum",
@@ -459,7 +471,6 @@ dependencies = [
 name = "bitsync-frontend"
 version = "0.1.0"
 dependencies = [
- "bitsync",
  "bitsync-jwt",
  "console_error_panic_hook",
  "console_log",
