@@ -16,7 +16,7 @@ where
     V: serde::Serialize + Clone + GraphQlVariablesHelper,
 {
     let login_token = match V::ADD_LOGIN {
-        true => Some(crate::global_storage::use_login_token().0.get_untracked()),
+        true => crate::global_storage::use_login_token().0.get_untracked(), // TODO: log
         false => None,
     };
 

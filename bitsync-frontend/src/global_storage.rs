@@ -3,7 +3,7 @@ use leptos::{
     create_effect, create_local_resource, create_trigger, provide_context, signal_prelude::*,
     use_context, Resource, Trigger,
 };
-use leptos_use::{storage::use_local_storage, utils::FromToStringCodec};
+use leptos_use::{use_cookie, utils::FromToStringCodec};
 use material_colors::{argb_from_hex, theme_from_source_color, utils::theme::Theme};
 
 use crate::api::{
@@ -42,27 +42,26 @@ impl PartialEq for ColorPalette {
 #[derive(Clone)]
 struct GlobalLoginStorage {
     login_state: Memo<LoginState>,
-    login: Signal<String>,
-    set_login: WriteSignal<String>,
+    login: Signal<Option<String>>,
+    set_login: WriteSignal<Option<String>>,
     logout: Trigger,
-    current_user: Resource<String, Option<Result<User, ApiError>>>,
+    current_user: Resource<Option<String>, Option<Result<User, ApiError>>>,
 }
 
 impl GlobalLoginStorage {
     fn new() -> Self {
-        let (login, set_login, unset_login) =
-            use_local_storage::<String, FromToStringCodec>(JWT_STORAGE_KEY);
+        let (login, set_login) = use_cookie::<String, FromToStringCodec>(JWT_STORAGE_KEY);
 
         let login_state = create_memo(move |_| {
             let login_token = login.get();
 
-            if login_token.is_empty() {
-                LoginState::NotSet
-            } else {
-                match JwtClaims::decode(&login.get()) {
+            match login_token {
+                None => LoginState::NotSet,
+                Some(value) if value.is_empty() => LoginState::Invalid,
+                Some(value) => match JwtClaims::decode(&value) {
                     Ok(claims) => LoginState::Set(claims),
                     Err(_) => LoginState::Invalid,
-                }
+                },
             }
         });
 
@@ -70,16 +69,15 @@ impl GlobalLoginStorage {
 
         create_effect(move |_| {
             logout_trigger.track();
-            unset_login();
+            set_login.set(None);
         });
 
         let current_user_resource = create_local_resource(
             move || login.get(),
-            move |_| async move {
-                if login.get().is_empty() {
-                    None
-                } else {
-                    Some(MeQuery::send(()).await.map(|me_query| me_query.me))
+            move |login| async move {
+                match login {
+                    None => None,
+                    Some(_) => Some(MeQuery::send(()).await.map(|me_query| me_query.me)),
                 }
             },
         );
@@ -105,7 +103,7 @@ pub fn use_login_state() -> Memo<LoginState> {
     login_storage.login_state
 }
 
-pub fn use_login_token() -> (Signal<String>, WriteSignal<String>) {
+pub fn use_login_token() -> (Signal<Option<String>>, WriteSignal<Option<String>>) {
     let login_storage =
         use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
 
@@ -119,7 +117,7 @@ pub fn use_logout() -> Trigger {
     login_storage.logout
 }
 
-pub fn use_current_user() -> Resource<String, Option<Result<User, ApiError>>> {
+pub fn use_current_user() -> Resource<Option<String>, Option<Result<User, ApiError>>> {
     let login_storage =
         use_context::<GlobalLoginStorage>().expect("GlobalLoginStorage is initialized");
 

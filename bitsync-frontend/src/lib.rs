@@ -34,7 +34,7 @@ pub fn app() -> impl IntoView {
 
     create_effect(move |_| {
         if let Some(Ok(value)) = action_1.value().get() {
-            set_login.set(value.login);
+            set_login.set(Some(value.login));
         }
     });
 
