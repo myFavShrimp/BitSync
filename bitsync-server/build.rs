@@ -1,5 +1,5 @@
-static PUBLIC_SCHEMA_FILE_NAME: &str = "public_api_schema.graphql";
-static PRIVATE_SCHEMA_FILE_NAME: &str = "private_api_schema.graphql";
+static PUBLIC_SCHEMA_FILE_NAME: &str = "../public_api_schema.graphql";
+static PRIVATE_SCHEMA_FILE_NAME: &str = "../private_api_schema.graphql";
 
 fn main() {
     update_schemas_if_outdated();

@@ -427,18 +427,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bitsync"
-version = "0.1.0"
-dependencies = [
- "axum",
- "bitsync-core",
- "color-eyre",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "bitsync-core"
 version = "0.1.0"
 dependencies = [
@@ -498,6 +486,18 @@ dependencies = [
  "serde",
  "thiserror",
  "uuid",
+]
+
+[[package]]
+name = "bitsync-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "bitsync-core",
+ "color-eyre",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
