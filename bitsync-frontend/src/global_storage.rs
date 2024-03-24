@@ -1,7 +1,7 @@
 use bitsync_jwt::JwtClaims;
 use leptos::{
-    create_effect, create_local_resource, create_trigger, provide_context, signal_prelude::*,
-    use_context, Resource, Trigger,
+    create_local_resource, create_trigger, provide_context, signal_prelude::*, use_context, watch,
+    Resource, Trigger,
 };
 use leptos_use::{use_cookie, utils::FromToStringCodec};
 use material_colors::{argb_from_hex, theme_from_source_color, utils::theme::Theme};
@@ -67,10 +67,13 @@ impl GlobalLoginStorage {
 
         let logout_trigger = create_trigger();
 
-        create_effect(move |_| {
-            logout_trigger.track();
-            set_login.set(None);
-        });
+        _ = watch(
+            move || logout_trigger.track(),
+            move |_, _, _| {
+                set_login.set(None);
+            },
+            false,
+        );
 
         let current_user_resource = create_local_resource(
             move || login.get(),
