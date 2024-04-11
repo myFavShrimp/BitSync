@@ -8,12 +8,9 @@ use tower_http::trace::TraceLayer;
 
 use crate::AppState;
 
-pub mod api;
-
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .fallback(handler_404)
-        .merge(api::create_routes(state.clone()).await)
         .layer(Extension(RateLimitLayer::new(1000, Duration::from_secs(1))))
         .layer(DefaultBodyLimit::max(10240))
         .layer(TraceLayer::new_for_http())

@@ -96,18 +96,7 @@ impl Display for StorageItemPath {
     }
 }
 
-#[async_graphql::Scalar]
-impl async_graphql::ScalarType for StorageItemPath {
-    fn parse(_value: async_graphql::Value) -> async_graphql::InputValueResult<Self> {
-        unimplemented!("StorageItemPath GraphQL parsing");
-    }
-
-    fn to_value(&self) -> async_graphql::Value {
-        async_graphql::Value::String(self.scoped_path.to_string_lossy().to_string())
-    }
-}
-
-#[derive(async_graphql::SimpleObject, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct FileItem {
     pub path: StorageItemPath,
     pub size: u64,
@@ -153,7 +142,7 @@ impl DirItem {
     }
 }
 
-#[derive(async_graphql::Union, Debug)]
+#[derive(Debug)]
 pub enum StorageItem {
     DirItem(DirItem),
     FileItem(FileItem),

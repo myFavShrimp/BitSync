@@ -8,8 +8,6 @@ license = "MPL-2.0"
 
 [dependencies]
 argon2 = { version = "0.5.2", features = ["std"] }
-async-graphql = { version = "7.0.1", features = ["time", "tracing", "uuid", "dataloader", "tracing"] }
-async-graphql-axum = "7.0.1"
 async-recursion = "1.0.5"
 async-trait = "0.1.74"
 axum = "0.7.2"
