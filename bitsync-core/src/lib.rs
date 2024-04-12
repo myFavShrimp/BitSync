@@ -9,7 +9,3 @@ pub struct AppState {
     pub(crate) config: config::Config,
     pub(crate) postgres_pool: sqlx::PgPool,
 }
-
-pub mod entities {
-    pub use crate::database::user;
-}
