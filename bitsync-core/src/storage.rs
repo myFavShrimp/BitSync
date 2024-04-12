@@ -9,7 +9,7 @@ use time::OffsetDateTime;
 use tokio::sync::Mutex;
 
 use crate::{
-    config::Config,
+    // config::Config,
     database::user::User,
     validate::{validate_file_path, PathValidationError},
 };
@@ -251,7 +251,7 @@ pub enum StorageKind {
 }
 
 impl StorageKind {
-    pub async fn create(_config: &Config) -> Self {
+    pub async fn create(/*_config: &Config*/) -> Self {
         Self::FsStorage(FsStorage)
     }
 }

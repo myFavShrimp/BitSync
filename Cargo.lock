@@ -286,13 +286,9 @@ version = "0.1.0"
 dependencies = [
  "argon2",
  "async-recursion",
- "async-trait",
- "axum",
- "axum-extra",
  "bitsync-jwt",
  "color-eyre",
  "dotenv",
- "headers",
  "nucleo-matcher",
  "serde",
  "serde-env",
@@ -300,8 +296,6 @@ dependencies = [
  "thiserror",
  "time",
  "tokio",
- "tower",
- "tower-http",
  "tracing",
  "tracing-subscriber",
  "uuid",
@@ -344,10 +338,17 @@ dependencies = [
 name = "bitsync-server"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum",
+ "axum-extra",
  "bitsync-core",
+ "bitsync-jwt",
  "color-eyre",
+ "serde",
+ "thiserror",
  "tokio",
+ "tower",
+ "tower-http",
  "tracing",
  "tracing-subscriber",
 ]

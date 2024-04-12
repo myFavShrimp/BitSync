@@ -19,7 +19,7 @@ async fn main() -> eyre::Result<()> {
         .await
         .wrap_err(format!("Failed to bind to address '{address}'"))?;
 
-    let app = bitsync_core::make_service(config).await?;
+    let app = bitsync_server::make_service(config).await?;
 
     axum::serve(listener, app)
         .await

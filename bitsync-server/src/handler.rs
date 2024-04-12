@@ -3,10 +3,9 @@ use std::{sync::Arc, time::Duration};
 use axum::{
     extract::DefaultBodyLimit, http::StatusCode, response::IntoResponse, Extension, Router,
 };
+use bitsync_core::AppState;
 use tower::limit::RateLimitLayer;
 use tower_http::trace::TraceLayer;
-
-use crate::AppState;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
@@ -24,5 +23,5 @@ pub async fn handler_404() -> impl IntoResponse {
 pub mod routes {
     use crate::helper_macro::route;
 
-    route!(ApiGraphQl => "/api/graphql");
+    // route!(ApiGraphQl => "/api/graphql");
 }

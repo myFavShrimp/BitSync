@@ -12,7 +12,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn create(
+    pub(crate) async fn create(
         connection: &PgPool,
         username: &str,
         password: &str,
@@ -27,25 +27,28 @@ impl User {
         .await
     }
 
-    pub async fn find_by_ids(connection: &PgPool, ids: &[Uuid]) -> Result<Vec<User>, sqlx::Error> {
+    pub(crate) async fn find_by_ids(
+        connection: &PgPool,
+        ids: &[Uuid],
+    ) -> Result<Vec<User>, sqlx::Error> {
         sqlx::query_as!(User, r#"SELECT * FROM "user" WHERE id = ANY($1)"#, ids)
             .fetch_all(connection)
             .await
     }
 
-    pub async fn find_by_id(connection: &PgPool, id: &Uuid) -> Result<User, sqlx::Error> {
+    pub(crate) async fn find_by_id(connection: &PgPool, id: &Uuid) -> Result<User, sqlx::Error> {
         sqlx::query_as!(User, r#"SELECT * FROM "user" WHERE id = $1"#, id)
             .fetch_one(connection)
             .await
     }
 
-    pub async fn find_all(connection: &PgPool) -> Result<Vec<User>, sqlx::Error> {
+    pub(crate) async fn find_all(connection: &PgPool) -> Result<Vec<User>, sqlx::Error> {
         sqlx::query_as!(User, r#"SELECT * FROM "user""#)
             .fetch_all(connection)
             .await
     }
 
-    pub async fn find_by_username(
+    pub(crate) async fn find_by_username(
         connection: &PgPool,
         username: &str,
     ) -> Result<User, sqlx::Error> {
@@ -58,7 +61,7 @@ impl User {
         .await
     }
 
-    pub async fn update_password(
+    pub(crate) async fn update_password(
         connection: &PgPool,
         user_id: &Uuid,
         new_password: &str,
