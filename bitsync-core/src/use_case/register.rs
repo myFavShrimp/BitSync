@@ -1,18 +1,16 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use crate::{
     database::user::User,
-    handler::api::graphql::PublicContext,
     hash::hash_password,
     storage::{
         Storage, StorageError, StorageItemPath, StorageItemPathError, StorageKind, UserStorage,
     },
+    AppState,
 };
 
 #[derive(thiserror::Error, Debug)]
 pub enum RegistrationError {
-    #[error("An unexpected error occurred")]
-    Context(async_graphql::Error),
     #[error("An unexpected error occurred")]
     PasswordHash(#[from] argon2::password_hash::Error),
     #[error("An unexpected error occurred")]
@@ -26,33 +24,24 @@ pub enum RegistrationError {
 }
 
 pub async fn perform_registration<'context>(
-    ctx: &async_graphql::Context<'context>,
+    app_state: &Arc<AppState>,
     username: String,
     password: String,
 ) -> Result<User, RegistrationError> {
-    let context = ctx
-        .data::<PublicContext>()
-        .map_err(RegistrationError::Context)?;
-
-    if let Ok(_user) = User::find_by_username(&context.app_state.postgres_pool, &username).await {
+    if let Ok(_user) = User::find_by_username(&app_state.postgres_pool, &username).await {
         return Err(RegistrationError::UserExists);
     }
 
     let hashed_password = hash_password(&password)?;
-    let user = User::create(
-        &context.app_state.postgres_pool,
-        &username,
-        &hashed_password,
-    )
-    .await?;
+    let user = User::create(&app_state.postgres_pool, &username, &hashed_password).await?;
 
     let user_storage = UserStorage {
         user: user.clone(),
-        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from("/"))?;
 
-    let storage = StorageKind::create(&context.app_state.config).await;
+    let storage = StorageKind::create().await;
 
     storage.create_directory(&path).await?;
 

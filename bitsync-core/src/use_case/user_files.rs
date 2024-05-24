@@ -1,17 +1,17 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use crate::{
-    handler::api::graphql::PrivateContext,
     storage::{
         DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError,
         StorageKind, UserStorage,
     },
+    AppState,
 };
+
+use super::auth::AuthData;
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryReadError {
-    #[error("An unexpected error occurred")]
-    Context(async_graphql::Error),
     #[error(transparent)]
     StorageItemPathCreation(#[from] StorageItemPathError),
     #[error(transparent)]
@@ -21,18 +21,15 @@ pub enum UserDirectoryReadError {
 }
 
 pub async fn user_directory<'context>(
-    ctx: &async_graphql::Context<'context>,
+    app_state: &Arc<AppState>,
+    auth_data: &AuthData,
     path: &str,
 ) -> Result<DirItem, UserDirectoryReadError> {
-    let context = ctx
-        .data::<PrivateContext>()
-        .map_err(UserDirectoryReadError::Context)?;
-
-    let storage = StorageKind::create(&context.app_state.config).await;
+    let storage = StorageKind::create().await;
 
     let user_storage = UserStorage {
-        user: context.current_user.clone(),
-        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+        user: auth_data.user.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
     let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
@@ -44,19 +41,19 @@ pub async fn user_directory<'context>(
     }
 }
 
-#[derive(async_graphql::SimpleObject)]
+#[derive()]
 pub struct UserStorageItemSearchResultDirectory {
     directory: DirItem,
     score: u32,
 }
 
-#[derive(async_graphql::SimpleObject)]
+#[derive()]
 pub struct UserStorageItemSearchResultFile {
     file: FileItem,
     score: u32,
 }
 
-#[derive(async_graphql::SimpleObject)]
+#[derive()]
 pub struct UserStorageItemSearchResult {
     directories: Vec<UserStorageItemSearchResultDirectory>,
     files: Vec<UserStorageItemSearchResultFile>,
@@ -64,8 +61,6 @@ pub struct UserStorageItemSearchResult {
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserStorageItemSearchError {
-    #[error("An unexpected error occurred")]
-    Context(async_graphql::Error),
     #[error(transparent)]
     StorageItemPathCreation(#[from] StorageItemPathError),
     #[error(transparent)]
@@ -73,18 +68,15 @@ pub enum UserStorageItemSearchError {
 }
 
 pub async fn user_storage_item_search<'context>(
-    ctx: &async_graphql::Context<'context>,
+    app_state: &Arc<AppState>,
+    auth_data: &AuthData,
     search: &str,
 ) -> Result<UserStorageItemSearchResult, UserStorageItemSearchError> {
-    let context = ctx
-        .data::<PrivateContext>()
-        .map_err(UserStorageItemSearchError::Context)?;
-
-    let storage = StorageKind::create(&context.app_state.config).await;
+    let storage = StorageKind::create().await;
 
     let user_storage = UserStorage {
-        user: context.current_user.clone(),
-        storage_root: context.app_state.config.fs_storage_root_dir.clone(),
+        user: auth_data.user.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
     let path = StorageItemPath::new(user_storage, PathBuf::from("/"))?;
 
