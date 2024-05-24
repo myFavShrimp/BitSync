@@ -1,9 +1,9 @@
 macro_rules! route {
-    ($name:ident => $route:literal, ($($arg:ident : $arg_type:ty),*)) => {
+    ($name:ident => $route:literal, ($($arg_prefix:tt $arg:ident : $arg_type:ty),*)) => {
         pub struct $name;
         impl $name {
             pub fn handler_route() -> String {
-                format!($route, $( format!(":{}", stringify!($arg))),*)
+                format!($route, $( $crate::helper_macro::route_parameter_format!($arg_prefix $arg) ),*)
             }
 
             pub fn route_path($($arg: $arg_type),*) -> String {
@@ -25,17 +25,26 @@ macro_rules! route {
     };
 }
 
-pub(crate) use route;
+macro_rules! route_parameter_format {
+    (* $arg:ident) => {
+        format_args!("*{}", stringify!($arg))
+    };
+    (: $arg:ident) => {
+        format_args!(":{}", stringify!($arg))
+    };
+}
+
+pub(crate) use {route, route_parameter_format};
 
 #[cfg(test)]
 mod test {
-    route!(SomeRoute => "/path/{}/with/{}", (something: String, parameter: u8));
+    route!(SomeRoute => "/path/{}/with/{}", (: something: String, *parameter: u8));
 
     #[test]
     fn handler_route() {
         assert_eq!(
             SomeRoute::handler_route(),
-            "/path/:something/with/:parameter"
+            "/path/:something/with/*parameter"
         )
     }
 
