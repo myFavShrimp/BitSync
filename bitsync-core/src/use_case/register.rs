@@ -3,9 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use crate::{
     database::user::User,
     hash::hash_password,
-    storage::{
-        Storage, StorageError, StorageItemPath, StorageItemPathError, StorageKind, UserStorage,
-    },
+    storage::{Storage, StorageError, StorageItemPath, StorageItemPathError, UserStorage},
     AppState,
 };
 
@@ -41,7 +39,7 @@ pub async fn perform_registration<'context>(
     };
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from("/"))?;
 
-    let storage = StorageKind::create().await;
+    let storage = Storage::create();
 
     storage.create_directory(&path).await?;
 

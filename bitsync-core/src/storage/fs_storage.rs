@@ -2,9 +2,9 @@ use std::{fs::File, io::Read, path::PathBuf};
 
 use tokio::fs::DirEntry;
 
-use super::{DirItem, FileItem, Storage, StorageError, StorageItem, StorageItemPath};
+use super::{DirItem, FileItem, StorageError, StorageItem, StorageItemPath};
 
-pub struct FsStorage;
+pub struct Storage;
 
 #[async_recursion::async_recursion]
 pub async fn dir_items(dir: PathBuf, recursive: bool) -> Result<Vec<DirEntry>, std::io::Error> {
@@ -23,8 +23,12 @@ pub async fn dir_items(dir: PathBuf, recursive: bool) -> Result<Vec<DirEntry>, s
     Ok(result)
 }
 
-impl Storage for FsStorage {
-    async fn create_directory(&self, path: &StorageItemPath) -> Result<DirItem, StorageError> {
+impl Storage {
+    pub fn create() -> Self {
+        Self
+    }
+
+    pub async fn create_directory(&self, path: &StorageItemPath) -> Result<DirItem, StorageError> {
         tokio::fs::create_dir_all(path.data_directory())
             .await
             .map_err(|error| StorageError::DirectoryCreation {
@@ -41,7 +45,7 @@ impl Storage for FsStorage {
         .map_err(StorageError::MetadataReader)
     }
 
-    async fn storage_item(&self, path: &StorageItemPath) -> Result<StorageItem, StorageError> {
+    pub async fn storage_item(&self, path: &StorageItemPath) -> Result<StorageItem, StorageError> {
         StorageItem::from_metadata(
             path.clone(),
             tokio::fs::metadata(path.data_directory())
@@ -51,7 +55,7 @@ impl Storage for FsStorage {
         .map_err(StorageError::MetadataReader)
     }
 
-    async fn list_storage_items(
+    pub async fn list_storage_items(
         &self,
         path: &StorageItemPath,
     ) -> Result<Vec<StorageItem>, StorageError> {
@@ -79,7 +83,7 @@ impl Storage for FsStorage {
         Ok(result)
     }
 
-    async fn list_storage_items_recursively(
+    pub async fn list_storage_items_recursively(
         &self,
         path: &StorageItemPath,
     ) -> Result<Vec<StorageItem>, StorageError> {
@@ -103,7 +107,7 @@ impl Storage for FsStorage {
         Ok(storage_items)
     }
 
-    async fn add_file(
+    pub async fn add_file(
         &self,
         path: &StorageItemPath,
         mut file: File,
@@ -131,7 +135,7 @@ impl Storage for FsStorage {
         .map_err(StorageError::MetadataReader)
     }
 
-    async fn move_item(
+    pub async fn move_item(
         &self,
         path: &StorageItemPath,
         new_path: &StorageItemPath,
@@ -149,7 +153,7 @@ impl Storage for FsStorage {
         .map_err(StorageError::MetadataReader)
     }
 
-    async fn copy_file(
+    pub async fn copy_file(
         &self,
         path: &StorageItemPath,
         new_path: &StorageItemPath,
@@ -170,7 +174,7 @@ impl Storage for FsStorage {
         .map_err(StorageError::MetadataReader)
     }
 
-    async fn copy_directory(
+    pub async fn copy_directory(
         &self,
         from_path: &StorageItemPath,
         to_path: &StorageItemPath,
@@ -213,13 +217,13 @@ impl Storage for FsStorage {
         .map_err(StorageError::MetadataReader)
     }
 
-    async fn remove_directory(&self, path: &StorageItemPath) -> Result<(), StorageError> {
+    pub async fn remove_directory(&self, path: &StorageItemPath) -> Result<(), StorageError> {
         tokio::fs::remove_dir_all(path.data_directory())
             .await
             .map_err(StorageError::DirReader)
     }
 
-    async fn remove_file(&self, path: &StorageItemPath) -> Result<(), StorageError> {
+    pub async fn remove_file(&self, path: &StorageItemPath) -> Result<(), StorageError> {
         tokio::fs::remove_file(path.data_directory())
             .await
             .map_err(|error| StorageError::FileReader {

@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use crate::{
     storage::{
         DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError,
-        StorageKind, UserStorage,
+        UserStorage,
     },
     AppState,
 };
@@ -25,7 +25,7 @@ pub async fn user_directory<'context>(
     auth_data: &AuthData,
     path: &str,
 ) -> Result<DirItem, UserDirectoryReadError> {
-    let storage = StorageKind::create().await;
+    let storage = Storage::create();
 
     let user_storage = UserStorage {
         user: auth_data.user.clone(),
@@ -72,7 +72,7 @@ pub async fn user_storage_item_search<'context>(
     auth_data: &AuthData,
     search: &str,
 ) -> Result<UserStorageItemSearchResult, UserStorageItemSearchError> {
-    let storage = StorageKind::create().await;
+    let storage = Storage::create();
 
     let user_storage = UserStorage {
         user: auth_data.user.clone(),

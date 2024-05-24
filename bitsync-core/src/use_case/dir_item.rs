@@ -5,7 +5,7 @@ use tokio::sync::Mutex;
 use crate::{
     storage::{
         DirItem, DirItemContent, FileItem, Storage, StorageError, StorageItemPath,
-        StorageItemPathError, StorageKind, UserStorage,
+        StorageItemPathError, UserStorage,
     },
     AppState,
 };
@@ -37,7 +37,7 @@ pub async fn list_directories<'context>(
             };
             let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
-            let storage = StorageKind::create().await;
+            let storage = Storage::create();
             let dir_content = storage.list_storage_items(&path).await?;
 
             let mut directories = Vec::new();
@@ -78,7 +78,7 @@ pub async fn list_files<'context>(
             };
             let path = StorageItemPath::new(user_storage, PathBuf::from(path))?;
 
-            let storage = StorageKind::create().await;
+            let storage = Storage::create();
             let dir_content = storage.list_storage_items(&path).await?;
 
             let mut directories = Vec::new();

@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    fs::{File, Metadata},
+    fs::Metadata,
     path::{Path, PathBuf, StripPrefixError},
     sync::Arc,
 };
@@ -14,7 +14,7 @@ use crate::{
     validate::{validate_file_path, PathValidationError},
 };
 
-use fs_storage::FsStorage;
+pub use fs_storage::Storage;
 
 mod fs_storage;
 
@@ -204,136 +204,4 @@ pub enum StorageError {
     StorageItemPathCreation(#[from] StorageItemPathError),
     #[error(transparent)]
     StripPrefix(#[from] StripPrefixError),
-}
-
-pub trait Storage {
-    async fn create_directory(&self, path: &StorageItemPath) -> Result<DirItem, StorageError>;
-
-    async fn storage_item(&self, path: &StorageItemPath) -> Result<StorageItem, StorageError>;
-
-    async fn list_storage_items(
-        &self,
-        path: &StorageItemPath,
-    ) -> Result<Vec<StorageItem>, StorageError>;
-
-    async fn list_storage_items_recursively(
-        &self,
-        path: &StorageItemPath,
-    ) -> Result<Vec<StorageItem>, StorageError>;
-
-    async fn add_file(&self, path: &StorageItemPath, file: File) -> Result<FileItem, StorageError>;
-
-    async fn move_item(
-        &self,
-        path: &StorageItemPath,
-        new_path: &StorageItemPath,
-    ) -> Result<StorageItem, StorageError>;
-
-    async fn copy_file(
-        &self,
-        path: &StorageItemPath,
-        new_path: &StorageItemPath,
-    ) -> Result<FileItem, StorageError>;
-
-    async fn copy_directory(
-        &self,
-        path: &StorageItemPath,
-        new_path: &StorageItemPath,
-    ) -> Result<DirItem, StorageError>;
-
-    async fn remove_directory(&self, path: &StorageItemPath) -> Result<(), StorageError>;
-
-    async fn remove_file(&self, path: &StorageItemPath) -> Result<(), StorageError>;
-}
-
-pub enum StorageKind {
-    FsStorage(FsStorage),
-}
-
-impl StorageKind {
-    pub async fn create(/*_config: &Config*/) -> Self {
-        Self::FsStorage(FsStorage)
-    }
-}
-
-impl Storage for StorageKind {
-    async fn create_directory(&self, path: &StorageItemPath) -> Result<DirItem, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.create_directory(path).await,
-        }
-    }
-
-    async fn storage_item(&self, path: &StorageItemPath) -> Result<StorageItem, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.storage_item(path).await,
-        }
-    }
-
-    async fn list_storage_items(
-        &self,
-        path: &StorageItemPath,
-    ) -> Result<Vec<StorageItem>, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.list_storage_items(path).await,
-        }
-    }
-
-    async fn list_storage_items_recursively(
-        &self,
-        path: &StorageItemPath,
-    ) -> Result<Vec<StorageItem>, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => {
-                fs_storage.list_storage_items_recursively(path).await
-            }
-        }
-    }
-
-    async fn add_file(&self, path: &StorageItemPath, file: File) -> Result<FileItem, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.add_file(path, file).await,
-        }
-    }
-
-    async fn move_item(
-        &self,
-        path: &StorageItemPath,
-        new_path: &StorageItemPath,
-    ) -> Result<StorageItem, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.move_item(path, new_path).await,
-        }
-    }
-
-    async fn copy_file(
-        &self,
-        path: &StorageItemPath,
-        new_path: &StorageItemPath,
-    ) -> Result<FileItem, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.copy_file(path, new_path).await,
-        }
-    }
-
-    async fn copy_directory(
-        &self,
-        path: &StorageItemPath,
-        new_path: &StorageItemPath,
-    ) -> Result<DirItem, StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.copy_directory(path, new_path).await,
-        }
-    }
-
-    async fn remove_directory(&self, path: &StorageItemPath) -> Result<(), StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.remove_directory(path).await,
-        }
-    }
-
-    async fn remove_file(&self, path: &StorageItemPath) -> Result<(), StorageError> {
-        match self {
-            StorageKind::FsStorage(fs_storage) => fs_storage.remove_file(path).await,
-        }
-    }
 }
