@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use bitsync_jwt::JwtClaims;
+use crate::jwt::JwtClaims;
 
 use crate::{database::user::User, hash::verify_password_hash, AppState};
 
@@ -9,7 +9,7 @@ use crate::{database::user::User, hash::verify_password_hash, AppState};
 pub enum LoginError {
     PasswordHash(#[from] argon2::password_hash::Error),
     Database(#[from] sqlx::Error),
-    Jwt(#[from] bitsync_jwt::jsonwebtoken::errors::Error),
+    Jwt(#[from] jsonwebtoken::errors::Error),
 }
 
 pub async fn perform_login(

@@ -1,8 +1,6 @@
 use std::sync::Arc;
 
-use bitsync_jwt::JwtClaims;
-
-use crate::{database::user::User, AppState};
+use crate::{database::user::User, jwt::JwtClaims, AppState};
 
 #[derive(Debug, Clone)]
 pub struct AuthData {

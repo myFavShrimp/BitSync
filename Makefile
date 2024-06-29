@@ -1,5 +1,5 @@
 watch-server:
-	cargo watch -x "run --bin bitsync-server"
+	cargo watch -x run
 
 link-env:
 	ln -s dev.env .env

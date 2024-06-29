@@ -226,16 +226,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "bitsync-core"
+name = "bitsync"
 version = "0.1.0"
 dependencies = [
  "argon2",
  "async-recursion",
- "bitsync-jwt",
+ "async-trait",
+ "axum",
+ "axum-extra",
+ "axum_route_helper",
  "bytes",
  "color-eyre",
  "dotenv",
  "futures-core",
+ "jsonwebtoken",
  "nucleo-matcher",
  "serde",
  "serde-env",
@@ -244,39 +248,11 @@ dependencies = [
  "time",
  "tokio",
  "tokio-stream",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "bitsync-jwt"
-version = "0.1.0"
-dependencies = [
- "jsonwebtoken",
- "serde",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "bitsync-server"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "axum",
- "axum-extra",
- "axum_route_helper",
- "bitsync-core",
- "bitsync-jwt",
- "color-eyre",
- "serde",
- "thiserror",
- "tokio",
  "tower",
  "tower-http",
  "tracing",
  "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

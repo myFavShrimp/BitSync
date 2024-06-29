@@ -1,10 +1,31 @@
-[workspace]
-members = [ "bitsync-core", "bitsync-jwt", "bitsync-server"]
-resolver = "2"
+[package]
+name = "bitsync"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
 
-[workspace.dependencies]
+[dependencies]
+argon2 = { version = "0.5.2", features = ["std"] }
+async-recursion = "1.0.5"
+async-trait = "0.1.74"
+axum = "0.7.2"
+axum-extra = { version = "0.9.0", features = ["typed-header"] }
+axum_route_helper = { git = "https://github.com/myFavShrimp/axum_route_helper.git", rev = "cc8a2a2", version = "0.1.0" }
+bytes = "1.6.0"
+color-eyre = "0.6.2"
+dotenv = "0.15.0"
+futures-core = "0.3.30"
+jsonwebtoken = "9.2.0"
+nucleo-matcher = "0.3.0"
 serde = { version = "1.0.193", features = ["derive"] }
+serde-env = "0.1.1"
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "time", "uuid", "postgres"] }
 thiserror = "1.0.51"
+time = { version = "0.3.30", features = ["serde-human-readable"] }
+tokio = { version = "1.34.0", features = ["full"] }
+tokio-stream = "0.1.15"
+tower = { version = "0.4.13", features = ["limit"] }
+tower-http = { version = "0.5.0", features = ["trace", "cors"] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
 uuid = { version = "1.6.1", features = ["serde"] }
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -1,12 +1,15 @@
 use std::{convert::Infallible, sync::Arc};
 
+use crate::{
+    use_case::{self, auth::AuthData},
+    AppState,
+};
 use axum::{
     extract::{FromRef, FromRequestParts},
     http::request::Parts,
 };
 use axum_extra::headers::{authorization::Bearer, Authorization};
 use axum_extra::TypedHeader;
-use bitsync_core::{use_case::auth::AuthData, AppState};
 
 #[derive(Debug, Clone)]
 pub enum AuthStatus {
@@ -33,9 +36,7 @@ where
                         return Ok(AuthStatus::Missing);
                     }
 
-                    match bitsync_core::use_case::auth::decode_auth_token(app_state, bearer.token())
-                        .await
-                    {
+                    match use_case::auth::decode_auth_token(app_state, bearer.token()).await {
                         Ok(auth) => AuthStatus::User(auth),
                         Err(_) => AuthStatus::Invalid,
                     }

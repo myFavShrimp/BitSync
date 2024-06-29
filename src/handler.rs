@@ -1,9 +1,9 @@
 use std::{sync::Arc, time::Duration};
 
+use crate::AppState;
 use axum::{
     extract::DefaultBodyLimit, http::StatusCode, response::IntoResponse, Extension, Router,
 };
-use bitsync_core::AppState;
 use tower::limit::RateLimitLayer;
 use tower_http::trace::TraceLayer;
 
