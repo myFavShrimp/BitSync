@@ -179,6 +179,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "axum_route_helper"
+version = "0.1.0"
+source = "git+https://github.com/myFavShrimp/axum_route_helper.git?rev=cc8a2a2#cc8a2a26e9e23ac66d9497a31d1b3bdf95133b19"
+
+[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -261,6 +266,7 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-extra",
+ "axum_route_helper",
  "bitsync-core",
  "bitsync-jwt",
  "color-eyre",

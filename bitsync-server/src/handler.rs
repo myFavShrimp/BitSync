@@ -21,7 +21,7 @@ pub async fn handler_404() -> impl IntoResponse {
 
 #[allow(dead_code)]
 pub mod routes {
-    use crate::helper_macro::route;
+    use axum_route_helper::route;
 
-    // route!(ApiGraphQl => "/api/graphql");
+    route!(Home => "/");
 }
