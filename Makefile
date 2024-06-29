@@ -20,3 +20,5 @@ install-tools:
 	cargo install sqlx-cli
 	cargo install cargo-watch
 
+fetch-css-reset:
+	curl -o reset.css "https://unpkg.com/reset-css/reset.css" # meyer reset - https://github.com/shannonmoeller/reset-css
