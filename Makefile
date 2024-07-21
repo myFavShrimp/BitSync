@@ -1,3 +1,5 @@
+.PHONY: *
+
 watch-server:
 	cargo watch -x run
 
@@ -21,4 +23,6 @@ install-tools:
 	cargo install cargo-watch
 
 fetch-css-reset:
-	curl -o reset.css "https://unpkg.com/reset-css/reset.css" # meyer reset - https://github.com/shannonmoeller/reset-css
+	curl -Lo reset.css "https://unpkg.com/reset-css/reset.css" # meyer reset - https://github.com/shannonmoeller/reset-css
+
+ws: watch-server
