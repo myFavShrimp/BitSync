@@ -10,6 +10,7 @@ mod handler;
 mod hash;
 mod jwt;
 mod storage;
+mod templates;
 mod use_case;
 mod validate;
 

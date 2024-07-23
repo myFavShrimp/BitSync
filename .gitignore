@@ -1,4 +1,5 @@
 /target
+/templates
 .env
 dist
 *.graphql
