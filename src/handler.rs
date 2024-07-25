@@ -7,8 +7,11 @@ use axum::{
 use tower::limit::RateLimitLayer;
 use tower_http::trace::TraceLayer;
 
+mod static_assets;
+
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
+        .merge(static_assets::create_routes(state).await)
         .fallback(handler_404)
         .layer(Extension(RateLimitLayer::new(1000, Duration::from_secs(1))))
         .layer(DefaultBodyLimit::max(10240))
@@ -22,6 +25,8 @@ pub async fn handler_404() -> impl IntoResponse {
 #[allow(dead_code)]
 pub mod routes {
     use axum_route_helper::route;
+
+    route!(Static => "/static");
 
     route!(Home => "/");
 }

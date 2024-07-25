@@ -3,12 +3,17 @@ let origin_dir = "./templates-src"
 
 def main [] {
     rm -rf ($destination_dir + '/*')
-    let original_files = (glob -D templates-src/**/*.html | each {|file| $file | str replace (pwd) '.'})
 
-    $original_files | each {|file| destination_path $file}
+    minify_templates
 }
 
-def destination_path [original_path: string] {
+def minify_templates [] {
+    let original_files = (glob -D templates-src/**/*.html | each {|file| $file | str replace (pwd) '.'})
+
+    $original_files | each {|file| minify_template $file}
+}
+
+def minify_template [original_path: string] {
     let destination_file = ($original_path | str replace $origin_dir '' | $destination_dir + $in)
 
     let parent_dir = $destination_file | path dirname
