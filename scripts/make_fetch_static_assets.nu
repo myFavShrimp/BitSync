@@ -1,4 +1,4 @@
-let output_path = "./static/"
+let output_path = "./static/external/"
 
 let static_assets = [
     ["name" "url" "destination"];
