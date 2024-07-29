@@ -28,7 +28,7 @@ pub async fn handler_404() -> impl IntoResponse {
 pub mod routes {
     use axum_route_helper::route;
 
-    route!(Static => "/static");
+    route!(Static => "/static/{}", (*file_path: String));
 
     route!(Home => "/");
 }

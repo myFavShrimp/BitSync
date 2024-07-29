@@ -24,14 +24,15 @@ install-tools:
 	cargo install minhtml
 	cargo install nu
 
-fetch-css-reset:
-	curl -Lo static/reset.css "https://unpkg.com/reset-css/reset.css" # meyer reset - https://github.com/shannonmoeller/reset-css
+static-assets: fetch-static-assets font-css
 
-fetch-mdui:
-	curl -Lo static/mdui.css "https://unpkg.com/mdui@2/mdui.css"
-	curl -Lo static/mdui.global.js "https://unpkg.com/mdui@2/mdui.global.js"
+fetch-static-assets:
+	nu ./scripts/make_fetch_static_assets.nu --all
+
+font-css:
+	nu ./scripts/make_font_css.nu
 
 templates:
-	nu ./make_templates.nu
+	nu ./scripts/make_templates.nu
 
 ws: watch-server

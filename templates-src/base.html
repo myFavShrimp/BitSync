@@ -1,16 +1,38 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html lang="en" class="mdui-theme-dark">
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
     <meta content="width=device-width,initial-scale=1.0" name=viewport>
 
-    <script src="static/mdui.global.js"></script>
-    <link rel="stylesheet" type="text/css" href="static/mdui.css">
+    <script src="static/htmx.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="static/reset.css">
+    <link rel="stylesheet" type="text/css" href="static/css/reset.css">
+
+    <link rel="stylesheet" type="text/css" href="static/css/Noto Sans.css">
+
+    <script src="static/mdui/mdui.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/mdui/mdui.css">
+
+    <link rel="stylesheet" type="text/css" href="static/css/Material Icons Outlined.css">
+    <link rel="stylesheet" type="text/css" href="static/css/Material Icons Rounded.css">
+    <link rel="stylesheet" type="text/css" href="static/css/Material Icons Sharp.css">
 </head>
 <body>
-    {% block main %}
-    {% endblock %}
+    <mdui-layout>
+        <mdui-top-app-bar class="example-top-app-bar">
+            <mdui-top-app-bar-title>BitSync</mdui-top-app-bar-title>
+        </mdui-top-app-bar>
+
+        <mdui-navigation-rail value="recent">
+            <mdui-navigation-rail-item icon="watch_later--outlined" value="recent">Recent</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item icon="image--outlined" value="images">Images</mdui-navigation-rail-item>
+            <mdui-navigation-rail-item icon="library_music--outlined" value="library">Library</mdui-navigation-rail-item>
+        </mdui-navigation-rail>
+
+        <mdui-layout-main class="example-layout-main" style="min-height: 300px">Main</mdui-layout-main>
+
+        {% block main %}
+        {% endblock %}
+    </mdui-layout>
 </body>
 </html>
