@@ -19,7 +19,7 @@ def minify_template [original_path: string] {
     let parent_dir = $destination_file | path dirname
     mkdir $parent_dir
 
-    let minified = minhtml --do-not-minify-doctype --ensure-spec-compliant-unquoted-attribute-values --keep-spaces-between-attributes --preserve-brace-template-syntax $original_path
+    let minified = minhtml --do-not-minify-doctype --ensure-spec-compliant-unquoted-attribute-values --keep-spaces-between-attributes --preserve-brace-template-syntax --minify-css $original_path
 
     $minified | save -f $destination_file
 
