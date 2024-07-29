@@ -1,3 +1,5 @@
+{% import "macros.html" as macros %}
+
 <!DOCTYPE HTML>
 <html lang="en" class="mdui-theme-dark">
 <head>
@@ -18,11 +20,21 @@
     <link rel="stylesheet" type="text/css" href="static/external/css/Material Icons Sharp.css">
     <link rel="stylesheet" type="text/css" href="static/css/base.css">
 
+    <style>
+        .top-bar-logo {
+            width: 130px;
+            height: 40px;
+            margin-left: 4px;
+            fill: white;
+        }
+    </style>
 </head>
 <body>
     <mdui-layout>
-        <mdui-top-app-bar class="example-top-app-bar">
-            <mdui-top-app-bar-title>BitSync</mdui-top-app-bar-title>
+        <mdui-top-app-bar>
+            <mdui-top-app-bar-title>
+                {% call macros::logo("top-bar-logo") %}
+            </mdui-top-app-bar-title>
         </mdui-top-app-bar>
 
         <mdui-navigation-rail value="recent">
@@ -31,10 +43,11 @@
             <mdui-navigation-rail-item icon="library_music--outlined" value="library">Library</mdui-navigation-rail-item>
         </mdui-navigation-rail>
 
-        <mdui-layout-main class="example-layout-main" style="min-height: 300px">Main</mdui-layout-main>
+        <mdui-layout-main class="example-layout-main" style="min-height: 300px">
+            {% block main %}
+            {% endblock %}
+        </mdui-layout-main>
 
-        {% block main %}
-        {% endblock %}
     </mdui-layout>
 </body>
 </html>

@@ -10,8 +10,8 @@ let static_assets = [
     ["Material Symbols LICENSE" "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE" "fonts/material-symbols/LICENSE"]
     ["Meyer CSS reset" "https://unpkg.com/reset-css/reset.css" "css/reset.css"]
     ["HTMX" "https://unpkg.com/htmx.org@2.0.1/dist/htmx.min.js" "htmx.js"]
-    ["Noto Latin Ext" "https://fonts.gstatic.com/s/notosans/v36/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5aDdu2ui.woff2" fonts/noto-sans/latin-ext.woff2]
-    ["Noto Latin" "https://fonts.gstatic.com/s/notosans/v36/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7duw.woff2" fonts/noto-sans/latin.woff2]
+    ["Noto Latin Ext" "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr6zRAW_0.woff2" fonts/noto-sans/latin-ext.woff2]
+    ["Noto Latin" "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr5TRA.woff2" fonts/noto-sans/latin.woff2]
 ]
 
 def main [
