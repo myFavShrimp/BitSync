@@ -1,4 +1,27 @@
-{% extends "base.html" %}
+{% import "macros.html" as macros %}
 
-{% block main %}
+{% extends "base.html" %}
+{% block content %}
+<mdui-layout>
+    <mdui-top-app-bar>
+        <mdui-top-app-bar-title>
+            {% call macros::logo("top-bar-logo") %}
+        </mdui-top-app-bar-title>
+        <mdui-button-icon icon="check_box--outlined"></mdui-button-icon>
+    </mdui-top-app-bar>
+
+    <mdui-navigation-rail value="my-files">
+        <mdui-navigation-rail-item icon="home--outlined" value="my-files">My Files</mdui-navigation-rail-item>
+    </mdui-navigation-rail>
+
+    <mdui-layout-main class="example-layout-main" style="min-height: 300px">
+        {% block main %}
+            <mdui-list>
+                <mdui-list-subheader>My Files</mdui-list-subheader>
+                <mdui-divider inset></mdui-divider>
+            </mdui-list>
+        {% endblock %}
+    </mdui-layout-main>
+
+</mdui-layout>
 {% endblock %}

@@ -21,7 +21,7 @@ pub enum RegistrationError {
     Storage(#[from] StorageError),
 }
 
-pub async fn perform_registration<'context>(
+pub async fn perform_registration(
     app_state: &Arc<AppState>,
     username: String,
     password: String,

@@ -1,13 +1,21 @@
+use std::sync::Arc;
+
 use axum::{
     response::{Html, IntoResponse},
     routing::get,
     Router,
 };
 
+use crate::AppState;
+
 use super::routes;
 
-pub(crate) async fn create_routes() -> Router {
-    Router::new().route(&routes::Home::handler_route(), get(index_handler))
+mod login;
+
+pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
+    Router::new()
+        .route(&routes::Home::handler_route(), get(index_handler))
+        .merge(login::create_routes(state).await)
 }
 
 #[derive(askama::Template)]

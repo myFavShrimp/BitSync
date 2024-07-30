@@ -10,10 +10,10 @@ use tower_http::trace::TraceLayer;
 mod content;
 mod static_assets;
 
-pub(crate) async fn create_routes(_state: Arc<AppState>) -> Router {
+pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .merge(static_assets::create_routes().await)
-        .merge(content::create_routes().await)
+        .merge(content::create_routes(state).await)
         .fallback(handler_404)
         .layer(Extension(RateLimitLayer::new(1000, Duration::from_secs(1))))
         .layer(DefaultBodyLimit::max(10240))
@@ -31,4 +31,6 @@ pub mod routes {
     route!(Static => "/static/{}", (*file_path: String));
 
     route!(Home => "/");
+    route!(GetLoginPage => "/login");
+    route!(PostLoginAction => "/login");
 }
