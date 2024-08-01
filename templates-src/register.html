@@ -3,7 +3,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% let (style_sheet, class_name) = turf::style_sheet_values!("scss/login.scss") %}
+{% let (style_sheet, class_name) = turf::style_sheet_values!("scss/register.scss") %}
 
 <div class="{{ class_name.page }}">
     <style>{{ style_sheet }}</style>
@@ -18,8 +18,8 @@
             <mdui-text-field label="Password" name="password"></mdui-text-field>
 
             <div class="{{ class_name.button_group }}">
-                <mdui-button href="{{ crate::handler::routes::GetRegisterPage::route_path() }}" variant="tonal">Register</mdui-button>
-                <mdui-button type="submit">Login</mdui-button>
+                <mdui-button href="{{ crate::handler::routes::GetLoginPage::route_path() }}" variant="tonal">Login</mdui-button>
+                <mdui-button type="submit">Register</mdui-button>
             </div>
         </div>
     </form>

@@ -11,6 +11,8 @@ use axum::{
 use axum_extra::headers::{authorization::Bearer, Authorization};
 use axum_extra::TypedHeader;
 
+pub static AUTH_COOKIE_NAME: &str = "auth";
+
 #[derive(Debug, Clone)]
 pub enum AuthStatus {
     Missing,

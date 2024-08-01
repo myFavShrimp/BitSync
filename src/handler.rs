@@ -33,4 +33,7 @@ pub mod routes {
     route!(Home => "/");
     route!(GetLoginPage => "/login");
     route!(PostLoginAction => "/login");
+
+    route!(GetRegisterPage => "/register");
+    route!(PostRegisterAction => "/register");
 }

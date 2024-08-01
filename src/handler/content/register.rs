@@ -1,0 +1,59 @@
+use std::sync::Arc;
+
+use axum::{
+    extract::State,
+    response::{Html, IntoResponse},
+    routing::{get, post},
+    Router,
+};
+use axum_extra::extract::Form;
+use serde::Deserialize;
+
+use crate::use_case;
+
+use crate::AppState;
+
+use super::routes;
+
+pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
+    Router::new()
+        .route(
+            &routes::GetRegisterPage::handler_route(),
+            get(register_page_handler),
+        )
+        .route(
+            &routes::PostRegisterAction::handler_route(),
+            post(register_action_handler),
+        )
+        .with_state(state)
+}
+
+#[derive(askama::Template)]
+#[template(path = "register.html")]
+struct Register;
+
+async fn register_page_handler() -> impl IntoResponse {
+    Html(Register.to_string())
+}
+
+#[derive(Deserialize, Clone, Debug)]
+struct RegisterActionFormData {
+    username: String,
+    password: String,
+}
+
+async fn register_action_handler(
+    State(state): State<Arc<AppState>>,
+    Form(registration_data): Form<RegisterActionFormData>,
+) -> impl IntoResponse {
+    match use_case::register::perform_registration(
+        &state,
+        registration_data.username,
+        registration_data.password,
+    )
+    .await
+    {
+        Ok(_) => todo!(),
+        Err(_) => todo!(),
+    }
+}
