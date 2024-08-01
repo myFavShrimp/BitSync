@@ -30,7 +30,8 @@ pub mod routes {
 
     route!(Static => "/static/{}", (*file_path: String));
 
-    route!(Home => "/");
+    route!(FilesHome => "/");
+
     route!(GetLoginPage => "/login");
     route!(PostLoginAction => "/login");
 
