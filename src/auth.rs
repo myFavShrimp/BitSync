@@ -5,11 +5,12 @@ use crate::{
     AppState,
 };
 use axum::{
-    extract::{FromRef, FromRequestParts},
-    http::request::Parts,
+    extract::{FromRef, FromRequest, FromRequestParts, Request, State},
+    http::{request::Parts, StatusCode},
+    middleware::Next,
+    response::Response,
 };
-use axum_extra::headers::{authorization::Bearer, Authorization};
-use axum_extra::TypedHeader;
+use axum_extra::extract::CookieJar;
 
 pub static AUTH_COOKIE_NAME: &str = "auth";
 
@@ -31,25 +32,35 @@ where
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let app_state = Arc::<AppState>::from_ref(state);
 
-        Ok(
-            match TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, state).await {
-                Ok(TypedHeader(Authorization(bearer))) => {
-                    if bearer.token().is_empty() {
-                        return Ok(AuthStatus::Missing);
-                    }
-
-                    match use_case::auth::decode_auth_token(app_state, bearer.token()).await {
+        Ok(match CookieJar::from_request_parts(parts, state).await {
+            Ok(cookie_jar) => match cookie_jar.get(AUTH_COOKIE_NAME) {
+                Some(auth_cookie) => {
+                    match use_case::auth::decode_auth_token(app_state, auth_cookie.value()).await {
                         Ok(auth) => AuthStatus::User(auth),
-                        Err(_) => AuthStatus::Invalid,
+                        Err(..) => AuthStatus::Invalid,
                     }
                 }
-                Err(e) => match e.reason() {
-                    axum_extra::typed_header::TypedHeaderRejectionReason::Missing => {
-                        AuthStatus::Missing
-                    }
-                    _ => AuthStatus::Invalid,
-                },
+                None => AuthStatus::Missing,
             },
-        )
+            Err(..) => AuthStatus::Missing,
+        })
+    }
+}
+
+pub struct RequireLogin;
+
+#[async_trait::async_trait]
+impl<S> FromRequestParts<S> for RequireLogin
+where
+    Arc<AppState>: FromRef<S>,
+    S: Send + Sync,
+{
+    type Rejection = StatusCode;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        match AuthStatus::from_request_parts(parts, state).await {
+            Ok(AuthStatus::User(..)) => Ok(Self),
+            Ok(..) | Err(_) => Err(StatusCode::UNAUTHORIZED),
+        }
     }
 }
