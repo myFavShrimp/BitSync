@@ -48,6 +48,30 @@ where
     }
 }
 
+fn redirect_to_login_response() -> Response {
+    let redirect_route = crate::handler::routes::GetLoginPage::route_path();
+
+    (
+        StatusCode::SEE_OTHER,
+        [
+            ("HX-Redirect", &redirect_route),
+            (headers::Location::name().as_str(), &redirect_route),
+        ],
+    )
+        .into_response()
+}
+
+pub async fn require_logout_middleware(
+    auth_status: AuthStatus,
+    request: Request,
+    next: Next,
+) -> Response {
+    match auth_status {
+        AuthStatus::User(..) => redirect_to_login_response(),
+        AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
+    }
+}
+
 pub async fn require_login_middleware(
     auth_status: AuthStatus,
     request: Request,
@@ -55,17 +79,6 @@ pub async fn require_login_middleware(
 ) -> Response {
     match auth_status {
         AuthStatus::User(..) => next.run(request).await,
-        AuthStatus::Missing | AuthStatus::Invalid => {
-            let redirect_route = crate::handler::routes::GetLoginPage::route_path();
-
-            (
-                StatusCode::SEE_OTHER,
-                [
-                    ("HX-Redirect", &redirect_route),
-                    (headers::Location::name().as_str(), &redirect_route),
-                ],
-            )
-                .into_response()
-        }
+        AuthStatus::Missing | AuthStatus::Invalid => redirect_to_login_response(),
     }
 }
