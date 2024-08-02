@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::State,
+    middleware::from_fn_with_state,
     response::{Html, IntoResponse},
     routing::{get, post},
     Router,
@@ -9,7 +10,7 @@ use axum::{
 use axum_extra::extract::{cookie::SameSite, CookieJar, Form};
 use serde::Deserialize;
 
-use crate::use_case;
+use crate::{auth::require_logout_middleware, use_case};
 
 use crate::AppState;
 
@@ -25,6 +26,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
             &routes::PostLoginAction::handler_route(),
             post(login_action_handler),
         )
+        .route_layer(from_fn_with_state(state.clone(), require_logout_middleware))
         .with_state(state)
 }
 
