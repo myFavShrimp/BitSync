@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
 use axum::{
-    middleware::from_extractor_with_state,
+    middleware::from_fn_with_state,
     response::{Html, IntoResponse},
     routing::get,
     Router,
 };
 
 use crate::{
-    auth::{AuthStatus, RequireLogin},
+    auth::{require_login_middleware, AuthStatus},
     AppState,
 };
 
@@ -20,9 +20,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
             &routes::FilesHome::handler_route(),
             get(files_home_page_handler),
         )
-        .route_layer(from_extractor_with_state::<RequireLogin, Arc<AppState>>(
-            state.clone(),
-        ))
+        .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
         .with_state(state)
 }
 

@@ -5,12 +5,13 @@ use crate::{
     AppState,
 };
 use axum::{
-    extract::{FromRef, FromRequest, FromRequestParts, Request, State},
+    extract::{FromRef, FromRequestParts, Request},
     http::{request::Parts, StatusCode},
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use axum_extra::extract::CookieJar;
+use headers::Header;
 
 pub static AUTH_COOKIE_NAME: &str = "auth";
 
@@ -47,20 +48,24 @@ where
     }
 }
 
-pub struct RequireLogin;
+pub async fn require_login_middleware(
+    auth_status: AuthStatus,
+    request: Request,
+    next: Next,
+) -> Response {
+    match auth_status {
+        AuthStatus::User(..) => next.run(request).await,
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            let redirect_route = crate::handler::routes::GetLoginPage::route_path();
 
-#[async_trait::async_trait]
-impl<S> FromRequestParts<S> for RequireLogin
-where
-    Arc<AppState>: FromRef<S>,
-    S: Send + Sync,
-{
-    type Rejection = StatusCode;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        match AuthStatus::from_request_parts(parts, state).await {
-            Ok(AuthStatus::User(..)) => Ok(Self),
-            Ok(..) | Err(_) => Err(StatusCode::UNAUTHORIZED),
+            (
+                StatusCode::SEE_OTHER,
+                [
+                    ("HX-Redirect", &redirect_route),
+                    (headers::Location::name().as_str(), &redirect_route),
+                ],
+            )
+                .into_response()
         }
     }
 }
