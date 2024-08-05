@@ -64,7 +64,10 @@ async fn login_action_handler(
                 auth_cookie
             });
 
-            cookie_jar
+            (
+                cookie_jar,
+                [("HX-Redirect", routes::FilesHome::route_path())],
+            )
         }
         Err(_) => todo!(),
     }

@@ -5,23 +5,27 @@
 
 {% let (style_sheet, class_name) = turf::style_sheet_values!("scss/register.scss") %}
 
-<div class="{{ class_name.page }}">
+<main class="response {{ class_name.page }}">
     <style>{{ style_sheet }}</style>
 
-    <form class="{{ class_name.form }}" hx-post="/login">
-        <mdui-top-app-bar-title>
-            {% call macros::logo(class_name.logo) %}
-        </mdui-top-app-bar-title>
+    <form class="{{ class_name.form }}" hx-post="{{ crate::handler::routes::PostRegisterAction::route_path() }}">
+        {% call macros::logo(class_name.logo) %}
 
-        <div class="{{ class_name.form_content }}">
-            <mdui-text-field label="Username" name="username"></mdui-text-field>
-            <mdui-text-field label="Password" name="password"></mdui-text-field>
+        <div>
+            <div class="field label fill large">
+                <input name="username" required>
+                <label>Username</label>
+            </div>
+            <div class="field label fill large">
+                <input name="password" required>
+                <label>Password</label>
+            </div>
 
             <div class="{{ class_name.button_group }}">
-                <mdui-button href="{{ crate::handler::routes::GetLoginPage::route_path() }}" variant="tonal">Login</mdui-button>
-                <mdui-button type="submit">Register</mdui-button>
+                <a class="button border large" href="{{ crate::handler::routes::GetLoginPage::route_path() }}">Login</a>
+                <button class="large" type="submit">Register</button>
             </div>
         </div>
     </form>
-</div>
+</main>
 {% endblock %}

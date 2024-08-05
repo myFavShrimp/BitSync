@@ -30,12 +30,15 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .with_state(state)
 }
 
-#[derive(askama::Template)]
+#[derive(askama::Template, Default)]
 #[template(path = "register.html")]
-struct Register;
+struct Register {
+    username: Option<String>,
+    error_message: Option<String>,
+}
 
 async fn register_page_handler() -> impl IntoResponse {
-    Html(Register.to_string())
+    Html(Register::default().to_string())
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -50,12 +53,16 @@ async fn register_action_handler(
 ) -> impl IntoResponse {
     match use_case::register::perform_registration(
         &state,
-        registration_data.username,
-        registration_data.password,
+        &registration_data.username,
+        &registration_data.password,
     )
     .await
     {
         Ok(_) => todo!(),
-        Err(_) => todo!(),
+        Err(error) => Register {
+            username: Some(registration_data.username),
+            error_message: Some(error.to_string()),
+        }
+        .to_string(),
     }
 }

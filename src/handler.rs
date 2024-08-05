@@ -2,8 +2,12 @@ use std::{sync::Arc, time::Duration};
 
 use crate::AppState;
 use axum::{
-    extract::DefaultBodyLimit, http::StatusCode, response::IntoResponse, Extension, Router,
+    extract::DefaultBodyLimit,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Extension, Router,
 };
+use headers::Header;
 use tower::limit::RateLimitLayer;
 use tower_http::trace::TraceLayer;
 
@@ -34,6 +38,8 @@ pub mod routes {
 
     route!(GetLoginPage => "/login");
     route!(PostLoginAction => "/login");
+
+    route!(GetLogoutAction => "/logout");
 
     route!(GetRegisterPage => "/register");
     route!(PostRegisterAction => "/register");

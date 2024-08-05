@@ -2,26 +2,39 @@
 
 {% extends "base.html" %}
 {% block content %}
-<mdui-layout>
-    <mdui-top-app-bar>
-        <mdui-top-app-bar-title>
-            {% call macros::logo("top-bar-logo") %}
-        </mdui-top-app-bar-title>
-        <mdui-button-icon icon="check_box--outlined"></mdui-button-icon>
-    </mdui-top-app-bar>
 
-    <mdui-navigation-rail value="my-files">
-        <mdui-navigation-rail-item icon="home--outlined" value="my-files">My Files</mdui-navigation-rail-item>
-    </mdui-navigation-rail>
+{% let (style_sheet, class_name) = turf::style_sheet_values!("scss/files_home.scss") %}
 
-    <mdui-layout-main class="example-layout-main" style="min-height: 300px">
-        {% block main %}
-            <mdui-list>
-                <mdui-list-subheader>My Files</mdui-list-subheader>
-                <mdui-divider inset></mdui-divider>
-            </mdui-list>
-        {% endblock %}
-    </mdui-layout-main>
+<style>{{ style_sheet }}</style>
+<nav class="left m l small-text">
+    <header></header>
+    <a class="active">
+        <i>home</i>
+        <div>My Files</div>
+    </a>
+</nav>
+<nav class="top surface">
+    <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::FilesHome::route_path() }}">
+        {% call macros::logo("top-bar-logo") %}
+    </a>
+    <div class="max"></div>
+    <button class="circle large transparent" data-ui="#menu-settings">
+        <i>settings</i>
+        <menu class="left no-wrap" id="menu-settings">
+            <a href="{{ crate::handler::routes::GetLogoutAction::route_path() }}">
+                <div>Log out</div>
+            </a>
+        </menu>
+    </button>
+</nav>
 
-</mdui-layout>
+<!-- {% block main %} -->
+    <!-- <mdui-list> -->
+        <!-- <mdui-list-subheader>My Files</mdui-list-subheader> -->
+        <!-- <mdui-divider inset></mdui-divider> -->
+    <!-- </mdui-list> -->
+<!-- {% endblock %} -->
+
+<main class="responsive max">
+</main>
 {% endblock %}

@@ -23,15 +23,15 @@ pub enum RegistrationError {
 
 pub async fn perform_registration(
     app_state: &Arc<AppState>,
-    username: String,
-    password: String,
+    username: &str,
+    password: &str,
 ) -> Result<User, RegistrationError> {
-    if let Ok(_user) = User::find_by_username(&app_state.postgres_pool, &username).await {
+    if let Ok(_user) = User::find_by_username(&app_state.postgres_pool, username).await {
         return Err(RegistrationError::UserExists);
     }
 
-    let hashed_password = hash_password(&password)?;
-    let user = User::create(&app_state.postgres_pool, &username, &hashed_password).await?;
+    let hashed_password = hash_password(password)?;
+    let user = User::create(&app_state.postgres_pool, username, &hashed_password).await?;
 
     let user_storage = UserStorage {
         user: user.clone(),
