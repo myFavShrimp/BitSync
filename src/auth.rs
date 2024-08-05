@@ -1,9 +1,6 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{
-    use_case::{self, auth::AuthData},
-    AppState,
-};
+use crate::{database::user::User, jwt::JwtClaims, use_case, AppState};
 use axum::{
     extract::{FromRef, FromRequestParts, Request},
     http::{request::Parts, StatusCode},
@@ -14,6 +11,44 @@ use axum_extra::extract::CookieJar;
 use headers::Header;
 
 pub static AUTH_COOKIE_NAME: &str = "auth";
+
+#[derive(Debug, Clone)]
+pub struct AuthData {
+    pub claims: JwtClaims,
+    pub user: User,
+}
+
+#[async_trait::async_trait]
+impl<S> FromRequestParts<S> for AuthData
+where
+    Arc<AppState>: FromRef<S>,
+    S: Send + Sync,
+{
+    type Rejection = Response;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let app_state = Arc::<AppState>::from_ref(state);
+
+        match CookieJar::from_request_parts(parts, state).await {
+            Ok(cookie_jar) => match cookie_jar.get(AUTH_COOKIE_NAME) {
+                Some(auth_cookie) => {
+                    match use_case::auth::decode_auth_token(app_state, auth_cookie.value()).await {
+                        Ok(auth) => Ok(auth),
+                        Err(..) => Err(redirect_response(
+                            &crate::handler::routes::GetLoginPage::route_path(),
+                        )),
+                    }
+                }
+                None => Err(redirect_response(
+                    &crate::handler::routes::GetLoginPage::route_path(),
+                )),
+            },
+            Err(..) => Err(redirect_response(
+                &crate::handler::routes::GetLoginPage::route_path(),
+            )),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum AuthStatus {
@@ -65,20 +100,17 @@ pub async fn require_logout_middleware(
     next: Next,
 ) -> Response {
     match auth_status {
-        AuthStatus::User(..) => redirect_response(&crate::handler::routes::FilesHome::route_path()),
+        AuthStatus::User(..) => {
+            redirect_response(&crate::handler::routes::GetFilesHomePage::route_path())
+        }
         AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
     }
 }
 
 pub async fn require_login_middleware(
-    auth_status: AuthStatus,
+    _auth_data: AuthData,
     request: Request,
     next: Next,
 ) -> Response {
-    match auth_status {
-        AuthStatus::User(..) => next.run(request).await,
-        AuthStatus::Missing | AuthStatus::Invalid => {
-            redirect_response(&crate::handler::routes::GetLoginPage::route_path())
-        }
-    }
+    next.run(request).await
 }

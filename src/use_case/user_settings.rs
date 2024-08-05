@@ -1,8 +1,6 @@
 use std::sync::Arc;
 
-use crate::{database::user::User, hash::hash_password, AppState};
-
-use super::auth::AuthData;
+use crate::{auth::AuthData, database::user::User, hash::hash_password, AppState};
 
 #[derive(thiserror::Error, Debug)]
 #[error("An unexpected error occurred")]

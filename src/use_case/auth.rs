@@ -1,12 +1,6 @@
 use std::sync::Arc;
 
-use crate::{database::user::User, jwt::JwtClaims, AppState};
-
-#[derive(Debug, Clone)]
-pub struct AuthData {
-    pub claims: JwtClaims,
-    pub user: User,
-}
+use crate::{auth::AuthData, database::user::User, jwt::JwtClaims, AppState};
 
 #[derive(Debug, Clone, thiserror::Error)]
 #[error("The provided auth token is invalid")]

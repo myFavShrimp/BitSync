@@ -14,7 +14,7 @@
     </a>
 </nav>
 <nav class="top surface">
-    <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::FilesHome::route_path() }}">
+    <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::GetFilesHomePage::route_path() }}">
         {% call macros::logo("top-bar-logo") %}
     </a>
     <div class="max"></div>
@@ -28,13 +28,35 @@
     </button>
 </nav>
 
-<!-- {% block main %} -->
-    <!-- <mdui-list> -->
-        <!-- <mdui-list-subheader>My Files</mdui-list-subheader> -->
-        <!-- <mdui-divider inset></mdui-divider> -->
-    <!-- </mdui-list> -->
-<!-- {% endblock %} -->
-
 <main class="responsive max">
+    <table class="medium-space">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th class="min">Size</th>
+                <th class="min"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- {% match dir_item.content %} -->
+            <!-- {% when Some with (dir_item_content) %} -->
+                <tr class="padding surface-container wave">
+                    <td>Cell</td>
+                    <td>Cell</td>
+                    <td>Cell</td>
+                </tr>
+                <tr class="padding surface-container wave">
+                    <td>Cell</td>
+                    <td>Cell</td>
+                    <td>Cell</td>
+                </tr>
+                <tr class="padding surface-container wave">
+                    <td>Cell</td>
+                    <td>Cell</td>
+                    <td>Cell</td>
+                </tr>
+            <!-- {% endmatch %} -->
+        </tbody>
+    </table>
 </main>
 {% endblock %}

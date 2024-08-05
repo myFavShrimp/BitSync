@@ -9,7 +9,6 @@ use time::OffsetDateTime;
 use tokio::sync::Mutex;
 
 use crate::{
-    // config::Config,
     database::user::User,
     validate::{validate_file_path, PathValidationError},
 };

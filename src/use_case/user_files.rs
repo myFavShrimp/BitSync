@@ -1,14 +1,13 @@
 use std::{path::PathBuf, sync::Arc};
 
 use crate::{
+    auth::AuthData,
     storage::{
         DirItem, FileItem, Storage, StorageError, StorageItemPath, StorageItemPathError,
         UserStorage,
     },
     AppState,
 };
-
-use super::auth::AuthData;
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryReadError {

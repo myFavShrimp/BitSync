@@ -3,14 +3,13 @@ use std::{path::PathBuf, sync::Arc};
 use tokio::sync::Mutex;
 
 use crate::{
+    auth::AuthData,
     storage::{
         DirItem, DirItemContent, FileItem, Storage, StorageError, StorageItemPath,
         StorageItemPathError, UserStorage,
     },
     AppState,
 };
-
-use super::auth::AuthData;
 
 #[derive(thiserror::Error, Debug)]
 pub enum DirectoryReadError {
