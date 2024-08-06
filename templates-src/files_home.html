@@ -38,24 +38,13 @@
             </tr>
         </thead>
         <tbody>
-            <!-- {% match dir_item.content %} -->
-            <!-- {% when Some with (dir_item_content) %} -->
+            {% for dir_item in dir_content %}
                 <tr class="padding surface-container wave">
-                    <td>Cell</td>
-                    <td>Cell</td>
-                    <td>Cell</td>
+                    <td>{{ dir_item.file_name() }}</td>
+                    <td>{{ dir_item.file_size() }}</td>
+                    <td></td>
                 </tr>
-                <tr class="padding surface-container wave">
-                    <td>Cell</td>
-                    <td>Cell</td>
-                    <td>Cell</td>
-                </tr>
-                <tr class="padding surface-container wave">
-                    <td>Cell</td>
-                    <td>Cell</td>
-                    <td>Cell</td>
-                </tr>
-            <!-- {% endmatch %} -->
+            {% endfor %}
         </tbody>
     </table>
 </main>

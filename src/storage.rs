@@ -1,21 +1,16 @@
 use std::{
     fmt::Display,
-    fs::Metadata,
     path::{Path, PathBuf, StripPrefixError},
-    sync::Arc,
 };
-
-use time::OffsetDateTime;
-use tokio::sync::Mutex;
 
 use crate::{
     database::user::User,
     validate::{validate_file_path, PathValidationError},
 };
 
-pub use fs_storage::Storage;
+// pub use fs_storage::Storage;
 
-mod fs_storage;
+// mod fs_storage;
 
 static USER_DATA_DIR: &str = "user";
 
@@ -69,7 +64,7 @@ impl StorageItemPath {
         })
     }
 
-    pub fn data_directory(&self) -> PathBuf {
+    pub fn local_directory(&self) -> PathBuf {
         let scoped_path = self.scoped_path.clone();
 
         let mut user_directory = self.storage.data_directory();
@@ -83,7 +78,7 @@ impl StorageItemPath {
     }
 
     pub fn strip_data_dir(&self, path: PathBuf) -> PathBuf {
-        path.strip_prefix(self.data_directory())
+        path.strip_prefix(self.local_directory())
             .map(|path| path.to_path_buf())
             .unwrap_or(path)
     }
@@ -95,112 +90,94 @@ impl Display for StorageItemPath {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct FileItem {
-    pub path: StorageItemPath,
-    pub size: u64,
-    pub updated_at: OffsetDateTime,
+#[derive(thiserror::Error, Debug)]
+pub enum StorageError {
+    #[error("Failed to read directory")]
+    ReadDir(#[from] std::io::Error),
+    #[error("Failed to create scoped storage path data")]
+    StorageItemPathCreation(#[from] StorageItemPathError),
+    #[error("Failed to read storage item data")]
+    StorageItemCreation(#[from] StorageItemError),
 }
 
-impl FileItem {
-    pub fn from_metadata(
-        path: StorageItemPath,
-        metadata: Metadata,
-    ) -> Result<Self, std::io::Error> {
-        Ok(Self {
-            path,
-            size: metadata.len(),
-            updated_at: metadata.modified()?.into(),
-        })
-    }
+pub enum StorageItemKind {
+    Directory,
+    File,
 }
 
-#[derive(Debug)]
-pub struct DirItemContent {
-    pub files: Vec<FileItem>,
-    pub directories: Vec<DirItem>,
-}
-
-#[derive(Clone, Debug)]
-pub struct DirItem {
-    pub path: StorageItemPath,
-    pub updated_at: OffsetDateTime,
-    pub content: Arc<Mutex<Option<DirItemContent>>>,
-}
-
-impl DirItem {
-    pub fn from_metadata(
-        path: StorageItemPath,
-        metadata: Metadata,
-    ) -> Result<Self, std::io::Error> {
-        Ok(Self {
-            path,
-            updated_at: metadata.modified()?.into(),
-            content: Arc::new(Mutex::new(None)),
-        })
-    }
-}
-
-#[derive(Debug)]
-pub enum StorageItem {
-    DirItem(DirItem),
-    FileItem(FileItem),
+pub struct StorageItem {
+    path: StorageItemPath,
+    size: u64,
+    kind: StorageItemKind,
 }
 
 impl StorageItem {
-    pub fn path(&self) -> &StorageItemPath {
-        match self {
-            StorageItem::DirItem(dir_item) => &dir_item.path,
-            StorageItem::FileItem(file_item) => &file_item.path,
+    pub fn file_name(&self) -> String {
+        match self.path.scoped_path.file_name() {
+            Some(file_name) => file_name.to_string_lossy().to_string(),
+            None => String::new(),
         }
     }
 
-    pub fn from_metadata(
-        path: StorageItemPath,
-        metadata: Metadata,
-    ) -> Result<Self, std::io::Error> {
-        if metadata.is_dir() {
-            Ok(Self::DirItem(DirItem::from_metadata(path, metadata)?))
-        } else {
-            Ok(Self::FileItem(FileItem::from_metadata(path, metadata)?))
-        }
-    }
-    pub async fn from_dir_entry(
-        path: StorageItemPath,
-        value: tokio::fs::DirEntry,
-    ) -> Result<Self, std::io::Error> {
-        let metadata = value.metadata().await?;
-
-        Self::from_metadata(path, metadata)
+    pub fn file_size(&self) -> u64 {
+        self.size
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum StorageError {
-    #[error(transparent)]
-    DirReader(std::io::Error),
-    #[error(transparent)]
-    MetadataReader(std::io::Error),
-    #[error("Could not read the data of '{file_path}'")]
-    FileReader {
-        #[source]
-        source: std::io::Error,
-        file_path: StorageItemPath,
-    },
-    #[error("Could not write the data of '{file_path}'")]
-    FileWriter {
-        #[source]
-        source: std::io::Error,
-        file_path: StorageItemPath,
-    },
-    #[error("Could not create the directory '{path}'")]
-    DirectoryCreation {
-        #[source]
-        source: std::io::Error,
+#[derive(thiserror::Error, Debug)]
+pub enum StorageItemError {
+    #[error("Storage item is of unsupported type: symlink")]
+    IsSymlink,
+    #[error("Could not gather a storage item's metadata")]
+    Metadata(#[from] std::io::Error),
+}
+
+impl StorageItem {
+    pub async fn from_dir_entry(
         path: StorageItemPath,
-    },
-    #[error(transparent)]
-    StorageItemPathCreation(#[from] StorageItemPathError),
-    #[error(transparent)]
-    StripPrefix(#[from] StripPrefixError),
+        dir_entry: tokio::fs::DirEntry,
+    ) -> Result<Self, StorageItemError> {
+        let metadata = dir_entry.metadata().await?;
+
+        let kind = if metadata.file_type().is_dir() {
+            StorageItemKind::Directory
+        } else if metadata.file_type().is_file() {
+            StorageItemKind::File
+        } else {
+            return Err(StorageItemError::IsSymlink);
+        };
+
+        Ok(Self {
+            path,
+            size: metadata.len(),
+            kind,
+        })
+    }
+}
+
+impl UserStorage {
+    pub async fn dir_contents(
+        &self,
+        path: &StorageItemPath,
+    ) -> Result<Vec<StorageItem>, StorageError> {
+        let mut dir_entries = tokio::fs::read_dir(path.local_directory())
+            .await
+            .map_err(StorageError::ReadDir)?;
+
+        let mut storage_items = Vec::new();
+
+        while let Some(dir_entry) = dir_entries
+            .next_entry()
+            .await
+            .map_err(StorageError::ReadDir)?
+        {
+            let dir_entry_path = path.storage.strip_data_dir(dir_entry.path());
+            let path = StorageItemPath::new(path.storage.clone(), dir_entry_path)
+                .map_err(StorageError::StorageItemPathCreation)?;
+
+            storage_items.push(StorageItem::from_dir_entry(path, dir_entry).await?);
+        }
+
+        Ok(storage_items)
+    }
 }

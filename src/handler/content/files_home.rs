@@ -11,7 +11,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_middleware, AuthData},
-    storage::DirItem,
+    storage::StorageItem,
     use_case, AppState,
 };
 
@@ -40,7 +40,7 @@ struct FilesHomePageQueryParameters {
 #[derive(askama::Template)]
 #[template(path = "files_home.html")]
 struct FilesHome {
-    dir_item: DirItem,
+    dir_content: Vec<StorageItem>,
 }
 
 async fn files_home_page_handler(
@@ -50,7 +50,7 @@ async fn files_home_page_handler(
 ) -> impl IntoResponse {
     match use_case::user_files::user_directory(&app_state, &auth_data, &query_parameters.path).await
     {
-        Ok(dir_item) => Html(FilesHome { dir_item }.to_string()),
+        Ok(dir_content) => Html(FilesHome { dir_content }.to_string()),
         Err(_) => todo!(),
     }
 }
