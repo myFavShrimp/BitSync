@@ -11,7 +11,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_middleware, AuthData},
-    storage::StorageItem,
+    storage::{StorageItem, StorageItemKind},
     use_case, AppState,
 };
 

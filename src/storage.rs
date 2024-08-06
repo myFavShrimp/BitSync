@@ -107,8 +107,8 @@ pub enum StorageItemKind {
 
 pub struct StorageItem {
     path: StorageItemPath,
-    size: u64,
-    kind: StorageItemKind,
+    pub size: u64,
+    pub kind: StorageItemKind,
 }
 
 impl StorageItem {
@@ -117,10 +117,6 @@ impl StorageItem {
             Some(file_name) => file_name.to_string_lossy().to_string(),
             None => String::new(),
         }
-    }
-
-    pub fn file_size(&self) -> u64 {
-        self.size
     }
 }
 

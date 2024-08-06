@@ -32,6 +32,7 @@
     <table class="medium-space">
         <thead>
             <tr>
+                <th class="min"></th>
                 <th>Name</th>
                 <th class="min">Size</th>
                 <th class="min"></th>
@@ -40,8 +41,16 @@
         <tbody>
             {% for dir_item in dir_content %}
                 <tr class="padding surface-container wave">
+                    <td>
+                        {% match dir_item.kind %}
+                        {% when StorageItemKind::Directory %}
+                            <i class="tiny">folder</i>
+                        {% when StorageItemKind::File %}
+                            <i class="tiny">description</i>
+                        {% endmatch %}
+                    </td>
                     <td>{{ dir_item.file_name() }}</td>
-                    <td>{{ dir_item.file_size() }}</td>
+                    <td>{{ dir_item.size }}</td>
                     <td></td>
                 </tr>
             {% endfor %}
