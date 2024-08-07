@@ -90,16 +90,6 @@ impl Display for StorageItemPath {
     }
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum StorageError {
-    #[error("Failed to read directory")]
-    ReadDir(#[from] std::io::Error),
-    #[error("Failed to create scoped storage path data")]
-    StorageItemPathCreation(#[from] StorageItemPathError),
-    #[error("Failed to read storage item data")]
-    StorageItemCreation(#[from] StorageItemError),
-}
-
 pub enum StorageItemKind {
     Directory,
     File,
@@ -151,7 +141,33 @@ impl StorageItem {
     }
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum StorageError {
+    #[error("Failed to read directory")]
+    ReadDir(#[from] std::io::Error),
+    #[error("Failed to create scoped storage path data")]
+    StorageItemPathCreation(#[from] StorageItemPathError),
+    #[error("Failed to read storage item data")]
+    StorageItemCreation(#[from] StorageItemError),
+    #[error("Failed to create directory")]
+    DirectoryCreation {
+        source: std::io::Error,
+        path: std::path::PathBuf,
+    },
+}
+
 impl UserStorage {
+    pub async fn ensure_exists(&self) -> Result<(), StorageError> {
+        tokio::fs::create_dir_all(&self.storage_root)
+            .await
+            .map_err(|error| StorageError::DirectoryCreation {
+                source: error,
+                path: PathBuf::from(&self.storage_root),
+            })?;
+
+        Ok(())
+    }
+
     pub async fn dir_contents(
         &self,
         path: &StorageItemPath,

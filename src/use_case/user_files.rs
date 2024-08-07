@@ -25,6 +25,9 @@ pub async fn user_directory<'context>(
         user: auth_data.user.clone(),
         storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
+
+    user_storage.ensure_exists().await?;
+
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
 
     Ok(user_storage.dir_contents(&path).await?)
