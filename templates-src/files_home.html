@@ -42,14 +42,9 @@
             {% for dir_item in dir_content %}
                 <tr class="padding surface-container wave">
                     <td>
-                        {% match dir_item.kind %}
-                        {% when StorageItemKind::Directory %}
-                            <i class="tiny">folder</i>
-                        {% when StorageItemKind::File %}
-                            <i class="tiny">description</i>
-                        {% endmatch %}
+                        <i class="tiny">{{ dir_item.icon }}</i>
                     </td>
-                    <td>{{ dir_item.file_name() }}</td>
+                    <td>{{ dir_item.name }}</td>
                     <td>{{ dir_item.size }}</td>
                     <td></td>
                 </tr>

@@ -37,10 +37,29 @@ struct FilesHomePageQueryParameters {
     path: String,
 }
 
+struct StorageItemPresentation {
+    size: String,
+    name: String,
+    icon: String,
+}
+
+impl From<StorageItem> for StorageItemPresentation {
+    fn from(value: StorageItem) -> Self {
+        Self {
+            size: value.size.to_string(),
+            name: value.file_name(),
+            icon: match value.kind {
+                StorageItemKind::Directory => String::from("folder"),
+                StorageItemKind::File => String::from("description"),
+            },
+        }
+    }
+}
+
 #[derive(askama::Template)]
 #[template(path = "files_home.html")]
 struct FilesHome {
-    dir_content: Vec<StorageItem>,
+    dir_content: Vec<StorageItemPresentation>,
 }
 
 async fn files_home_page_handler(
@@ -50,7 +69,19 @@ async fn files_home_page_handler(
 ) -> impl IntoResponse {
     match use_case::user_files::user_directory(&app_state, &auth_data, &query_parameters.path).await
     {
-        Ok(dir_content) => Html(FilesHome { dir_content }.to_string()),
+        Ok(dir_content) => {
+            let displayable_dir_content = dir_content
+                .into_iter()
+                .map(StorageItemPresentation::from)
+                .collect();
+
+            Html(
+                FilesHome {
+                    dir_content: displayable_dir_content,
+                }
+                .to_string(),
+            )
+        }
         Err(_) => todo!(),
     }
 }

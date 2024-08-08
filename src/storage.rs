@@ -8,9 +8,7 @@ use crate::{
     validate::{validate_file_path, PathValidationError},
 };
 
-// pub use fs_storage::Storage;
-
-// mod fs_storage;
+mod error;
 
 static USER_DATA_DIR: &str = "user";
 
