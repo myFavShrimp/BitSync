@@ -11,7 +11,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_middleware, AuthData},
-    storage::{StorageItem, StorageItemKind},
+    presentation::StorageItemPresentation,
     use_case, AppState,
 };
 
@@ -35,25 +35,6 @@ fn build_default_files_home_query_parameter_path() -> String {
 struct FilesHomePageQueryParameters {
     #[serde(default = "build_default_files_home_query_parameter_path")]
     path: String,
-}
-
-struct StorageItemPresentation {
-    size: String,
-    name: String,
-    icon: String,
-}
-
-impl From<StorageItem> for StorageItemPresentation {
-    fn from(value: StorageItem) -> Self {
-        Self {
-            size: value.size.to_string(),
-            name: value.file_name(),
-            icon: match value.kind {
-                StorageItemKind::Directory => String::from("folder"),
-                StorageItemKind::File => String::from("description"),
-            },
-        }
-    }
 }
 
 #[derive(askama::Template)]
