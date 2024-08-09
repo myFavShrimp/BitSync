@@ -1,9 +1,9 @@
-use std::{path::PathBuf, sync::Arc};
+use std::sync::Arc;
 
 use crate::{
     database::user::User,
     hash::hash_password,
-    storage::{StorageError, StorageItemPath, StorageItemPathError, UserStorage},
+    storage::{EnsureExistsError, UserStorage},
     AppState,
 };
 
@@ -16,9 +16,7 @@ pub enum RegistrationError {
     #[error("The username already exists")]
     UserExists,
     #[error(transparent)]
-    StorageItemPathCreation(#[from] StorageItemPathError),
-    #[error("Error handling the create operation")]
-    Storage(#[from] StorageError),
+    StorageEnsurance(#[from] EnsureExistsError),
 }
 
 pub async fn perform_registration(
@@ -37,11 +35,8 @@ pub async fn perform_registration(
         user: user.clone(),
         storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
-    // let path = StorageItemPath::new(user_storage.clone(), PathBuf::from("/"))?;
 
-    // let storage = Storage::create();
-
-    // storage.create_directory(&path).await?;
+    user_storage.ensure_exists().await?;
 
     Ok(user)
 }

@@ -2,18 +2,19 @@ use std::{path::PathBuf, sync::Arc};
 
 use crate::{
     auth::AuthData,
-    storage::{StorageError, StorageItem, StorageItemPath, StorageItemPathError, UserStorage},
+    storage::{DirContentsError, EnsureExistsError, StorageItem, StorageItemPath, UserStorage},
+    validate::PathValidationError,
     AppState,
 };
 
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryReadError {
     #[error(transparent)]
-    StorageItemPathCreation(#[from] StorageItemPathError),
+    StorageEnsurance(#[from] EnsureExistsError),
     #[error(transparent)]
-    Storage(#[from] StorageError),
-    #[error("Not a directory")]
-    NotADirectory,
+    DirContents(#[from] DirContentsError),
+    #[error(transparent)]
+    Validation(#[from] PathValidationError),
 }
 
 pub async fn user_directory<'context>(
@@ -21,6 +22,8 @@ pub async fn user_directory<'context>(
     auth_data: &AuthData,
     path: &str,
 ) -> Result<Vec<StorageItem>, UserDirectoryReadError> {
+    crate::validate::validate_file_path(path)?;
+
     let user_storage = UserStorage {
         user: auth_data.user.clone(),
         storage_root: app_state.config.fs_storage_root_dir.clone(),
@@ -28,7 +31,7 @@ pub async fn user_directory<'context>(
 
     user_storage.ensure_exists().await?;
 
-    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path))?;
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
 
     Ok(user_storage.dir_contents(&path).await?)
 }

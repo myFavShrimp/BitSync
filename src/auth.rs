@@ -1,6 +1,6 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{database::user::User, jwt::JwtClaims, use_case, AppState};
+use crate::{database::user::User, jwt::JwtClaims, AppState};
 use axum::{
     extract::{FromRef, FromRequestParts, Request},
     http::{request::Parts, StatusCode},
@@ -9,6 +9,23 @@ use axum::{
 };
 use axum_extra::extract::CookieJar;
 use headers::Header;
+
+#[derive(Debug, Clone, thiserror::Error)]
+#[error("The provided auth token is invalid")]
+pub struct AuthTokenInvalidError;
+
+async fn decode_auth_token(
+    app_state: Arc<AppState>,
+    token: &str,
+) -> Result<AuthData, AuthTokenInvalidError> {
+    match JwtClaims::decode_and_validate(token, &app_state.config.jwt_secret) {
+        Ok(claims) => match User::find_by_id(&app_state.postgres_pool, &claims.sub).await {
+            Ok(user) => Ok(AuthData { claims, user }),
+            Err(_) => Err(AuthTokenInvalidError),
+        },
+        Err(_) => Err(AuthTokenInvalidError),
+    }
+}
 
 pub static AUTH_COOKIE_NAME: &str = "auth";
 
@@ -32,7 +49,7 @@ where
         match CookieJar::from_request_parts(parts, state).await {
             Ok(cookie_jar) => match cookie_jar.get(AUTH_COOKIE_NAME) {
                 Some(auth_cookie) => {
-                    match use_case::auth::decode_auth_token(app_state, auth_cookie.value()).await {
+                    match decode_auth_token(app_state, auth_cookie.value()).await {
                         Ok(auth) => Ok(auth),
                         Err(..) => Err(redirect_response(
                             &crate::handler::routes::GetLoginPage::route_path(),
@@ -71,7 +88,7 @@ where
         Ok(match CookieJar::from_request_parts(parts, state).await {
             Ok(cookie_jar) => match cookie_jar.get(AUTH_COOKIE_NAME) {
                 Some(auth_cookie) => {
-                    match use_case::auth::decode_auth_token(app_state, auth_cookie.value()).await {
+                    match decode_auth_token(app_state, auth_cookie.value()).await {
                         Ok(auth) => AuthStatus::User(auth),
                         Err(..) => AuthStatus::Invalid,
                     }
