@@ -9,7 +9,7 @@ pub struct StorageItemPresentation {
 impl From<StorageItem> for StorageItemPresentation {
     fn from(value: StorageItem) -> Self {
         Self {
-            size: value.size.to_string(),
+            size: format_file_size(value.size),
             name: value.file_name(),
             icon: match value.kind {
                 StorageItemKind::Directory => String::from("folder"),
@@ -17,4 +17,11 @@ impl From<StorageItem> for StorageItemPresentation {
             },
         }
     }
+}
+
+fn format_file_size(bytes: u64) -> String {
+    size::Size::from_bytes(bytes)
+        .format()
+        .with_style(size::Style::Abbreviated)
+        .to_string()
 }

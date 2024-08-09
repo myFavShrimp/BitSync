@@ -40,13 +40,27 @@
         </thead>
         <tbody>
             {% for dir_item in dir_content %}
-                <tr class="padding surface-container wave">
+                <tr class="padding surface-container">
                     <td>
-                        <i class="tiny">{{ dir_item.icon }}</i>
+                        <i class="small">{{ dir_item.icon }}</i>
                     </td>
                     <td>{{ dir_item.name }}</td>
-                    <td>{{ dir_item.size }}</td>
-                    <td></td>
+                    <td class="{{ class_name.file_size_column }}">
+                        {{ dir_item.size }}
+                    </td>
+                    <td>
+                        <label class="checkbox icon">
+                            <input type="checkbox">
+                            <span>
+                                <i>more_horiz</i>
+                                <i>more_horiz</i>
+                            </span>
+                            <menu class="left no-wrap" id="menu-settings">
+                                <a href="">Download</a>
+                                <a href="">Delete</a>
+                            </menu>
+                        </label>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
