@@ -7,6 +7,11 @@ use crate::{
     AppState,
 };
 
+pub struct UserDirectoryResult {
+    pub dir_contents: Vec<StorageItem>,
+    pub path: StorageItemPath,
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum UserDirectoryReadError {
     #[error(transparent)]
@@ -21,7 +26,7 @@ pub async fn user_directory<'context>(
     app_state: &Arc<AppState>,
     auth_data: &AuthData,
     path: &str,
-) -> Result<Vec<StorageItem>, UserDirectoryReadError> {
+) -> Result<UserDirectoryResult, UserDirectoryReadError> {
     crate::validate::validate_file_path(path)?;
 
     let user_storage = UserStorage {
@@ -37,7 +42,7 @@ pub async fn user_directory<'context>(
     dir_contents.sort_by_key(|item| item.path());
     dir_contents.sort_by_key(|item| item.kind.clone());
 
-    Ok(dir_contents)
+    Ok(UserDirectoryResult { dir_contents, path })
 }
 
 // #[derive()]

@@ -44,7 +44,7 @@
         {% call macros::logo("top-bar-logo") %}
     </a>
     <div class="max"></div>
-    <label class="checkbox icon">
+    <label class="checkbox icon m l">
         <input type="checkbox">
         <span>
             <i class="{{ class_name.force_menu_icon_default_color }}">settings</i>
@@ -58,6 +58,15 @@
 </nav>
 
 <main class="responsive max">
+    {% match parent_directory_url %}
+    {% when Some with (link_data) %}
+        <a href="{{ link_data.parent_directory_url }}" class="button transparent small">
+            <i class="small">chevron_left</i>
+            {{ link_data.current_directory_name }}
+        </a>
+    {% when None %}
+    {% endmatch %}
+
     <table class="medium-space">
         <thead>
             <tr>
