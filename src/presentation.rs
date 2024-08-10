@@ -1,6 +1,7 @@
 use crate::storage::{StorageItem, StorageItemKind};
 
 pub struct StorageItemPresentation {
+    pub path: String,
     pub size: String,
     pub name: String,
     pub icon: String,
@@ -9,6 +10,7 @@ pub struct StorageItemPresentation {
 impl From<StorageItem> for StorageItemPresentation {
     fn from(value: StorageItem) -> Self {
         Self {
+            path: value.path(),
             size: format_file_size(value.size),
             name: value.file_name(),
             icon: match value.kind {

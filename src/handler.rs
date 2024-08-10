@@ -26,17 +26,36 @@ pub async fn handler_404() -> impl IntoResponse {
 
 #[allow(dead_code)]
 pub mod routes {
-    use axum_route_helper::route;
+    use axum_extra::routing::TypedPath;
+    use serde::Deserialize;
 
-    route!(Static => "/static/{}", (*file_path: String));
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/static/*file_path")]
+    pub struct Static {
+        pub file_path: String,
+    }
 
-    route!(GetFilesHomePage => "/");
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/")]
+    pub struct GetFilesHomePage;
 
-    route!(GetLoginPage => "/login");
-    route!(PostLoginAction => "/login");
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/login")]
+    pub struct GetLoginPage;
 
-    route!(GetLogoutAction => "/logout");
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/login")]
+    pub struct PostLoginAction;
 
-    route!(GetRegisterPage => "/register");
-    route!(PostRegisterAction => "/register");
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/logout")]
+    pub struct GetLogoutAction;
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/register")]
+    pub struct GetRegisterPage;
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/register")]
+    pub struct PostRegisterAction;
 }

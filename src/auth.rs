@@ -52,16 +52,16 @@ where
                     match decode_auth_token(app_state, auth_cookie.value()).await {
                         Ok(auth) => Ok(auth),
                         Err(..) => Err(redirect_response(
-                            &crate::handler::routes::GetLoginPage::route_path(),
+                            &crate::handler::routes::GetLoginPage.to_string(),
                         )),
                     }
                 }
                 None => Err(redirect_response(
-                    &crate::handler::routes::GetLoginPage::route_path(),
+                    &crate::handler::routes::GetLoginPage.to_string(),
                 )),
             },
             Err(..) => Err(redirect_response(
-                &crate::handler::routes::GetLoginPage::route_path(),
+                &crate::handler::routes::GetLoginPage.to_string(),
             )),
         }
     }
@@ -118,7 +118,7 @@ pub async fn require_logout_middleware(
 ) -> Response {
     match auth_status {
         AuthStatus::User(..) => {
-            redirect_response(&crate::handler::routes::GetFilesHomePage::route_path())
+            redirect_response(&crate::handler::routes::GetFilesHomePage.to_string())
         }
         AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
     }

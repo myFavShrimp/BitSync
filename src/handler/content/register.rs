@@ -4,10 +4,9 @@ use axum::{
     extract::State,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
-    routing::{get, post},
     Router,
 };
-use axum_extra::extract::Form;
+use axum_extra::{extract::Form, routing::RouterExt};
 use serde::Deserialize;
 
 use crate::{auth::require_logout_middleware, use_case};
@@ -18,14 +17,8 @@ use super::routes;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
-        .route(
-            &routes::GetRegisterPage::handler_route(),
-            get(register_page_handler),
-        )
-        .route(
-            &routes::PostRegisterAction::handler_route(),
-            post(register_action_handler),
-        )
+        .typed_get(register_page_handler)
+        .typed_post(register_action_handler)
         .route_layer(from_fn_with_state(state.clone(), require_logout_middleware))
         .with_state(state)
 }
@@ -37,7 +30,7 @@ struct Register {
     error_message: Option<String>,
 }
 
-async fn register_page_handler() -> impl IntoResponse {
+async fn register_page_handler(_: routes::GetRegisterPage) -> impl IntoResponse {
     Html(Register::default().to_string())
 }
 
@@ -48,6 +41,7 @@ struct RegisterActionFormData {
 }
 
 async fn register_action_handler(
+    _: routes::PostRegisterAction,
     State(state): State<Arc<AppState>>,
     Form(registration_data): Form<RegisterActionFormData>,
 ) -> impl IntoResponse {

@@ -32,8 +32,12 @@ pub async fn user_directory<'context>(
     user_storage.ensure_exists().await?;
 
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+    let mut dir_contents = user_storage.dir_contents(&path).await?;
 
-    Ok(user_storage.dir_contents(&path).await?)
+    dir_contents.sort_by_key(|item| item.path());
+    dir_contents.sort_by_key(|item| item.kind.clone());
+
+    Ok(dir_contents)
 }
 
 // #[derive()]

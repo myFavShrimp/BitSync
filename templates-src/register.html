@@ -8,7 +8,7 @@
 <main class="response {{ class_name.page }}">
     <style>{{ style_sheet }}</style>
 
-    <form class="{{ class_name.form }}" hx-post="{{ crate::handler::routes::PostRegisterAction::route_path() }}">
+    <form class="{{ class_name.form }}" hx-post="{{ crate::handler::routes::PostRegisterAction.to_string() }}">
         {% call macros::logo(class_name.logo) %}
 
         <div>
@@ -22,7 +22,7 @@
             </div>
 
             <div class="{{ class_name.button_group }}">
-                <a class="button border large" href="{{ crate::handler::routes::GetLoginPage::route_path() }}">Login</a>
+                <a class="button border large" href="{{ crate::handler::routes::GetLoginPage.to_string() }}">Login</a>
                 <button class="large" type="submit">Register</button>
             </div>
         </div>

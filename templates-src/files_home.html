@@ -14,18 +14,47 @@
     </a>
 </nav>
 <nav class="top surface">
-    <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::GetFilesHomePage::route_path() }}">
+    <button class="circle large transparent s" data-ui="#nav-drawer-mobile">
+        <i>menu</i>
+    </button>
+    <dialog id="nav-drawer-mobile" class="left no-padding">
+        <nav class="drawer">
+            <header>
+                <nav>
+                    <img class="circle" src="/favicon.png">
+                    <h6 class="max">Title</h6>
+                    <button class="transparent circle large" data-ui="#nav-drawer-mobile" >
+                        <i>close</i>
+                    </button>
+                </nav>
+            </header>
+            <a>
+                <i>inbox</i>
+                    <span class="max">Inbox</span>
+                <b>24</b>
+            </a>
+            <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
+                <i>logout</i>
+                <span class="max">Logout</span>
+            </a>
+        </nav>
+    </dialog>
+
+    <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
         {% call macros::logo("top-bar-logo") %}
     </a>
     <div class="max"></div>
-    <button class="circle large transparent" data-ui="#menu-settings">
-        <i>settings</i>
-        <menu class="left no-wrap" id="menu-settings">
-            <a href="{{ crate::handler::routes::GetLogoutAction::route_path() }}">
+    <label class="checkbox icon">
+        <input type="checkbox">
+        <span>
+            <i class="{{ class_name.force_menu_icon_default_color }}">settings</i>
+        </span>
+        <menu class="left no-wrap">
+            <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
                 <div>Log out</div>
             </a>
         </menu>
-    </button>
+    </label>
 </nav>
 
 <main class="responsive max">
@@ -52,10 +81,9 @@
                         <label class="checkbox icon">
                             <input type="checkbox">
                             <span>
-                                <i>more_horiz</i>
-                                <i>more_horiz</i>
+                                <i class="{{ class_name.force_menu_icon_default_color }}">more_horiz</i>
                             </span>
-                            <menu class="left no-wrap" id="menu-settings">
+                            <menu class="left no-wrap">
                                 <a href="">Download</a>
                                 <a href="">Delete</a>
                             </menu>

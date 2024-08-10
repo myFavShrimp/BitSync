@@ -4,10 +4,12 @@ use axum::{
     extract::State,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
-    routing::{get, post},
     Router,
 };
-use axum_extra::extract::{cookie::SameSite, CookieJar, Form};
+use axum_extra::{
+    extract::{cookie::SameSite, CookieJar, Form},
+    routing::RouterExt,
+};
 use serde::Deserialize;
 
 use crate::{auth::require_logout_middleware, use_case};
@@ -18,14 +20,8 @@ use super::routes;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
-        .route(
-            &routes::GetLoginPage::handler_route(),
-            get(login_page_handler),
-        )
-        .route(
-            &routes::PostLoginAction::handler_route(),
-            post(login_action_handler),
-        )
+        .typed_get(login_page_handler)
+        .typed_post(login_action_handler)
         .route_layer(from_fn_with_state(state.clone(), require_logout_middleware))
         .with_state(state)
 }
@@ -34,7 +30,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 #[template(path = "login.html")]
 struct Login;
 
-async fn login_page_handler() -> impl IntoResponse {
+async fn login_page_handler(_: routes::GetLoginPage) -> impl IntoResponse {
     Html(Login.to_string())
 }
 
@@ -45,6 +41,7 @@ struct LoginActionFormData {
 }
 
 async fn login_action_handler(
+    _: routes::PostLoginAction,
     State(state): State<Arc<AppState>>,
     cookie_jar: CookieJar,
     Form(login_data): Form<LoginActionFormData>,
@@ -66,7 +63,7 @@ async fn login_action_handler(
 
             (
                 cookie_jar,
-                [("HX-Redirect", routes::GetFilesHomePage::route_path())],
+                [("HX-Redirect", routes::GetFilesHomePage.to_string())],
             )
         }
         Err(_) => todo!(),

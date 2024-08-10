@@ -77,6 +77,7 @@ impl Display for StorageItemPath {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum StorageItemKind {
     Directory,
     File,
@@ -94,6 +95,10 @@ impl StorageItem {
             Some(file_name) => file_name.to_string_lossy().to_string(),
             None => String::new(),
         }
+    }
+
+    pub fn path(&self) -> String {
+        self.path.scoped_path.to_string_lossy().to_string()
     }
 }
 
