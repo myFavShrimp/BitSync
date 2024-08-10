@@ -11,6 +11,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_middleware, AuthData},
+    handler::routes::GetFilesHomePageQueryParameters,
     presentation::StorageItemPresentation,
     use_case, AppState,
 };
@@ -24,16 +25,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .with_state(state)
 }
 
-fn build_default_files_home_query_parameter_path() -> String {
-    "/".to_owned()
-}
-
-#[derive(Deserialize, Debug)]
-struct FilesHomePageQueryParameters {
-    #[serde(default = "build_default_files_home_query_parameter_path")]
-    path: String,
-}
-
 #[derive(askama::Template)]
 #[template(path = "files_home.html")]
 struct FilesHome {
@@ -44,7 +35,7 @@ async fn files_home_page_handler(
     _: routes::GetFilesHomePage,
     State(app_state): State<Arc<AppState>>,
     auth_data: AuthData,
-    query_parameters: Query<FilesHomePageQueryParameters>,
+    query_parameters: Query<GetFilesHomePageQueryParameters>,
 ) -> impl IntoResponse {
     match use_case::user_files::user_directory(&app_state, &auth_data, &query_parameters.path).await
     {

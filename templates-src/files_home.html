@@ -73,7 +73,16 @@
                     <td>
                         <i class="small">{{ dir_item.icon }}</i>
                     </td>
-                    <td>{{ dir_item.name }}</td>
+                    <td>
+                        {% match dir_item.directory_url %}
+                        {% when Some with (url) %}
+                            <a href="{{ url }}">
+                                {{ dir_item.name }}
+                            </a>
+                        {% when None %}
+                            {{ dir_item.name }}
+                        {% endmatch %}
+                    </td>
                     <td class="{{ class_name.file_size_column }}">
                         {{ dir_item.size }}
                     </td>

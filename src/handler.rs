@@ -27,7 +27,7 @@ pub async fn handler_404() -> impl IntoResponse {
 #[allow(dead_code)]
 pub mod routes {
     use axum_extra::routing::TypedPath;
-    use serde::Deserialize;
+    use serde::{Deserialize, Serialize};
 
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/static/*file_path")]
@@ -35,9 +35,18 @@ pub mod routes {
         pub file_path: String,
     }
 
+    fn build_default_files_home_query_parameter_path() -> String {
+        "/".to_owned()
+    }
+
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/")]
     pub struct GetFilesHomePage;
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct GetFilesHomePageQueryParameters {
+        #[serde(default = "build_default_files_home_query_parameter_path")]
+        pub path: String,
+    }
 
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/login")]
