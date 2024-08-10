@@ -1,7 +1,6 @@
 use std::{path::PathBuf, pin::Pin, sync::Arc};
 
 use tokio::io::DuplexStream;
-use tokio_util::compat::TokioAsyncReadCompatExt;
 
 use crate::{
     auth::AuthData,
