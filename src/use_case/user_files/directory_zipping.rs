@@ -16,7 +16,7 @@ pub enum DirectoryZipError {
     StreamCopy(#[from] StreamCopyError),
 }
 
-pub async fn write_directory_zip_to_stream(
+pub async fn write_zipped_storage_item_to_stream(
     stream: DuplexStream,
     directory_item: &StorageItem,
 ) -> Result<(), DirectoryZipError> {

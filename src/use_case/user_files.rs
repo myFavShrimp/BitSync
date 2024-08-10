@@ -129,8 +129,11 @@ pub async fn user_file_download(
             let (write_stream, read_stream) = tokio::io::duplex(4096);
 
             tokio::spawn(async move {
-                match directory_zipping::write_directory_zip_to_stream(write_stream, &storage_item)
-                    .await
+                match directory_zipping::write_zipped_storage_item_to_stream(
+                    write_stream,
+                    &storage_item,
+                )
+                .await
                 {
                     Ok(_) => {}
                     Err(_) => todo!(),
