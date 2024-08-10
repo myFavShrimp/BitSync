@@ -1,14 +1,19 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{path::PathBuf, pin::Pin, sync::Arc};
+
+use tokio::io::DuplexStream;
+use tokio_util::compat::TokioAsyncReadCompatExt;
 
 use crate::{
     auth::AuthData,
     storage::{
-        DirContentsError, EnsureExistsError, FileContentsError, StorageBackend, StorageItem,
-        StorageItemPath, UserStorage,
+        AsyncFileRead, DirContentsError, EnsureExistsError, FileContentsError, StorageBackend,
+        StorageItem, StorageItemError, StorageItemPath, UserStorage,
     },
     validate::PathValidationError,
     AppState,
 };
+
+mod directory_zipping;
 
 pub struct UserDirectoryContentsResult {
     pub dir_contents: Vec<StorageItem>,
@@ -48,20 +53,47 @@ pub async fn user_directory_contents(
     Ok(UserDirectoryContentsResult { dir_contents, path })
 }
 
+pub enum AsyncStorageItemRead {
+    File(AsyncFileRead),
+    Directory(DuplexStream),
+}
+
+impl tokio::io::AsyncRead for AsyncStorageItemRead {
+    fn poll_read(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+        buf: &mut tokio::io::ReadBuf<'_>,
+    ) -> std::task::Poll<std::io::Result<()>> {
+        let self_mut = self.get_mut();
+
+        match self_mut {
+            AsyncStorageItemRead::File(inner) => {
+                let pinned_inner = Pin::new(inner);
+
+                pinned_inner.poll_read(cx, buf)
+            }
+            AsyncStorageItemRead::Directory(inner) => {
+                let pinned_inner = Pin::new(inner);
+
+                pinned_inner.poll_read(cx, buf)
+            }
+        }
+    }
+}
+
 pub struct UserFileResult {
-    pub file: tokio::fs::File,
+    pub file: AsyncStorageItemRead,
     pub mime: mime_guess::Mime,
     pub path: StorageItemPath,
 }
 
 #[derive(thiserror::Error, Debug)]
+#[error("An error occurred during user file download")]
 pub enum UserFileError {
-    #[error(transparent)]
     StorageEnsurance(#[from] EnsureExistsError),
-    #[error(transparent)]
     FileContents(#[from] FileContentsError),
-    #[error(transparent)]
     Validation(#[from] PathValidationError),
+    StorageItem(#[from] StorageItemError),
 }
 
 pub async fn user_file_download(
@@ -80,33 +112,68 @@ pub async fn user_file_download(
 
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
 
-    let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
-    let file = StorageBackend::file_contents(&path).await?;
+    let storage_item = StorageBackend::storage_item(&path).await?;
 
-    Ok(UserFileResult { file, mime, path })
+    match storage_item.kind {
+        crate::storage::StorageItemKind::File => {
+            let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
+            let file = StorageBackend::file_stream(&path).await?;
+
+            Ok(UserFileResult {
+                file: AsyncStorageItemRead::File(file),
+                mime,
+                path,
+            })
+        }
+        crate::storage::StorageItemKind::Directory => {
+            let (write_stream, read_stream) = tokio::io::duplex(4096);
+
+            tokio::spawn(async move {
+                match directory_zipping::write_directory_zip_to_stream(write_stream, &storage_item)
+                    .await
+                {
+                    Ok(_) => {}
+                    Err(_) => todo!(),
+                };
+            });
+
+            let mut dir_path = path.scoped_path.clone();
+            dir_path.set_extension("zip");
+
+            let fake_zip_path = StorageItemPath::new(user_storage.clone(), PathBuf::from(dir_path));
+
+            let mime = mime_guess::from_path(&fake_zip_path.scoped_path).first_or_octet_stream();
+
+            Ok(UserFileResult {
+                file: AsyncStorageItemRead::Directory(read_stream),
+                mime,
+                path: fake_zip_path,
+            })
+        }
+    }
 }
 
-pub async fn user_file_delete(
-    app_state: &Arc<AppState>,
-    auth_data: &AuthData,
-    path: &str,
-) -> Result<UserFileResult, UserFileError> {
-    crate::validate::validate_file_path(path)?;
+// pub async fn user_file_delete(
+//     app_state: &Arc<AppState>,
+//     auth_data: &AuthData,
+//     path: &str,
+// ) -> Result<UserFileResult, UserFileError> {
+//     crate::validate::validate_file_path(path)?;
 
-    let user_storage = UserStorage {
-        user: auth_data.user.clone(),
-        storage_root: app_state.config.fs_storage_root_dir.clone(),
-    };
+//     let user_storage = UserStorage {
+//         user: auth_data.user.clone(),
+//         storage_root: app_state.config.fs_storage_root_dir.clone(),
+//     };
 
-    StorageBackend::ensure_exists(&user_storage).await?;
+//     StorageBackend::ensure_exists(&user_storage).await?;
 
-    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+//     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
 
-    let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
-    let file = StorageBackend::file_contents(&path).await?;
+//     let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
+//     let file = StorageBackend::file_stream(&path).await?;
 
-    Ok(UserFileResult { file, mime, path })
-}
+//     Ok(UserFileResult { file, mime, path })
+// }
 
 // #[derive()]
 // pub struct UserStorageItemSearchResultDirectory {

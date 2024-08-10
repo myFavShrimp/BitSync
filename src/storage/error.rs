@@ -28,3 +28,10 @@ pub enum StorageItemCreationError {
     #[error("Could not gather metadata while creating a storage item")]
     Metadata { source: IOError, path: PathBuf },
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("Failed to read an items metadata")]
+pub struct MetadataError {
+    pub source: IOError,
+    pub path: PathBuf,
+}

@@ -1,9 +1,13 @@
 use std::{
     fmt::Display,
     path::{Path, PathBuf},
+    pin::Pin,
 };
 
-use error::{DirectoryCreationError, OpenFileError, ReadDirectoryError, StorageItemCreationError};
+use error::{
+    DirectoryCreationError, MetadataError, OpenFileError, ReadDirectoryError,
+    StorageItemCreationError,
+};
 
 use crate::database::user::User;
 
@@ -132,6 +136,30 @@ impl StorageItem {
     }
 }
 
+impl TryFrom<(StorageItemPath, std::fs::Metadata)> for StorageItem {
+    type Error = StorageItemCreationError;
+
+    fn try_from(
+        (path, metadata): (StorageItemPath, std::fs::Metadata),
+    ) -> Result<Self, StorageItemCreationError> {
+        let kind = if metadata.file_type().is_dir() {
+            StorageItemKind::Directory
+        } else if metadata.file_type().is_file() {
+            StorageItemKind::File
+        } else {
+            return Err(StorageItemCreationError::IsSymlink {
+                path: path.local_directory(),
+            });
+        };
+
+        Ok(Self {
+            path,
+            size: metadata.len(),
+            kind,
+        })
+    }
+}
+
 #[derive(thiserror::Error, Debug)]
 #[error("Could not ensure that the storage exists")]
 pub struct EnsureExistsError(#[from] DirectoryCreationError);
@@ -143,10 +171,32 @@ pub enum DirContentsError {
     StorageItemCreation(#[from] StorageItemCreationError),
 }
 
+pub struct AsyncFileRead(tokio::fs::File);
+
+impl tokio::io::AsyncRead for AsyncFileRead {
+    fn poll_read(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+        buf: &mut tokio::io::ReadBuf<'_>,
+    ) -> std::task::Poll<std::io::Result<()>> {
+        let self_mut = self.get_mut();
+        let inner = Pin::new(&mut self_mut.0);
+
+        inner.poll_read(cx, buf)
+    }
+}
+
 #[derive(thiserror::Error, Debug)]
 #[error("Could not read a file's contents")]
 pub enum FileContentsError {
     OpenFile(#[from] OpenFileError),
+    StorageItemCreation(#[from] StorageItemCreationError),
+}
+
+#[derive(thiserror::Error, Debug)]
+#[error("Could not read an items information")]
+pub enum StorageItemError {
+    Metadata(#[from] MetadataError),
     StorageItemCreation(#[from] StorageItemCreationError),
 }
 
@@ -195,9 +245,7 @@ impl StorageBackend {
         Ok(storage_items)
     }
 
-    pub async fn file_contents(
-        path: &StorageItemPath,
-    ) -> Result<tokio::fs::File, FileContentsError> {
+    pub async fn file_stream(path: &StorageItemPath) -> Result<AsyncFileRead, FileContentsError> {
         let file = tokio::fs::File::open(path.local_directory())
             .await
             .map_err(|error| OpenFileError {
@@ -205,6 +253,30 @@ impl StorageBackend {
                 path: path.local_directory(),
             })?;
 
-        Ok(file)
+        Ok(AsyncFileRead(file))
     }
+
+    pub async fn storage_item(path: &StorageItemPath) -> Result<StorageItem, StorageItemError> {
+        let metadata = tokio::fs::metadata(&path.local_directory())
+            .await
+            .map_err(|error| MetadataError {
+                source: error,
+                path: path.local_directory(),
+            })?;
+
+        Ok(StorageItem::try_from((path.clone(), metadata))?)
+    }
+
+    // pub async fn (
+    //     path: &StorageItemPath,
+    // ) -> Result<tokio::fs::File, FileContentsError> {
+    //     let file = tokio::fs::File::open(path.local_directory())
+    //         .await
+    //         .map_err(|error| OpenFileError {
+    //             source: error,
+    //             path: path.local_directory(),
+    //         })?;
+
+    //     Ok(file)
+    // }
 }

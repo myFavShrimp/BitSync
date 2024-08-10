@@ -86,7 +86,7 @@
                     </td>
                     <td>
                         {% match dir_item.kind %}
-                        {% when StorageItemPresentationKind::Directory with { url } %}
+                        {% when StorageItemPresentationKind::Directory with { url, download_url } %}
                             <a href="{{ url }}">
                                 {{ dir_item.name }}
                             </a>
@@ -104,11 +104,7 @@
                                 <i class="{{ class_name.force_menu_icon_default_color }}">more_horiz</i>
                             </span>
                             <menu class="left no-wrap">
-                                {% match dir_item.kind %}
-                                {% when StorageItemPresentationKind::Directory with { url } %}
-                                {% when StorageItemPresentationKind::File with { download_url } %}
-                                    <a href="{{ download_url }}">Download</a>
-                                {% endmatch %}
+                                <a href="{{ dir_item.kind.download_url() }}">Download</a>
                                 <a href="">Delete</a>
                             </menu>
                         </label>

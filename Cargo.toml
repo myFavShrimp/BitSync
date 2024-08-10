@@ -9,11 +9,13 @@ argon2 = { version = "0.5.2", features = ["std"] }
 askama = "0.12.1"
 async-recursion = "1.0.5"
 async-trait = "0.1.74"
+async_zip = { version = "0.0.17", features = ["full"] }
 axum = "0.7.2"
 axum-extra = { version = "0.9.0", features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment"] }
 bytes = "1.6.0"
 color-eyre = "0.6.2"
 dotenv = "0.15.0"
+futures = "0.3.30"
 futures-core = "0.3.30"
 headers = "0.4.0"
 iftree = "1.0.5"
