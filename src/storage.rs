@@ -4,7 +4,6 @@ use std::{
 };
 
 use error::{DirectoryCreationError, OpenFileError, ReadDirectoryError, StorageItemCreationError};
-use tokio_util::io::ReaderStream;
 
 use crate::database::user::User;
 
@@ -151,20 +150,21 @@ pub enum FileContentsError {
     StorageItemCreation(#[from] StorageItemCreationError),
 }
 
-impl UserStorage {
-    pub async fn ensure_exists(&self) -> Result<(), EnsureExistsError> {
-        tokio::fs::create_dir_all(&self.storage_root)
+pub struct StorageBackend;
+
+impl StorageBackend {
+    pub async fn ensure_exists(storage: &UserStorage) -> Result<(), EnsureExistsError> {
+        tokio::fs::create_dir_all(&storage.storage_root)
             .await
             .map_err(|error| DirectoryCreationError {
                 source: error,
-                path: PathBuf::from(&self.storage_root),
+                path: storage.storage_root.clone(),
             })?;
 
         Ok(())
     }
 
     pub async fn dir_contents(
-        &self,
         path: &StorageItemPath,
     ) -> Result<Vec<StorageItem>, DirContentsError> {
         let mut dir_entries =
@@ -196,7 +196,6 @@ impl UserStorage {
     }
 
     pub async fn file_contents(
-        &self,
         path: &StorageItemPath,
     ) -> Result<tokio::fs::File, FileContentsError> {
         let file = tokio::fs::File::open(path.local_directory())

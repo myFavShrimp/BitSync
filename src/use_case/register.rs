@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     database::user::User,
     hash::hash_password,
-    storage::{EnsureExistsError, UserStorage},
+    storage::{EnsureExistsError, StorageBackend, UserStorage},
     AppState,
 };
 
@@ -36,7 +36,7 @@ pub async fn perform_registration(
         storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
 
-    user_storage.ensure_exists().await?;
+    StorageBackend::ensure_exists(&user_storage).await?;
 
     Ok(user)
 }

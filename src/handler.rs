@@ -74,6 +74,15 @@ pub mod routes {
         pub path: String,
     }
     #[derive(TypedPath, Deserialize)]
-    #[typed_path("/user_file/download")]
+    #[typed_path("/user-file/download")]
     pub struct GetUserFileDownload;
+
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct GetUserFileDeleteQueryParameters {
+        #[serde(default = "build_default_files_query_parameter_path")]
+        pub path: String,
+    }
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-file/delete")]
+    pub struct GetUserFileDelete;
 }

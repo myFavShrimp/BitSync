@@ -3,8 +3,8 @@ use std::{path::PathBuf, sync::Arc};
 use crate::{
     auth::AuthData,
     storage::{
-        DirContentsError, EnsureExistsError, FileContentsError, StorageItem, StorageItemPath,
-        UserStorage,
+        DirContentsError, EnsureExistsError, FileContentsError, StorageBackend, StorageItem,
+        StorageItemPath, UserStorage,
     },
     validate::PathValidationError,
     AppState,
@@ -37,10 +37,10 @@ pub async fn user_directory_contents(
         storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
 
-    user_storage.ensure_exists().await?;
+    StorageBackend::ensure_exists(&user_storage).await?;
 
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
-    let mut dir_contents = user_storage.dir_contents(&path).await?;
+    let mut dir_contents = StorageBackend::dir_contents(&path).await?;
 
     dir_contents.sort_by_key(|item| item.path.path());
     dir_contents.sort_by_key(|item| item.kind.clone());
@@ -76,12 +76,34 @@ pub async fn user_file_download(
         storage_root: app_state.config.fs_storage_root_dir.clone(),
     };
 
-    user_storage.ensure_exists().await?;
+    StorageBackend::ensure_exists(&user_storage).await?;
 
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
 
     let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
-    let file = user_storage.file_contents(&path).await?;
+    let file = StorageBackend::file_contents(&path).await?;
+
+    Ok(UserFileResult { file, mime, path })
+}
+
+pub async fn user_file_delete(
+    app_state: &Arc<AppState>,
+    auth_data: &AuthData,
+    path: &str,
+) -> Result<UserFileResult, UserFileError> {
+    crate::validate::validate_file_path(path)?;
+
+    let user_storage = UserStorage {
+        user: auth_data.user.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
+    };
+
+    StorageBackend::ensure_exists(&user_storage).await?;
+
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+
+    let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
+    let file = StorageBackend::file_contents(&path).await?;
 
     Ok(UserFileResult { file, mime, path })
 }

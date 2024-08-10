@@ -18,6 +18,7 @@ use super::routes;
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(user_file_download_handler)
+        .typed_get(user_file_delete_handler)
         .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
         .with_state(state)
 }
