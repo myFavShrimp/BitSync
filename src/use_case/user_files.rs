@@ -2,18 +2,21 @@ use std::{path::PathBuf, sync::Arc};
 
 use crate::{
     auth::AuthData,
-    storage::{DirContentsError, EnsureExistsError, StorageItem, StorageItemPath, UserStorage},
+    storage::{
+        DirContentsError, EnsureExistsError, FileContentsError, StorageItem, StorageItemPath,
+        UserStorage,
+    },
     validate::PathValidationError,
     AppState,
 };
 
-pub struct UserDirectoryResult {
+pub struct UserDirectoryContentsResult {
     pub dir_contents: Vec<StorageItem>,
     pub path: StorageItemPath,
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum UserDirectoryReadError {
+pub enum UserDirectoryContentsError {
     #[error(transparent)]
     StorageEnsurance(#[from] EnsureExistsError),
     #[error(transparent)]
@@ -22,11 +25,11 @@ pub enum UserDirectoryReadError {
     Validation(#[from] PathValidationError),
 }
 
-pub async fn user_directory<'context>(
+pub async fn user_directory_contents(
     app_state: &Arc<AppState>,
     auth_data: &AuthData,
     path: &str,
-) -> Result<UserDirectoryResult, UserDirectoryReadError> {
+) -> Result<UserDirectoryContentsResult, UserDirectoryContentsError> {
     crate::validate::validate_file_path(path)?;
 
     let user_storage = UserStorage {
@@ -39,10 +42,48 @@ pub async fn user_directory<'context>(
     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
     let mut dir_contents = user_storage.dir_contents(&path).await?;
 
-    dir_contents.sort_by_key(|item| item.path());
+    dir_contents.sort_by_key(|item| item.path.path());
     dir_contents.sort_by_key(|item| item.kind.clone());
 
-    Ok(UserDirectoryResult { dir_contents, path })
+    Ok(UserDirectoryContentsResult { dir_contents, path })
+}
+
+pub struct UserFileResult {
+    pub file: tokio::fs::File,
+    pub mime: mime_guess::Mime,
+    pub path: StorageItemPath,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum UserFileError {
+    #[error(transparent)]
+    StorageEnsurance(#[from] EnsureExistsError),
+    #[error(transparent)]
+    FileContents(#[from] FileContentsError),
+    #[error(transparent)]
+    Validation(#[from] PathValidationError),
+}
+
+pub async fn user_file_download(
+    app_state: &Arc<AppState>,
+    auth_data: &AuthData,
+    path: &str,
+) -> Result<UserFileResult, UserFileError> {
+    crate::validate::validate_file_path(path)?;
+
+    let user_storage = UserStorage {
+        user: auth_data.user.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
+    };
+
+    user_storage.ensure_exists().await?;
+
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+
+    let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
+    let file = user_storage.file_contents(&path).await?;
+
+    Ok(UserFileResult { file, mime, path })
 }
 
 // #[derive()]

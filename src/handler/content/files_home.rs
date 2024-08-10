@@ -30,7 +30,12 @@ async fn files_home_page_handler(
     auth_data: AuthData,
     query_parameters: Query<GetFilesHomePageQueryParameters>,
 ) -> impl IntoResponse {
-    match use_case::user_files::user_directory(&app_state, &auth_data, &query_parameters.path).await
+    match use_case::user_files::user_directory_contents(
+        &app_state,
+        &auth_data,
+        &query_parameters.path,
+    )
+    .await
     {
         Ok(result) => Html(FilesHome::from(result).to_string()),
         Err(_) => todo!(),

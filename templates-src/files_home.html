@@ -67,6 +67,8 @@
     {% when None %}
     {% endmatch %}
 
+    {% if dir_content.is_empty() %}
+    {% else %}
     <table class="medium-space">
         <thead>
             <tr>
@@ -80,16 +82,16 @@
             {% for dir_item in dir_content %}
                 <tr class="padding surface-container">
                     <td>
-                        <i class="small">{{ dir_item.icon }}</i>
+                        <i class="small">{{ dir_item.kind.icon() }}</i>
                     </td>
                     <td>
-                        {% match dir_item.directory_url %}
-                        {% when Some with (url) %}
+                        {% match dir_item.kind %}
+                        {% when StorageItemPresentationKind::Directory with { url } %}
                             <a href="{{ url }}">
                                 {{ dir_item.name }}
                             </a>
-                        {% when None %}
-                            {{ dir_item.name }}
+                        {% when StorageItemPresentationKind::File with { download_url } %}
+                                {{ dir_item.name }}
                         {% endmatch %}
                     </td>
                     <td class="{{ class_name.file_size_column }}">
@@ -102,7 +104,11 @@
                                 <i class="{{ class_name.force_menu_icon_default_color }}">more_horiz</i>
                             </span>
                             <menu class="left no-wrap">
-                                <a href="">Download</a>
+                                {% match dir_item.kind %}
+                                {% when StorageItemPresentationKind::Directory with { url } %}
+                                {% when StorageItemPresentationKind::File with { download_url } %}
+                                    <a href="{{ download_url }}">Download</a>
+                                {% endmatch %}
                                 <a href="">Delete</a>
                             </menu>
                         </label>
@@ -111,5 +117,6 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
 </main>
 {% endblock %}

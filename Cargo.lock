@@ -147,8 +147,7 @@ checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 [[package]]
 name = "axum"
 version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a6c9af12842a67734c9a2e355436e5d03b22383ed60cf13cd0c18fbfe3dcbcf"
+source = "git+https://github.com/tokio-rs/axum.git?rev=52ae7bb904cc374ad0acdc08ae03760a71d95ac2#52ae7bb904cc374ad0acdc08ae03760a71d95ac2"
 dependencies = [
  "async-trait",
  "axum-core",
@@ -170,7 +169,7 @@ dependencies = [
  "serde_json",
  "serde_path_to_error",
  "serde_urlencoded",
- "sync_wrapper 1.0.1",
+ "sync_wrapper",
  "tokio",
  "tower",
  "tower-layer",
@@ -181,8 +180,7 @@ dependencies = [
 [[package]]
 name = "axum-core"
 version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a15c63fd72d41492dc4f497196f5da1fb04fb7529e631d73630d1b491e47a2e3"
+source = "git+https://github.com/tokio-rs/axum.git?rev=52ae7bb904cc374ad0acdc08ae03760a71d95ac2#52ae7bb904cc374ad0acdc08ae03760a71d95ac2"
 dependencies = [
  "async-trait",
  "bytes",
@@ -193,7 +191,7 @@ dependencies = [
  "mime",
  "pin-project-lite",
  "rustversion",
- "sync_wrapper 0.1.2",
+ "sync_wrapper",
  "tower-layer",
  "tower-service",
  "tracing",
@@ -202,8 +200,7 @@ dependencies = [
 [[package]]
 name = "axum-extra"
 version = "0.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0be6ea09c9b96cb5076af0de2e383bd2bc0c18f827cf1967bdd353e0b910d733"
+source = "git+https://github.com/tokio-rs/axum.git?rev=52ae7bb904cc374ad0acdc08ae03760a71d95ac2#52ae7bb904cc374ad0acdc08ae03760a71d95ac2"
 dependencies = [
  "axum",
  "axum-core",
@@ -221,6 +218,8 @@ dependencies = [
  "pin-project-lite",
  "serde",
  "serde_html_form",
+ "tokio",
+ "tokio-util",
  "tower",
  "tower-layer",
  "tower-service",
@@ -230,10 +229,8 @@ dependencies = [
 [[package]]
 name = "axum-macros"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00c055ee2d014ae5981ce1016374e8213682aa14d9bf40e48ab48b5f3ef20eaa"
+source = "git+https://github.com/tokio-rs/axum.git?rev=52ae7bb904cc374ad0acdc08ae03760a71d95ac2#52ae7bb904cc374ad0acdc08ae03760a71d95ac2"
 dependencies = [
- "heck",
  "proc-macro2",
  "quote",
  "syn 2.0.72",
@@ -323,6 +320,7 @@ dependencies = [
  "time",
  "tokio",
  "tokio-stream",
+ "tokio-util",
  "tower",
  "tower-http",
  "tracing",
@@ -1051,6 +1049,8 @@ dependencies = [
  "hyper",
  "pin-project-lite",
  "tokio",
+ "tower",
+ "tower-service",
 ]
 
 [[package]]
@@ -2358,12 +2358,6 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
-
-[[package]]
-name = "sync_wrapper"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2047c6ded9c721764247e62cd3b03c09ffc529b2ba5b10ec482ae507a4a70160"
 
 [[package]]
 name = "sync_wrapper"

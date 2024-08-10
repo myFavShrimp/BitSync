@@ -10,32 +10,58 @@ pub struct StorageItemPresentation {
     pub path: String,
     pub size: String,
     pub name: String,
-    pub icon: String,
-    pub directory_url: Option<String>,
+    pub kind: StorageItemPresentationKind,
+}
+
+pub enum StorageItemPresentationKind {
+    File { download_url: String },
+    Directory { url: String },
+}
+
+impl StorageItemPresentationKind {
+    pub fn icon(&self) -> &'static str {
+        match self {
+            StorageItemPresentationKind::Directory { .. } => "folder",
+            StorageItemPresentationKind::File { .. } => "description",
+        }
+    }
+}
+
+impl From<StorageItem> for StorageItemPresentationKind {
+    fn from(value: StorageItem) -> Self {
+        match value.kind {
+            StorageItemKind::Directory => {
+                let directory_url = crate::handler::routes::GetFilesHomePage
+                    .with_query_params(crate::handler::routes::GetFilesHomePageQueryParameters {
+                        path: value.path.path(),
+                    })
+                    .to_string();
+
+                StorageItemPresentationKind::Directory { url: directory_url }
+            }
+
+            StorageItemKind::File => {
+                let file_download_url = crate::handler::routes::GetUserFileDownload
+                    .with_query_params(crate::handler::routes::GetUserFileDownloadQueryParameters {
+                        path: value.path.path(),
+                    })
+                    .to_string();
+
+                StorageItemPresentationKind::File {
+                    download_url: file_download_url,
+                }
+            }
+        }
+    }
 }
 
 impl From<StorageItem> for StorageItemPresentation {
     fn from(value: StorageItem) -> Self {
-        let directory_url = match value.kind {
-            StorageItemKind::Directory => Some(
-                crate::handler::routes::GetFilesHomePage
-                    .with_query_params(crate::handler::routes::GetFilesHomePageQueryParameters {
-                        path: value.path(),
-                    })
-                    .to_string(),
-            ),
-            StorageItemKind::File => None,
-        };
-
         Self {
-            path: value.path(),
+            path: value.path.path(),
             size: format_file_size(value.size),
-            name: value.file_name(),
-            icon: match value.kind {
-                StorageItemKind::Directory => String::from("folder"),
-                StorageItemKind::File => String::from("description"),
-            },
-            directory_url,
+            name: value.path.file_name(),
+            kind: StorageItemPresentationKind::from(value),
         }
     }
 }

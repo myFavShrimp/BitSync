@@ -1,6 +1,6 @@
-use crate::use_case::user_files::UserDirectoryResult;
+use crate::use_case::user_files::UserDirectoryContentsResult;
 
-use super::models::{ParentDirectoryLink, StorageItemPresentation};
+use super::models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind};
 
 #[derive(askama::Template)]
 #[template(path = "files_home.html")]
@@ -9,8 +9,8 @@ pub struct FilesHome {
     parent_directory_url: Option<ParentDirectoryLink>,
 }
 
-impl From<UserDirectoryResult> for FilesHome {
-    fn from(value: UserDirectoryResult) -> Self {
+impl From<UserDirectoryContentsResult> for FilesHome {
+    fn from(value: UserDirectoryContentsResult) -> Self {
         let displayable_dir_content = value
             .dir_contents
             .into_iter()

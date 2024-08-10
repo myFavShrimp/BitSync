@@ -29,14 +29,14 @@ pub mod routes {
     use axum_extra::routing::TypedPath;
     use serde::{Deserialize, Serialize};
 
+    fn build_default_files_query_parameter_path() -> String {
+        "/".to_owned()
+    }
+
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/static/*file_path")]
     pub struct Static {
         pub file_path: String,
-    }
-
-    fn build_default_files_home_query_parameter_path() -> String {
-        "/".to_owned()
     }
 
     #[derive(TypedPath, Deserialize)]
@@ -44,7 +44,7 @@ pub mod routes {
     pub struct GetFilesHomePage;
     #[derive(Deserialize, Serialize, Debug)]
     pub struct GetFilesHomePageQueryParameters {
-        #[serde(default = "build_default_files_home_query_parameter_path")]
+        #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,
     }
 
@@ -67,4 +67,13 @@ pub mod routes {
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/register")]
     pub struct PostRegisterAction;
+
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct GetUserFileDownloadQueryParameters {
+        #[serde(default = "build_default_files_query_parameter_path")]
+        pub path: String,
+    }
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user_file/download")]
+    pub struct GetUserFileDownload;
 }

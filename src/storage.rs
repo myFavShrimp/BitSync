@@ -3,7 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use error::{DirectoryCreationError, ReadDirectoryError, StorageItemCreationError};
+use error::{DirectoryCreationError, OpenFileError, ReadDirectoryError, StorageItemCreationError};
+use tokio_util::io::ReaderStream;
 
 use crate::database::user::User;
 
@@ -69,6 +70,17 @@ impl StorageItemPath {
             .map(|path| path.to_path_buf())
             .unwrap_or(path)
     }
+
+    pub fn file_name(&self) -> String {
+        match self.scoped_path.file_name() {
+            Some(file_name) => file_name.to_string_lossy().to_string(),
+            None => String::new(),
+        }
+    }
+
+    pub fn path(&self) -> String {
+        self.scoped_path.to_string_lossy().to_string()
+    }
 }
 
 impl Display for StorageItemPath {
@@ -84,22 +96,9 @@ pub enum StorageItemKind {
 }
 
 pub struct StorageItem {
-    path: StorageItemPath,
+    pub path: StorageItemPath,
     pub size: u64,
     pub kind: StorageItemKind,
-}
-
-impl StorageItem {
-    pub fn file_name(&self) -> String {
-        match self.path.scoped_path.file_name() {
-            Some(file_name) => file_name.to_string_lossy().to_string(),
-            None => String::new(),
-        }
-    }
-
-    pub fn path(&self) -> String {
-        self.path.scoped_path.to_string_lossy().to_string()
-    }
 }
 
 impl StorageItem {
@@ -139,9 +138,16 @@ impl StorageItem {
 pub struct EnsureExistsError(#[from] DirectoryCreationError);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not read a directories contents")]
+#[error("Could not read a directory's contents")]
 pub enum DirContentsError {
     ReadDirectory(#[from] ReadDirectoryError),
+    StorageItemCreation(#[from] StorageItemCreationError),
+}
+
+#[derive(thiserror::Error, Debug)]
+#[error("Could not read a file's contents")]
+pub enum FileContentsError {
+    OpenFile(#[from] OpenFileError),
     StorageItemCreation(#[from] StorageItemCreationError),
 }
 
@@ -187,5 +193,19 @@ impl UserStorage {
         }
 
         Ok(storage_items)
+    }
+
+    pub async fn file_contents(
+        &self,
+        path: &StorageItemPath,
+    ) -> Result<tokio::fs::File, FileContentsError> {
+        let file = tokio::fs::File::open(path.local_directory())
+            .await
+            .map_err(|error| OpenFileError {
+                source: error,
+                path: path.local_directory(),
+            })?;
+
+        Ok(file)
     }
 }
