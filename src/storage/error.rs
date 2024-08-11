@@ -15,6 +15,20 @@ pub struct ReadDirectoryError {
 }
 
 #[derive(thiserror::Error, Debug)]
+#[error("Failed to remove directory")]
+pub struct RemoveDirectoryError {
+    pub source: IOError,
+    pub path: PathBuf,
+}
+
+#[derive(thiserror::Error, Debug)]
+#[error("Failed to remove file")]
+pub struct RemoveFileError {
+    pub source: IOError,
+    pub path: PathBuf,
+}
+
+#[derive(thiserror::Error, Debug)]
 #[error("Failed to open a file")]
 pub struct OpenFileError {
     pub source: IOError,

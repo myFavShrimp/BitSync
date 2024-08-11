@@ -5,6 +5,7 @@ use tokio::io::DuplexStream;
 use crate::{
     auth::AuthData,
     storage::{
+        error::{RemoveDirectoryError, RemoveFileError},
         AsyncFileRead, DirContentsError, EnsureExistsError, FileContentsError, StorageBackend,
         StorageItem, StorageItemError, StorageItemPath, UserStorage,
     },
@@ -155,27 +156,44 @@ pub async fn user_file_download(
     }
 }
 
-// pub async fn user_file_delete(
-//     app_state: &Arc<AppState>,
-//     auth_data: &AuthData,
-//     path: &str,
-// ) -> Result<UserFileResult, UserFileError> {
-//     crate::validate::validate_file_path(path)?;
+#[derive(thiserror::Error, Debug)]
+#[error("Failed to delete a user's file")]
+pub enum UserFileDeleteError {
+    StorageEnsurance(#[from] EnsureExistsError),
+    Validation(#[from] PathValidationError),
+    StorageItem(#[from] StorageItemError),
+    RemoveDirectory(#[from] RemoveDirectoryError),
+    RemoveFile(#[from] RemoveFileError),
+}
 
-//     let user_storage = UserStorage {
-//         user: auth_data.user.clone(),
-//         storage_root: app_state.config.fs_storage_root_dir.clone(),
-//     };
+pub async fn user_file_delete(
+    app_state: &Arc<AppState>,
+    auth_data: &AuthData,
+    path: &str,
+) -> Result<(), UserFileDeleteError> {
+    crate::validate::validate_file_path(path)?;
 
-//     StorageBackend::ensure_exists(&user_storage).await?;
+    let user_storage = UserStorage {
+        user: auth_data.user.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
+    };
 
-//     let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+    StorageBackend::ensure_exists(&user_storage).await?;
 
-//     let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
-//     let file = StorageBackend::file_stream(&path).await?;
+    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+    let storage_item = StorageBackend::storage_item(&path).await?;
 
-//     Ok(UserFileResult { file, mime, path })
-// }
+    match storage_item.kind {
+        crate::storage::StorageItemKind::Directory => {
+            StorageBackend::delete_directory(&path).await?;
+        }
+        crate::storage::StorageItemKind::File => {
+            StorageBackend::delete_file(&path).await?;
+        }
+    }
+
+    Ok(())
+}
 
 // #[derive()]
 // pub struct UserStorageItemSearchResultDirectory {

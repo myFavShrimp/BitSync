@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
+    http::StatusCode,
     middleware::from_fn_with_state,
     response::IntoResponse,
     Router,
@@ -41,6 +42,20 @@ async fn user_file_download_handler(
 
             (axum_extra::TypedHeader(content_type), attachment).into_response()
         }
+        Err(_) => todo!(),
+    }
+}
+
+async fn user_file_delete_handler(
+    _: routes::GetUserFileDelete,
+    State(app_state): State<Arc<AppState>>,
+    auth_data: AuthData,
+    query_parameters: Query<routes::GetUserFileDeleteQueryParameters>,
+) -> impl IntoResponse {
+    match use_case::user_files::user_file_delete(&app_state, &auth_data, &query_parameters.path)
+        .await
+    {
+        Ok(_) => StatusCode::OK,
         Err(_) => todo!(),
     }
 }

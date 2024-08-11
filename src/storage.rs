@@ -5,13 +5,13 @@ use std::{
 };
 
 use error::{
-    DirectoryCreationError, MetadataError, OpenFileError, ReadDirectoryError,
-    StorageItemCreationError,
+    DirectoryCreationError, MetadataError, OpenFileError, ReadDirectoryError, RemoveDirectoryError,
+    RemoveFileError, StorageItemCreationError,
 };
 
 use crate::database::user::User;
 
-mod error;
+pub mod error;
 
 static USER_DATA_DIR: &str = "user";
 
@@ -267,16 +267,25 @@ impl StorageBackend {
         Ok(StorageItem::try_from((path.clone(), metadata))?)
     }
 
-    // pub async fn (
-    //     path: &StorageItemPath,
-    // ) -> Result<tokio::fs::File, FileContentsError> {
-    //     let file = tokio::fs::File::open(path.local_directory())
-    //         .await
-    //         .map_err(|error| OpenFileError {
-    //             source: error,
-    //             path: path.local_directory(),
-    //         })?;
+    pub async fn delete_directory(path: &StorageItemPath) -> Result<(), RemoveDirectoryError> {
+        tokio::fs::remove_dir_all(path.local_directory())
+            .await
+            .map_err(|error| RemoveDirectoryError {
+                source: error,
+                path: path.local_directory(),
+            })?;
 
-    //     Ok(file)
-    // }
+        Ok(())
+    }
+
+    pub async fn delete_file(path: &StorageItemPath) -> Result<(), RemoveFileError> {
+        tokio::fs::remove_file(path.local_directory())
+            .await
+            .map_err(|error| RemoveFileError {
+                source: error,
+                path: path.local_directory(),
+            })?;
+
+        Ok(())
+    }
 }

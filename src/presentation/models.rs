@@ -11,11 +11,13 @@ pub struct StorageItemPresentation {
     pub size: String,
     pub name: String,
     pub kind: StorageItemPresentationKind,
+    pub download_url: String,
+    pub delete_url: String,
 }
 
 pub enum StorageItemPresentationKind {
-    File { download_url: String },
-    Directory { url: String, download_url: String },
+    File,
+    Directory { url: String },
 }
 
 impl StorageItemPresentationKind {
@@ -25,26 +27,10 @@ impl StorageItemPresentationKind {
             StorageItemPresentationKind::File { .. } => "description",
         }
     }
-
-    pub fn download_url(&self) -> String {
-        match self {
-            StorageItemPresentationKind::File { download_url } => download_url.clone(),
-            StorageItemPresentationKind::Directory {
-                url: _,
-                download_url,
-            } => download_url.clone(),
-        }
-    }
 }
 
 impl From<StorageItem> for StorageItemPresentationKind {
     fn from(value: StorageItem) -> Self {
-        let download_url = crate::handler::routes::GetUserFileDownload
-            .with_query_params(crate::handler::routes::GetUserFileDownloadQueryParameters {
-                path: value.path.path(),
-            })
-            .to_string();
-
         match value.kind {
             StorageItemKind::Directory => {
                 let directory_url = crate::handler::routes::GetFilesHomePage
@@ -53,23 +39,34 @@ impl From<StorageItem> for StorageItemPresentationKind {
                     })
                     .to_string();
 
-                StorageItemPresentationKind::Directory {
-                    url: directory_url,
-                    download_url,
-                }
+                StorageItemPresentationKind::Directory { url: directory_url }
             }
-            StorageItemKind::File => StorageItemPresentationKind::File { download_url },
+            StorageItemKind::File => StorageItemPresentationKind::File,
         }
     }
 }
 
 impl From<StorageItem> for StorageItemPresentation {
     fn from(value: StorageItem) -> Self {
+        let download_url = crate::handler::routes::GetUserFileDownload
+            .with_query_params(crate::handler::routes::GetUserFileDownloadQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
+        let delete_url = crate::handler::routes::GetUserFileDelete
+            .with_query_params(crate::handler::routes::GetUserFileDeleteQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
         Self {
             path: value.path.path(),
             size: format_file_size(value.size),
             name: value.path.file_name(),
             kind: StorageItemPresentationKind::from(value),
+            download_url,
+            delete_url,
         }
     }
 }
