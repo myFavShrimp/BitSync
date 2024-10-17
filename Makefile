@@ -19,10 +19,10 @@ fmt:
 	cargo fmt
 
 install-tools:
-	cargo install sqlx-cli
-	cargo install cargo-watch
-	cargo install minhtml
-	cargo install nu
+	cargo install --locked sqlx-cli
+	cargo install --locked bacon
+	cargo install --locked minhtml
+	cargo install --locked nu
 
 static-assets: fetch-static-assets font-css
 

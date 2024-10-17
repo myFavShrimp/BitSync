@@ -3,15 +3,6 @@ let output_path = "./static/external/"
 let static_assets = [
     ["name" "url" "destination"];
 
-    ["Beer CSS CSS" "https://cdn.jsdelivr.net/npm/beercss@3.6.12/dist/cdn/beer.min.css" "beer-css/beer.css"]
-    ["Beer CSS JS" "https://cdn.jsdelivr.net/npm/beercss@3.6.12/dist/cdn/beer.min.js" "beer-css/beer.js"]
-    ["Material Dynamic Colors" "https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js" "material-dynamic-colors.js"]
-
-    ["Material Symbols Outlined" "https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsOutlined%5BFILL,GRAD,opsz,wght%5D.woff2" "fonts/material-symbols/outlined.woff2"]
-    ["Material Symbols Rounded" "https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.woff2" "fonts/material-symbols/rounded.woff2"]
-    ["Material Symbols Sharp" "https://github.com/google/material-design-icons/raw/master/variablefont/MaterialSymbolsSharp%5BFILL,GRAD,opsz,wght%5D.woff2" "fonts/material-symbols/sharp.woff2"]
-    ["Material Symbols LICENSE" "https://raw.githubusercontent.com/google/material-design-icons/master/LICENSE" "fonts/material-symbols/LICENSE"]
-
     ["Meyer CSS reset" "https://unpkg.com/reset-css/reset.css" "css/reset.css"]
 
     ["HTMX" "https://unpkg.com/htmx.org@2.0.1/dist/htmx.min.js" "htmx.js"]
