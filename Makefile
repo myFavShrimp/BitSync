@@ -20,7 +20,7 @@ fmt:
 
 install-tools:
 	cargo install --locked sqlx-cli
-	cargo install --locked bacon
+	cargo install --locked cargo-watch
 	cargo install --locked minhtml
 	cargo install --locked nu
 

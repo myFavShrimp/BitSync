@@ -2,8 +2,12 @@ use std::{sync::Arc, time::Duration};
 
 use crate::AppState;
 use axum::{
-    extract::DefaultBodyLimit, http::StatusCode, response::IntoResponse, Extension, Router,
+    extract::DefaultBodyLimit,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Extension, Router,
 };
+use headers::Header;
 use tower::limit::RateLimitLayer;
 use tower_http::trace::TraceLayer;
 
@@ -85,4 +89,23 @@ pub mod routes {
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/user-file/delete")]
     pub struct GetUserFileDelete;
+}
+
+pub fn http_redirect_response(redirect_route: &str) -> Response {
+    (
+        StatusCode::SEE_OTHER,
+        [(headers::Location::name().as_str(), redirect_route)],
+    )
+        .into_response()
+}
+
+pub fn htmx_redirect_response(redirect_route: &str) -> Response {
+    (StatusCode::OK, [("HX-Redirect", redirect_route)]).into_response()
+}
+
+pub fn redirect_response(is_hx_request: bool, redirect_route: &str) -> Response {
+    match is_hx_request {
+        true => htmx_redirect_response(redirect_route),
+        false => http_redirect_response(redirect_route),
+    }
 }

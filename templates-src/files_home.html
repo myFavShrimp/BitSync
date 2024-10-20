@@ -6,48 +6,20 @@
 {% let (style_sheet, class_name) = turf::style_sheet_values!("scss/files_home.scss") %}
 
 <style>{{ style_sheet }}</style>
-<nav class="left m l small-text">
-    <header></header>
-    <a class="active">
-        <i>home</i>
-        <div>My Files</div>
-    </a>
-</nav>
-<nav class="top surface">
-    <button class="circle large transparent s" data-ui="#nav-drawer-mobile">
+<nav class="">
+    <button class="">
         <i>menu</i>
     </button>
-    <dialog id="nav-drawer-mobile" class="left no-padding">
-        <nav class="drawer">
-            <header>
-                <nav>
-                    <h6 class="max">Quick Access</h6>
-                    <button class="transparent circle large" data-ui="#nav-drawer-mobile" >
-                        <i>close</i>
-                    </button>
-                </nav>
-            </header>
-            <a>
-                <i>home</i>
-                <div>My Files</div>
-            </a>
-            <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
-                <i>logout</i>
-                <span class="max">Logout</span>
-            </a>
-        </nav>
-    </dialog>
-
     <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
         {% call macros::logo("top-bar-logo") %}
     </a>
-    <div class="max"></div>
-    <label class="checkbox icon m l">
+    <div class=""></div>
+    <label class="">
         <input type="checkbox">
         <span>
             <i class="{{ class_name.force_menu_icon_default_color }}">settings</i>
         </span>
-        <menu class="left no-wrap">
+        <menu class="">
             <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
                 <div>Log out</div>
             </a>
@@ -55,10 +27,10 @@
     </label>
 </nav>
 
-<main class="responsive max">
+<main class="">
     {% match parent_directory_url %}
     {% when Some with (link_data) %}
-        <a href="{{ link_data.parent_directory_url }}" class="button transparent small">
+        <a href="{{ link_data.parent_directory_url }}" class="">
             <i class="small">chevron_left</i>
             {{ link_data.current_directory_name }}
         </a>
@@ -67,20 +39,20 @@
 
     {% if dir_content.is_empty() %}
     {% else %}
-    <table class="medium-space">
+    <table class="">
         <thead>
             <tr>
-                <th class="min"></th>
+                <th class=""></th>
                 <th>Name</th>
-                <th class="min">Size</th>
-                <th class="min"></th>
+                <th class="">Size</th>
+                <th class=""></th>
             </tr>
         </thead>
         <tbody>
             {% for dir_item in dir_content %}
-                <tr class="padding surface-container">
+                <tr class="">
                     <td>
-                        <i class="small">{{ dir_item.kind.icon() }}</i>
+                        <i class="">{{ dir_item.kind.icon() }}</i>
                     </td>
                     <td>
                         {% match dir_item.kind %}
@@ -96,14 +68,15 @@
                         {{ dir_item.size }}
                     </td>
                     <td>
-                        <label class="checkbox icon">
+                        <label class="">
                             <input type="checkbox">
                             <span>
                                 <i class="{{ class_name.force_menu_icon_default_color }}">more_horiz</i>
                             </span>
-                            <menu class="left no-wrap">
+                            <menu class="">
                                 <a href="{{ dir_item.download_url }}">Download</a>
                                 <a href="{{ dir_item.delete_url }}">Delete</a>
+                                <a data-ui="#delete">Delete</a>
                             </menu>
                         </label>
                     </td>

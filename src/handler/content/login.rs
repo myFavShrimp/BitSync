@@ -12,7 +12,9 @@ use axum_extra::{
 };
 use serde::Deserialize;
 
-use crate::{auth::require_logout_middleware, use_case};
+use crate::{
+    auth::require_logout_middleware, handler::redirect_response, htmx::IsHxRequest, use_case,
+};
 
 use crate::AppState;
 
@@ -42,6 +44,7 @@ struct LoginActionFormData {
 
 async fn login_action_handler(
     _: routes::PostLoginAction,
+    IsHxRequest(is_hx_request): IsHxRequest,
     State(state): State<Arc<AppState>>,
     cookie_jar: CookieJar,
     Form(login_data): Form<LoginActionFormData>,
@@ -63,7 +66,7 @@ async fn login_action_handler(
 
             (
                 cookie_jar,
-                [("HX-Redirect", routes::GetFilesHomePage.to_string())],
+                redirect_response(is_hx_request, &routes::GetFilesHomePage.to_string()),
             )
         }
         Err(_) => todo!(),

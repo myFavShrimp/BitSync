@@ -1,14 +1,15 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{database::user::User, jwt::JwtClaims, AppState};
+use crate::{
+    database::user::User, handler::redirect_response, htmx::IsHxRequest, jwt::JwtClaims, AppState,
+};
 use axum::{
     extract::{FromRef, FromRequestParts, Request},
-    http::{request::Parts, StatusCode},
+    http::request::Parts,
     middleware::Next,
-    response::{IntoResponse, Response},
+    response::Response,
 };
 use axum_extra::extract::CookieJar;
-use headers::Header;
 
 #[derive(Debug, Clone, thiserror::Error)]
 #[error("The provided auth token is invalid")]
@@ -45,6 +46,10 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let app_state = Arc::<AppState>::from_ref(state);
+        let IsHxRequest(is_hx_request) = match IsHxRequest::from_request_parts(parts, state).await {
+            Ok(is_hx_request) => is_hx_request,
+            Err(infallible) => match infallible {},
+        };
 
         match CookieJar::from_request_parts(parts, state).await {
             Ok(cookie_jar) => match cookie_jar.get(AUTH_COOKIE_NAME) {
@@ -52,15 +57,18 @@ where
                     match decode_auth_token(app_state, auth_cookie.value()).await {
                         Ok(auth) => Ok(auth),
                         Err(..) => Err(redirect_response(
+                            is_hx_request,
                             &crate::handler::routes::GetLoginPage.to_string(),
                         )),
                     }
                 }
                 None => Err(redirect_response(
+                    is_hx_request,
                     &crate::handler::routes::GetLoginPage.to_string(),
                 )),
             },
             Err(..) => Err(redirect_response(
+                is_hx_request,
                 &crate::handler::routes::GetLoginPage.to_string(),
             )),
         }
@@ -99,35 +107,32 @@ where
         })
     }
 }
-
-fn redirect_response(redirect_route: &str) -> Response {
-    (
-        StatusCode::SEE_OTHER,
-        [
-            ("HX-Redirect", redirect_route),
-            (headers::Location::name().as_str(), redirect_route),
-        ],
-    )
-        .into_response()
-}
-
 pub async fn require_logout_middleware(
     auth_status: AuthStatus,
+    IsHxRequest(is_hx_request): IsHxRequest,
     request: Request,
     next: Next,
 ) -> Response {
     match auth_status {
-        AuthStatus::User(..) => {
-            redirect_response(&crate::handler::routes::GetFilesHomePage.to_string())
-        }
+        AuthStatus::User(..) => redirect_response(
+            is_hx_request,
+            &crate::handler::routes::GetFilesHomePage.to_string(),
+        ),
         AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
     }
 }
 
 pub async fn require_login_middleware(
-    _auth_data: AuthData,
+    auth_status: AuthStatus,
+    IsHxRequest(is_hx_request): IsHxRequest,
     request: Request,
     next: Next,
 ) -> Response {
-    next.run(request).await
+    match auth_status {
+        AuthStatus::Missing | AuthStatus::Invalid => redirect_response(
+            is_hx_request,
+            &crate::handler::routes::GetLoginPage.to_string(),
+        ),
+        AuthStatus::User(..) => next.run(request).await,
+    }
 }

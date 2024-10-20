@@ -8,6 +8,7 @@ pub mod config;
 mod database;
 mod handler;
 mod hash;
+mod htmx;
 mod jwt;
 mod presentation;
 mod storage;

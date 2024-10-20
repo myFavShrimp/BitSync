@@ -1,28 +1,28 @@
 {% import "macros.html" as macros %}
-
 {% extends "base.html" %}
+
 {% block content %}
 
 {% let (style_sheet, class_name) = turf::style_sheet_values!("scss/login.scss") %}
 
-<main class="response {{ class_name.page }}">
+<main class="{{ class_name.page }}">
     <style>{{ style_sheet }}</style>
 
     <form class="{{ class_name.form }}" hx-post="{{ crate::handler::routes::PostLoginAction.to_string() }}">
         {% call macros::logo(class_name.logo) %}
 
         <div>
-            <div class="field label fill large">
+            <div class="">
                 <input name="username" required>
                 <label>Username</label>
             </div>
-            <div class="field label fill large">
+            <div class="">
                 <input name="password" required>
                 <label>Password</label>
             </div>
 
-            <div class="{{ class_name.button_group }}">
-                <a class="button border large" href="{{ crate::handler::routes::GetRegisterPage.to_string() }}">Register</a>
+            <div class="{# { class_name.button_group } #}">
+                <a class="" href="{{ crate::handler::routes::GetRegisterPage.to_string() }}">Register</a>
                 <button class="large" type="submit">Login</mdui-button>
             </div>
         </div>
