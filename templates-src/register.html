@@ -5,25 +5,25 @@
 
 {% let (style_sheet, class_name) = turf::style_sheet_values!("scss/register.scss") %}
 
-<main class="response {{ class_name.page }}">
+<main class="{{ class_name.page }}">
     <style>{{ style_sheet }}</style>
 
     <form class="{{ class_name.form }}" hx-post="{{ crate::handler::routes::PostRegisterAction.to_string() }}">
         {% call macros::logo(class_name.logo) %}
 
         <div>
-            <div class="field label fill large">
+            <div class="">
                 <input name="username" required>
                 <label>Username</label>
             </div>
-            <div class="field label fill large">
+            <div class="">
                 <input name="password" required>
                 <label>Password</label>
             </div>
 
-            <div class="{{ class_name.button_group }}">
+            <div class="{# { class_name.button_group } #}">
                 <a class="button border large" href="{{ crate::handler::routes::GetLoginPage.to_string() }}">Login</a>
-                <button class="large" type="submit">Register</button>
+                <button class="" type="submit">Register</button>
             </div>
         </div>
     </form>

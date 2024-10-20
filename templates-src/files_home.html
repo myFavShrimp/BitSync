@@ -7,24 +7,12 @@
 
 <style>{{ style_sheet }}</style>
 <nav class="">
-    <button class="">
-        <i>menu</i>
-    </button>
     <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
         {% call macros::logo("top-bar-logo") %}
     </a>
-    <div class=""></div>
-    <label class="">
-        <input type="checkbox">
-        <span>
-            <i class="{{ class_name.force_menu_icon_default_color }}">settings</i>
-        </span>
-        <menu class="">
-            <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
-                <div>Log out</div>
-            </a>
-        </menu>
-    </label>
+    <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
+        Log out
+    </a>
 </nav>
 
 <main class="">
@@ -39,7 +27,7 @@
 
     {% if dir_content.is_empty() %}
     {% else %}
-    <table class="">
+    <table class="{{ class_name.test }}">
         <thead>
             <tr>
                 <th class=""></th>
@@ -68,17 +56,8 @@
                         {{ dir_item.size }}
                     </td>
                     <td>
-                        <label class="">
-                            <input type="checkbox">
-                            <span>
-                                <i class="{{ class_name.force_menu_icon_default_color }}">more_horiz</i>
-                            </span>
-                            <menu class="">
-                                <a href="{{ dir_item.download_url }}">Download</a>
-                                <a href="{{ dir_item.delete_url }}">Delete</a>
-                                <a data-ui="#delete">Delete</a>
-                            </menu>
-                        </label>
+                        <a href="{{ dir_item.download_url }}">Download</a>
+                        <a href="{{ dir_item.delete_url }}">Delete</a>
                     </td>
                 </tr>
             {% endfor %}
