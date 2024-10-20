@@ -3,12 +3,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% let (style_sheet, class_name) = turf::style_sheet_values!("scss/files_home.scss") %}
-
-<style>{{ style_sheet }}</style>
+<style>{{ crate::scss::files_home::STYLE_SHEET }}</style>
 <nav class="">
-    <a class="{{ class_name.logo }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
-        {% call macros::logo("top-bar-logo") %}
+    <a class="{{ crate::scss::files_home::ClassName::LOGO }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
+        {% call macros::logo(crate::scss::base::ClassName::TOP_BAR_LOGO) %}
     </a>
     <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
         Log out
@@ -27,7 +25,7 @@
 
     {% if dir_content.is_empty() %}
     {% else %}
-    <table class="{{ class_name.test }}">
+    <table class="{{ crate::scss::files_home::ClassName::TEST }}">
         <thead>
             <tr>
                 <th class=""></th>
@@ -52,7 +50,7 @@
                                 {{ dir_item.name }}
                         {% endmatch %}
                     </td>
-                    <td class="{{ class_name.file_size_column }}">
+                    <td class="{{ crate::scss::files_home::ClassName::FILE_SIZE_COLUMN }}">
                         {{ dir_item.size }}
                     </td>
                     <td>
