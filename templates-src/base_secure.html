@@ -1,0 +1,31 @@
+{% import "macros.html" as macros %}
+
+<!DOCTYPE HTML>
+<html lang="en" class="mdui-theme-dark">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta content="width=device-width,initial-scale=1.0" name=viewport>
+
+    <script src="static/external/htmx.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/external/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="static/external/css/Noto Sans.css">
+
+    <style>{{ crate::scss::base::STYLE_SHEET }}</style>
+</head>
+<body>
+
+{% block nav %}
+<nav>
+    <a class="{{ crate::scss::files_home::ClassName::LOGO }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
+        {% call macros::logo(crate::scss::base::ClassName::TOP_BAR_LOGO) %}
+    </a>
+    <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
+        Log out
+    </a>
+</nav>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+</body>
+</html>

@@ -73,6 +73,15 @@ pub mod routes {
     pub struct PostRegisterAction;
 
     #[derive(Deserialize, Serialize, Debug)]
+    pub struct PostUserFileUploadQueryParameters {
+        #[serde(default = "build_default_files_query_parameter_path")]
+        pub path: String,
+    }
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-file/upload")]
+    pub struct PostUserFileUpload;
+
+    #[derive(Deserialize, Serialize, Debug)]
     pub struct GetUserFileDownloadQueryParameters {
         #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,

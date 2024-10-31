@@ -1,13 +1,16 @@
 use std::{path::PathBuf, pin::Pin, sync::Arc};
 
+use axum_extra::extract::{multipart::MultipartError, Multipart};
+use futures::TryStreamExt;
 use tokio::io::DuplexStream;
+use tokio_util::io::StreamReader;
 
 use crate::{
     auth::AuthData,
     storage::{
         error::{RemoveDirectoryError, RemoveFileError},
-        AsyncFileRead, DirContentsError, EnsureExistsError, FileContentsError, StorageBackend,
-        StorageItem, StorageItemError, StorageItemPath, UserStorage,
+        AsyncFileRead, DirContentsError, EnsureExistsError, FileContentsError, FileWriteError,
+        StorageBackend, StorageItem, StorageItemError, StorageItemPath, UserStorage,
     },
     validate::PathValidationError,
     AppState,
@@ -89,7 +92,100 @@ pub struct UserFileResult {
 
 #[derive(thiserror::Error, Debug)]
 #[error("An error occurred during user file download")]
-pub enum UserFileError {
+pub enum UserFileUploadError {
+    StorageEnsurance(#[from] EnsureExistsError),
+    FileWrite(#[from] FileWriteError),
+    Validation(#[from] PathValidationError),
+    Multipart(#[from] MultipartError),
+    StorageItem(#[from] StorageItemError),
+}
+
+pub async fn user_file_upload(
+    app_state: &Arc<AppState>,
+    auth_data: &AuthData,
+    path: &str,
+    mut multipart_data: Multipart,
+) -> Result<UserFileResult, UserFileUploadError> {
+    crate::validate::validate_file_path(path)?;
+
+    let user_storage = UserStorage {
+        user: auth_data.user.clone(),
+        storage_root: app_state.config.fs_storage_root_dir.clone(),
+    };
+
+    StorageBackend::ensure_exists(&user_storage).await?;
+
+    let field = match multipart_data.next_field().await? {
+        Some(field) => field,
+        None => todo!("error - no file"),
+    };
+
+    let file_name = match field.file_name() {
+        Some(file_name) => file_name,
+        None => todo!("error - no file"),
+    };
+
+    crate::validate::validate_file_path(file_name)?;
+
+    let mut upload_path = PathBuf::from(path);
+    upload_path.push(file_name);
+
+    let path = StorageItemPath::new(user_storage.clone(), upload_path);
+
+    let field_with_io_error =
+        field.map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error));
+
+    let field_stream = StreamReader::new(field_with_io_error);
+
+    let storage_item = StorageBackend::write_file_stream(&path, field_stream).await?;
+
+    panic!("success");
+
+    // match storage_item.kind {
+    //     crate::storage::StorageItemKind::File => {
+    //         let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
+    //         let file = StorageBackend::read_file_stream(&path).await?;
+
+    //         Ok(UserFileResult {
+    //             file: AsyncStorageItemRead::File(file),
+    //             mime,
+    //             path,
+    //         })
+    //     }
+    //     crate::storage::StorageItemKind::Directory => {
+    //         let (write_stream, read_stream) = tokio::io::duplex(4096);
+
+    //         tokio::spawn(async move {
+    //             match directory_zipping::write_zipped_storage_item_to_stream(
+    //                 write_stream,
+    //                 &storage_item,
+    //             )
+    //             .await
+    //             {
+    //                 Ok(_) => {}
+    //                 Err(_) => todo!(),
+    //             };
+    //         });
+
+    //         let mut dir_path = path.scoped_path.clone();
+    //         dir_path.set_extension("zip");
+
+    //         let fake_zip_path = StorageItemPath::new(user_storage.clone(), PathBuf::from(dir_path));
+
+    //         let mime = mime_guess::from_path(&fake_zip_path.scoped_path).first_or_octet_stream();
+
+    //         Ok(UserFileResult {
+    //             file: AsyncStorageItemRead::Directory(read_stream),
+    //             mime,
+    //             path: fake_zip_path,
+    //         })
+    //     }
+    // }
+}
+
+#[derive(thiserror::Error, Debug)]
+#[error("An error occurred during user file download")]
+pub enum UserFileDownloadError {
     StorageEnsurance(#[from] EnsureExistsError),
     FileContents(#[from] FileContentsError),
     Validation(#[from] PathValidationError),
@@ -100,7 +196,7 @@ pub async fn user_file_download(
     app_state: &Arc<AppState>,
     auth_data: &AuthData,
     path: &str,
-) -> Result<UserFileResult, UserFileError> {
+) -> Result<UserFileResult, UserFileDownloadError> {
     crate::validate::validate_file_path(path)?;
 
     let user_storage = UserStorage {
@@ -117,7 +213,7 @@ pub async fn user_file_download(
     match storage_item.kind {
         crate::storage::StorageItemKind::File => {
             let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
-            let file = StorageBackend::file_stream(&path).await?;
+            let file = StorageBackend::read_file_stream(&path).await?;
 
             Ok(UserFileResult {
                 file: AsyncStorageItemRead::File(file),

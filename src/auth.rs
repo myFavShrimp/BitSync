@@ -30,6 +30,7 @@ async fn decode_auth_token(
 
 pub static AUTH_COOKIE_NAME: &str = "auth";
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct AuthData {
     pub claims: JwtClaims,
@@ -75,6 +76,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum AuthStatus {
     Missing,

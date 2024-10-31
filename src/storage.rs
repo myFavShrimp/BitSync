@@ -8,6 +8,9 @@ use error::{
     DirectoryCreationError, MetadataError, OpenFileError, ReadDirectoryError, RemoveDirectoryError,
     RemoveFileError, StorageItemCreationError,
 };
+use futures::pin_mut;
+use tokio::io::BufWriter;
+use tokio_util::io::StreamReader;
 
 use crate::database::user::User;
 
@@ -188,6 +191,14 @@ impl tokio::io::AsyncRead for AsyncFileRead {
 
 #[derive(thiserror::Error, Debug)]
 #[error("Could not read a file's contents")]
+pub enum FileWriteError {
+    OpenFile(#[from] OpenFileError),
+    StorageItemCreation(#[from] StorageItemCreationError),
+    StreamWrite(#[source] std::io::Error),
+}
+
+#[derive(thiserror::Error, Debug)]
+#[error("Could not read a file's contents")]
 pub enum FileContentsError {
     OpenFile(#[from] OpenFileError),
     StorageItemCreation(#[from] StorageItemCreationError),
@@ -245,7 +256,42 @@ impl StorageBackend {
         Ok(storage_items)
     }
 
-    pub async fn file_stream(path: &StorageItemPath) -> Result<AsyncFileRead, FileContentsError> {
+    pub async fn read_file_stream(
+        path: &StorageItemPath,
+    ) -> Result<AsyncFileRead, FileContentsError> {
+        let file = tokio::fs::File::open(path.local_directory())
+            .await
+            .map_err(|error| OpenFileError {
+                source: error,
+                path: path.local_directory(),
+            })?;
+
+        Ok(AsyncFileRead(file))
+    }
+
+    pub async fn write_file_stream<S, B, E>(
+        path: &StorageItemPath,
+        stream: StreamReader<S, B>,
+    ) -> Result<AsyncFileRead, FileWriteError>
+    where
+        S: futures::Stream<Item = Result<B, E>>,
+        B: bytes::Buf,
+        E: Into<std::io::Error>,
+    {
+        let file = tokio::fs::File::create(path.local_directory())
+            .await
+            .map_err(|error| OpenFileError {
+                source: error,
+                path: path.local_directory(),
+            })?;
+
+        let mut file_writer = BufWriter::new(file);
+        pin_mut!(stream);
+
+        tokio::io::copy(&mut stream, &mut file_writer)
+            .await
+            .map_err(FileWriteError::StreamWrite)?;
+
         let file = tokio::fs::File::open(path.local_directory())
             .await
             .map_err(|error| OpenFileError {

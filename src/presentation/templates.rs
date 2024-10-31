@@ -7,6 +7,7 @@ use super::models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPre
 pub struct FilesHome {
     dir_content: Vec<StorageItemPresentation>,
     parent_directory_url: Option<ParentDirectoryLink>,
+    file_upload_url: String,
 }
 
 impl From<UserDirectoryContentsResult> for FilesHome {
@@ -20,6 +21,7 @@ impl From<UserDirectoryContentsResult> for FilesHome {
         FilesHome {
             dir_content: displayable_dir_content,
             parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
+            file_upload_url: crate::handler::routes::PostUserFileUpload.to_string(),
         }
     }
 }

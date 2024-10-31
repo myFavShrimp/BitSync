@@ -1,19 +1,10 @@
 {% import "macros.html" as macros %}
+{% extends "base_secure.html" %}
 
-{% extends "base.html" %}
 {% block content %}
 
 <style>{{ crate::scss::files_home::STYLE_SHEET }}</style>
-<nav class="">
-    <a class="{{ crate::scss::files_home::ClassName::LOGO }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
-        {% call macros::logo(crate::scss::base::ClassName::TOP_BAR_LOGO) %}
-    </a>
-    <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
-        Log out
-    </a>
-</nav>
-
-<main class="">
+<main>
     {% match parent_directory_url %}
     {% when Some with (link_data) %}
         <a href="{{ link_data.parent_directory_url }}" class="">
@@ -22,6 +13,11 @@
         </a>
     {% when None %}
     {% endmatch %}
+
+    <form action="{{ file_upload_url }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="upload" />
+        <input type="submit" value="Upload" />
+    </form>
 
     {% if dir_content.is_empty() %}
     {% else %}
@@ -36,7 +32,7 @@
         </thead>
         <tbody>
             {% for dir_item in dir_content %}
-                <tr class="">
+                <tr>
                     <td>
                         <i class="">{{ dir_item.kind.icon() }}</i>
                     </td>

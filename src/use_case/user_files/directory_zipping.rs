@@ -59,7 +59,7 @@ async fn write_storage_item_to_zip(
                 .write_entry_stream(zip_entry_builder)
                 .await?;
 
-            let file_stream = StorageBackend::file_stream(&storage_item.path).await?;
+            let file_stream = StorageBackend::read_file_stream(&storage_item.path).await?;
 
             futures::io::copy(&mut file_stream.compat(), &mut zip_entry_writer)
                 .await

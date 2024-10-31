@@ -1,6 +1,6 @@
 {% import "macros.html" as macros %}
+{% extends "base_insecure.html" %}
 
-{% extends "base.html" %}
 {% block content %}
 
 {% let (style_sheet, class_name) = turf::style_sheet_values!("scss/register.scss") %}
