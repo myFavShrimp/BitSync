@@ -10,7 +10,7 @@ use crate::{
     storage::{
         error::{RemoveDirectoryError, RemoveFileError},
         AsyncFileRead, DirContentsError, EnsureExistsError, FileContentsError, FileWriteError,
-        StorageBackend, StorageItem, StorageItemError, StorageItemPath, UserStorage,
+        StorageBackend, StorageItem, StorageItemError, StoragePath, UserStorage,
     },
     validate::PathValidationError,
     AppState,
@@ -20,7 +20,7 @@ mod directory_zipping;
 
 pub struct UserDirectoryContentsResult {
     pub dir_contents: Vec<StorageItem>,
-    pub path: StorageItemPath,
+    pub path: StoragePath,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -47,7 +47,7 @@ pub async fn user_directory_contents(
 
     StorageBackend::ensure_exists(&user_storage).await?;
 
-    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+    let path = StoragePath::new(user_storage.clone(), PathBuf::from(path));
     let mut dir_contents = StorageBackend::dir_contents(&path).await?;
 
     dir_contents.sort_by_key(|item| item.path.path());
@@ -87,7 +87,7 @@ impl tokio::io::AsyncRead for AsyncStorageItemRead {
 pub struct UserFileResult {
     pub file: AsyncStorageItemRead,
     pub mime: mime_guess::Mime,
-    pub path: StorageItemPath,
+    pub path: StoragePath,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -130,7 +130,7 @@ pub async fn user_file_upload(
     let mut upload_path = PathBuf::from(path);
     upload_path.push(file_name);
 
-    let path = StorageItemPath::new(user_storage.clone(), upload_path);
+    let path = StoragePath::new(user_storage.clone(), upload_path);
 
     let field_with_io_error =
         field.map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error));
@@ -206,7 +206,7 @@ pub async fn user_file_download(
 
     StorageBackend::ensure_exists(&user_storage).await?;
 
-    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+    let path = StoragePath::new(user_storage.clone(), PathBuf::from(path));
 
     let storage_item = StorageBackend::storage_item(&path).await?;
 
@@ -239,7 +239,7 @@ pub async fn user_file_download(
             let mut dir_path = path.scoped_path.clone();
             dir_path.set_extension("zip");
 
-            let fake_zip_path = StorageItemPath::new(user_storage.clone(), PathBuf::from(dir_path));
+            let fake_zip_path = StoragePath::new(user_storage.clone(), PathBuf::from(dir_path));
 
             let mime = mime_guess::from_path(&fake_zip_path.scoped_path).first_or_octet_stream();
 
@@ -276,7 +276,7 @@ pub async fn user_file_delete(
 
     StorageBackend::ensure_exists(&user_storage).await?;
 
-    let path = StorageItemPath::new(user_storage.clone(), PathBuf::from(path));
+    let path = StoragePath::new(user_storage.clone(), PathBuf::from(path));
     let storage_item = StorageBackend::storage_item(&path).await?;
 
     match storage_item.kind {

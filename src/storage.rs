@@ -1,8 +1,4 @@
-use std::{
-    fmt::Display,
-    path::{Path, PathBuf},
-    pin::Pin,
-};
+use std::{fmt::Display, path::PathBuf, pin::Pin};
 
 use error::{
     DirectoryCreationError, MetadataError, OpenFileError, ReadDirectoryError, RemoveDirectoryError,
@@ -41,13 +37,19 @@ impl UserStorage {
     }
 }
 
+#[derive(thiserror::Error, Debug)]
+#[error("Could not map path to storage")]
+pub enum StoragePathError {
+    Invalid(#[from] crate::validate::PathValidationError),
+}
+
 #[derive(Clone, Debug)]
-pub struct StorageItemPath {
+pub struct StoragePath {
     storage: UserStorage,
     pub scoped_path: PathBuf,
 }
 
-impl StorageItemPath {
+impl StoragePath {
     pub fn new(storage: UserStorage, scoped_path: PathBuf) -> Self {
         let mut scoped_root = PathBuf::from("/");
         scoped_root.push(scoped_path);
@@ -67,15 +69,11 @@ impl StorageItemPath {
         user_directory
     }
 
-    pub fn push<P: AsRef<Path>>(&mut self, path: P) {
-        self.scoped_path.push(path);
-    }
-
-    pub fn strip_data_dir(&self, path: PathBuf) -> PathBuf {
-        path.strip_prefix(self.local_directory())
-            .map(|path| path.to_path_buf())
-            .unwrap_or(path)
-    }
+    // pub fn strip_data_dir(&self, path: PathBuf) -> PathBuf {
+    //     path.strip_prefix(self.local_directory())
+    //         .map(|path| path.to_path_buf())
+    //         .unwrap_or(path)
+    // }
 
     pub fn file_name(&self) -> String {
         match self.scoped_path.file_name() {
@@ -89,7 +87,7 @@ impl StorageItemPath {
     }
 }
 
-impl Display for StorageItemPath {
+impl Display for StoragePath {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.scoped_path.to_string_lossy())
     }
@@ -102,14 +100,14 @@ pub enum StorageItemKind {
 }
 
 pub struct StorageItem {
-    pub path: StorageItemPath,
+    pub path: StoragePath,
     pub size: u64,
     pub kind: StorageItemKind,
 }
 
 impl StorageItem {
     pub async fn from_dir_entry(
-        path: StorageItemPath,
+        path: StoragePath,
         dir_entry: tokio::fs::DirEntry,
     ) -> Result<Self, StorageItemCreationError> {
         let metadata =
@@ -139,11 +137,11 @@ impl StorageItem {
     }
 }
 
-impl TryFrom<(StorageItemPath, std::fs::Metadata)> for StorageItem {
+impl TryFrom<(StoragePath, std::fs::Metadata)> for StorageItem {
     type Error = StorageItemCreationError;
 
     fn try_from(
-        (path, metadata): (StorageItemPath, std::fs::Metadata),
+        (path, metadata): (StoragePath, std::fs::Metadata),
     ) -> Result<Self, StorageItemCreationError> {
         let kind = if metadata.file_type().is_dir() {
             StorageItemKind::Directory
@@ -225,9 +223,7 @@ impl StorageBackend {
         Ok(())
     }
 
-    pub async fn dir_contents(
-        path: &StorageItemPath,
-    ) -> Result<Vec<StorageItem>, DirContentsError> {
+    pub async fn dir_contents(path: &StoragePath) -> Result<Vec<StorageItem>, DirContentsError> {
         let mut dir_entries =
             tokio::fs::read_dir(path.local_directory())
                 .await
@@ -248,7 +244,7 @@ impl StorageBackend {
                 })?
         {
             let dir_entry_path = path.storage.strip_data_dir(dir_entry.path());
-            let path = StorageItemPath::new(path.storage.clone(), dir_entry_path);
+            let path = StoragePath::new(path.storage.clone(), dir_entry_path);
 
             storage_items.push(StorageItem::from_dir_entry(path, dir_entry).await?);
         }
@@ -256,9 +252,7 @@ impl StorageBackend {
         Ok(storage_items)
     }
 
-    pub async fn read_file_stream(
-        path: &StorageItemPath,
-    ) -> Result<AsyncFileRead, FileContentsError> {
+    pub async fn read_file_stream(path: &StoragePath) -> Result<AsyncFileRead, FileContentsError> {
         let file = tokio::fs::File::open(path.local_directory())
             .await
             .map_err(|error| OpenFileError {
@@ -270,7 +264,7 @@ impl StorageBackend {
     }
 
     pub async fn write_file_stream<S, B, E>(
-        path: &StorageItemPath,
+        path: &StoragePath,
         stream: StreamReader<S, B>,
     ) -> Result<AsyncFileRead, FileWriteError>
     where
@@ -302,7 +296,7 @@ impl StorageBackend {
         Ok(AsyncFileRead(file))
     }
 
-    pub async fn storage_item(path: &StorageItemPath) -> Result<StorageItem, StorageItemError> {
+    pub async fn storage_item(path: &StoragePath) -> Result<StorageItem, StorageItemError> {
         let metadata = tokio::fs::metadata(&path.local_directory())
             .await
             .map_err(|error| MetadataError {
@@ -313,7 +307,7 @@ impl StorageBackend {
         Ok(StorageItem::try_from((path.clone(), metadata))?)
     }
 
-    pub async fn delete_directory(path: &StorageItemPath) -> Result<(), RemoveDirectoryError> {
+    pub async fn delete_directory(path: &StoragePath) -> Result<(), RemoveDirectoryError> {
         tokio::fs::remove_dir_all(path.local_directory())
             .await
             .map_err(|error| RemoveDirectoryError {
@@ -324,7 +318,7 @@ impl StorageBackend {
         Ok(())
     }
 
-    pub async fn delete_file(path: &StorageItemPath) -> Result<(), RemoveFileError> {
+    pub async fn delete_file(path: &StoragePath) -> Result<(), RemoveFileError> {
         tokio::fs::remove_file(path.local_directory())
             .await
             .map_err(|error| RemoveFileError {
