@@ -1,0 +1,10 @@
+[package]
+name = "bitsync-database"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde.workspace = true
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "time", "uuid", "postgres"] }
+thiserror.workspace = true
+uuid.workspace = true

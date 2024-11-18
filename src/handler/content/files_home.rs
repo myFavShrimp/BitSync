@@ -7,12 +7,13 @@ use axum::{
     Router,
 };
 use axum_extra::routing::RouterExt;
+use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_directory_contents;
 
 use crate::{
     auth::{require_login_middleware, AuthData},
     handler::routes::GetFilesHomePageQueryParameters,
     presentation::templates::FilesHome,
-    use_case, AppState,
+    AppState,
 };
 
 use super::routes;
@@ -30,10 +31,10 @@ async fn files_home_page_handler(
     auth_data: AuthData,
     query_parameters: Query<GetFilesHomePageQueryParameters>,
 ) -> impl IntoResponse {
-    match use_case::user_files::user_directory_contents(
-        &app_state,
-        &auth_data,
+    match read_user_directory_contents(
+        &app_state.config.fs_storage_root_dir,
         &query_parameters.path,
+        &auth_data.user,
     )
     .await
     {

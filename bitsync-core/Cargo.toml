@@ -1,0 +1,23 @@
+[package]
+name = "bitsync-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+argon2 = { version = "0.5.2", features = ["std"] }
+async-recursion = "1.0.5"
+async_zip = { version = "0.0.17", features = ["tokio"] }
+bitsync-database.workspace = true
+bitsync-storage.workspace = true
+bytes.workspace = true
+futures.workspace = true
+jsonwebtoken = "9.2.0"
+mime_guess.workspace = true
+serde.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+time = { version = "0.3.30", features = ["serde-human-readable"] }
+tokio-stream = "0.1.15"
+tokio-util.workspace = true
+tracing.workspace = true
+uuid.workspace = true

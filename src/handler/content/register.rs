@@ -7,9 +7,10 @@ use axum::{
     Router,
 };
 use axum_extra::{extract::Form, routing::RouterExt};
+use bitsync_core::use_case::auth::registration::perform_registration;
 use serde::Deserialize;
 
-use crate::{auth::require_logout_middleware, use_case};
+use crate::auth::require_logout_middleware;
 
 use crate::AppState;
 
@@ -45,8 +46,9 @@ async fn register_action_handler(
     State(state): State<Arc<AppState>>,
     Form(registration_data): Form<RegisterActionFormData>,
 ) -> impl IntoResponse {
-    match use_case::register::perform_registration(
-        &state,
+    match perform_registration(
+        &state.database,
+        &state.config.fs_storage_root_dir,
         &registration_data.username,
         &registration_data.password,
     )

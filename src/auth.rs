@@ -1,8 +1,6 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{
-    database::user::User, handler::redirect_response, htmx::IsHxRequest, jwt::JwtClaims, AppState,
-};
+use crate::{handler::redirect_response, htmx::IsHxRequest, AppState};
 use axum::{
     extract::{FromRef, FromRequestParts, Request},
     http::request::Parts,
@@ -10,22 +8,27 @@ use axum::{
     response::Response,
 };
 use axum_extra::extract::CookieJar;
+use bitsync_core::jwt::JwtClaims;
+use bitsync_database::{database::ConnectionAcquisitionError, entity::User, repository};
 
-#[derive(Debug, Clone, thiserror::Error)]
+#[derive(Debug, thiserror::Error)]
 #[error("The provided auth token is invalid")]
-pub struct AuthTokenInvalidError;
+pub enum AuthTokenDecodeError {
+    Database(#[from] repository::QueryError),
+    ConnectionAcquisition(#[from] ConnectionAcquisitionError),
+    Decode(#[from] bitsync_core::jwt::Error),
+}
 
 async fn decode_auth_token(
     app_state: Arc<AppState>,
     token: &str,
-) -> Result<AuthData, AuthTokenInvalidError> {
-    match JwtClaims::decode_and_validate(token, &app_state.config.jwt_secret) {
-        Ok(claims) => match User::find_by_id(&app_state.postgres_pool, &claims.sub).await {
-            Ok(user) => Ok(AuthData { claims, user }),
-            Err(_) => Err(AuthTokenInvalidError),
-        },
-        Err(_) => Err(AuthTokenInvalidError),
-    }
+) -> Result<AuthData, AuthTokenDecodeError> {
+    let mut connection = app_state.database.acquire_connection().await?;
+
+    let claims = JwtClaims::decode_and_validate(token, &app_state.config.jwt_secret)?;
+    let user = repository::user::find_by_id(&mut *connection, &claims.sub).await?;
+
+    Ok(AuthData { claims, user })
 }
 
 pub static AUTH_COOKIE_NAME: &str = "auth";

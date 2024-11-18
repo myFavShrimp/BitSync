@@ -10,11 +10,10 @@ use axum_extra::{
     extract::{cookie::SameSite, CookieJar, Form},
     routing::RouterExt,
 };
+use bitsync_core::use_case::auth::login::perform_login;
 use serde::Deserialize;
 
-use crate::{
-    auth::require_logout_middleware, handler::redirect_response, htmx::IsHxRequest, use_case,
-};
+use crate::{auth::require_logout_middleware, handler::redirect_response, htmx::IsHxRequest};
 
 use crate::AppState;
 
@@ -49,7 +48,15 @@ async fn login_action_handler(
     cookie_jar: CookieJar,
     Form(login_data): Form<LoginActionFormData>,
 ) -> impl IntoResponse {
-    match use_case::login::perform_login(&state, login_data.username, login_data.password).await {
+    match perform_login(
+        &state.database,
+        &login_data.username,
+        &login_data.password,
+        state.config.jwt_expiration_seconds,
+        &state.config.jwt_secret,
+    )
+    .await
+    {
         Ok(login_token) => {
             let cookie_jar = cookie_jar.add({
                 let mut auth_cookie = axum_extra::extract::cookie::Cookie::new(

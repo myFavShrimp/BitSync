@@ -1,9 +1,11 @@
+use bitsync_storage::{
+    operation::read::{
+        read_dir_contents, read_file_stream, ReadDirContentsError, ReadFileStreamError,
+    },
+    storage_item::{StorageItem, StorageItemKind},
+};
 use tokio::io::DuplexStream;
 use tokio_util::compat::TokioAsyncReadCompatExt;
-
-use crate::storage::{
-    DirContentsError, FileContentsError, StorageBackend, StorageItem, StorageItemKind,
-};
 
 #[derive(Debug, thiserror::Error)]
 #[error("Failed to copy a stream")]
@@ -12,9 +14,9 @@ pub struct StreamCopyError(#[from] std::io::Error);
 #[derive(Debug, thiserror::Error)]
 #[error("An error occurred while writing a directory zip")]
 pub enum DirectoryZipError {
-    DirContents(#[from] DirContentsError),
+    ReadDirContents(#[from] ReadDirContentsError),
     Zip(#[from] async_zip::error::ZipError),
-    FileContents(#[from] FileContentsError),
+    ReadFileStream(#[from] ReadFileStreamError),
     StreamCopy(#[from] StreamCopyError),
 }
 
@@ -38,7 +40,7 @@ async fn write_storage_item_to_zip(
     root_storage_item: &StorageItem,
 ) -> Result<(), DirectoryZipError> {
     match storage_item.kind {
-        crate::storage::StorageItemKind::File => {
+        StorageItemKind::File => {
             let zipped_item_path = if let StorageItemKind::Directory = root_storage_item.kind {
                 storage_item
                     .path
@@ -59,7 +61,7 @@ async fn write_storage_item_to_zip(
                 .write_entry_stream(zip_entry_builder)
                 .await?;
 
-            let file_stream = StorageBackend::read_file_stream(&storage_item.path).await?;
+            let file_stream = read_file_stream(&storage_item.path).await?;
 
             futures::io::copy(&mut file_stream.compat(), &mut zip_entry_writer)
                 .await
@@ -67,8 +69,8 @@ async fn write_storage_item_to_zip(
 
             zip_entry_writer.close().await?;
         }
-        crate::storage::StorageItemKind::Directory => {
-            let directory_contents = StorageBackend::dir_contents(&storage_item.path).await?;
+        StorageItemKind::Directory => {
+            let directory_contents = read_dir_contents(&storage_item.path).await?;
 
             for directory_item in directory_contents {
                 write_storage_item_to_zip(zip_file_writer, &directory_item, root_storage_item)

@@ -1,8 +1,7 @@
 use std::path::PathBuf;
 
 use axum_extra::routing::TypedPath;
-
-use crate::storage::{StorageItem, StorageItemKind};
+use bitsync_storage::storage_item::{StorageItem, StorageItemKind};
 
 use super::format_file_size;
 

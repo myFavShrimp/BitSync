@@ -1,4 +1,4 @@
-use crate::use_case::user_files::UserDirectoryContentsResult;
+use bitsync_core::use_case::user_files::read_user_directory_contents::UserDirectoryContentsResult;
 
 use super::models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind};
 
