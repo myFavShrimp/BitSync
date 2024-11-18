@@ -3,19 +3,18 @@ use std::path::PathBuf;
 use bitsync_database::entity::User;
 use bitsync_storage::{
     operation::{
-        read::ReadStorageItemError,
+        read::{read_storage_item, ReadStorageItemError},
         write::{
             ensure_user_storage_exists, write_file_stream, EnsureUserStorageExistsError,
             WriteFileStreamError,
         },
     },
+    storage_item::StorageItem,
     storage_path::{StoragePath, StoragePathError},
     user_storage::UserStorage,
 };
 use futures::TryStreamExt;
 use tokio_util::io::StreamReader;
-
-use super::shared::AsyncStorageItemRead;
 
 pub struct UserFileUpload<S, B, E>
 where
@@ -28,7 +27,7 @@ where
 }
 
 pub struct UserFileResult {
-    pub file: AsyncStorageItemRead,
+    pub storage_item: StorageItem,
     pub mime: mime_guess::Mime,
     pub path: StoragePath,
 }
@@ -71,48 +70,15 @@ where
 
     let file_upload_stream_reader = StreamReader::new(file_upload_stream_with_io_error);
 
-    let _storage_item = write_file_stream(&path, file_upload_stream_reader).await?;
+    write_file_stream(&path, file_upload_stream_reader).await?;
 
-    panic!("success");
+    let storage_item = read_storage_item(&path).await?;
 
-    // match storage_item.kind {
-    //     crate::storage::StorageItemKind::File => {
-    //         let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
-    //         let file = StorageBackend::read_file_stream(&path).await?;
+    let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
 
-    //         Ok(UserFileResult {
-    //             file: AsyncStorageItemRead::File(file),
-    //             mime,
-    //             path,
-    //         })
-    //     }
-    //     crate::storage::StorageItemKind::Directory => {
-    //         let (write_stream, read_stream) = tokio::io::duplex(4096);
-
-    //         tokio::spawn(async move {
-    //             match directory_zipping::write_zipped_storage_item_to_stream(
-    //                 write_stream,
-    //                 &storage_item,
-    //             )
-    //             .await
-    //             {
-    //                 Ok(_) => {}
-    //                 Err(_) => todo!(),
-    //             };
-    //         });
-
-    //         let mut dir_path = path.scoped_path.clone();
-    //         dir_path.set_extension("zip");
-
-    //         let fake_zip_path = StorageItemPath::new(user_storage.clone(), PathBuf::from(dir_path));
-
-    //         let mime = mime_guess::from_path(&fake_zip_path.scoped_path).first_or_octet_stream();
-
-    //         Ok(UserFileResult {
-    //             file: AsyncStorageItemRead::Directory(read_stream),
-    //             mime,
-    //             path: fake_zip_path,
-    //         })
-    //     }
-    // }
+    Ok(UserFileResult {
+        storage_item,
+        mime,
+        path,
+    })
 }

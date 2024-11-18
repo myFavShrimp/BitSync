@@ -46,7 +46,7 @@ pub enum WriteFileStreamError {
 pub async fn write_file_stream<S, B, E>(
     path: &StoragePath,
     stream: StreamReader<S, B>,
-) -> Result<AsyncFileRead, WriteFileStreamError>
+) -> Result<(), WriteFileStreamError>
 where
     S: futures::Stream<Item = Result<B, E>>,
     B: bytes::Buf,
@@ -66,14 +66,7 @@ where
         .await
         .map_err(WriteFileStreamError::StreamWrite)?;
 
-    let file = tokio::fs::File::open(path.local_directory())
-        .await
-        .map_err(|error| OpenFileError {
-            source: error,
-            path: path.local_directory(),
-        })?;
-
-    Ok(AsyncFileRead(file))
+    Ok(())
 }
 
 #[derive(thiserror::Error, Debug)]
