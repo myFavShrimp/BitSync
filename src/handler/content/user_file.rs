@@ -4,7 +4,7 @@ use axum::{
     extract::{FromRequest, Query, Request, State},
     http::StatusCode,
     middleware::from_fn_with_state,
-    response::{IntoResponse, Response},
+    response::{Html, IntoResponse, Response},
     Router,
 };
 use axum_extra::{
@@ -20,6 +20,7 @@ use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_fil
 
 use crate::{
     auth::{require_login_middleware, AuthData},
+    presentation::templates::FilesHomeFileStorageTableRowOobSwap,
     AppState,
 };
 
@@ -95,15 +96,7 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => {
-            let content_type = headers::ContentType::from(result.mime);
-
-            let stream_body = AsyncReadBody::new(result.file);
-
-            let attachment = Attachment::new(stream_body).filename(result.path.file_name());
-
-            (axum_extra::TypedHeader(content_type), attachment).into_response()
-        }
+        Ok(result) => Html(FilesHomeFileStorageTableRowOobSwap::from(result).to_string()),
         Err(e) => todo!("{:#?}", e),
     }
 }

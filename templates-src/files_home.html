@@ -14,14 +14,22 @@
     {% when None %}
     {% endmatch %}
 
-    <form action="{{ file_upload_url }}" method="post" enctype="multipart/form-data">
+    <form
+        id="{{ FilesHomeElementId::FileUploadForm.to_str() }}"
+        hx-post="{{ file_upload_url }}"
+        enctype="multipart/form-data"
+        hx-swap-oob="true"
+    >
         <input type="file" name="upload" />
         <input type="submit" value="Upload" />
     </form>
 
     {% if dir_content.is_empty() %}
     {% else %}
-    <table class="{{ crate::scss::files_home::ClassName::TEST }}">
+    <table
+        class="{{ crate::scss::files_home::ClassName::TEST }}"
+        id="{{ FilesHomeElementId::FileStorageTable.to_str() }}"
+    >
         <thead>
             <tr>
                 <th class=""></th>
@@ -30,29 +38,10 @@
                 <th class=""></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="{{ FilesHomeElementId::FileStorageTableBody.to_str() }}">
             {% for dir_item in dir_content %}
                 <tr>
-                    <td>
-                        <i class="">{{ dir_item.kind.icon() }}</i>
-                    </td>
-                    <td>
-                        {% match dir_item.kind %}
-                        {% when StorageItemPresentationKind::Directory with { url } %}
-                            <a href="{{ url }}">
-                                {{ dir_item.name }}
-                            </a>
-                        {% when StorageItemPresentationKind::File %}
-                                {{ dir_item.name }}
-                        {% endmatch %}
-                    </td>
-                    <td class="{{ crate::scss::files_home::ClassName::FILE_SIZE_COLUMN }}">
-                        {{ dir_item.size }}
-                    </td>
-                    <td>
-                        <a href="{{ dir_item.download_url }}">Download</a>
-                        <a href="{{ dir_item.delete_url }}">Delete</a>
-                    </td>
+                    {% include "files_home/file_storage_table_row_content.html" %}
                 </tr>
             {% endfor %}
         </tbody>
