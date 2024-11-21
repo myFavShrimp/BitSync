@@ -10,7 +10,7 @@ use axum_extra::{extract::Form, routing::RouterExt};
 use bitsync_core::use_case::auth::registration::perform_registration;
 use serde::Deserialize;
 
-use crate::auth::require_logout_middleware;
+use crate::{auth::require_logout_middleware, presentation::templates::register::Register};
 
 use crate::AppState;
 
@@ -22,13 +22,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_post(register_action_handler)
         .route_layer(from_fn_with_state(state.clone(), require_logout_middleware))
         .with_state(state)
-}
-
-#[derive(askama::Template, Default)]
-#[template(path = "register.html")]
-struct Register {
-    username: Option<String>,
-    error_message: Option<String>,
 }
 
 async fn register_page_handler(_: routes::GetRegisterPage) -> impl IntoResponse {

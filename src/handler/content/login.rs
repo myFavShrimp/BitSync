@@ -13,7 +13,10 @@ use axum_extra::{
 use bitsync_core::use_case::auth::login::perform_login;
 use serde::Deserialize;
 
-use crate::{auth::require_logout_middleware, handler::redirect_response, htmx::IsHxRequest};
+use crate::{
+    auth::require_logout_middleware, handler::redirect_response, htmx::IsHxRequest,
+    presentation::templates::login::Login,
+};
 
 use crate::AppState;
 
@@ -26,10 +29,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .route_layer(from_fn_with_state(state.clone(), require_logout_middleware))
         .with_state(state)
 }
-
-#[derive(askama::Template)]
-#[template(path = "login.html")]
-struct Login;
 
 async fn login_page_handler(_: routes::GetLoginPage) -> impl IntoResponse {
     Html(Login.to_string())

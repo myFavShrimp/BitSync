@@ -20,7 +20,7 @@ use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_fil
 
 use crate::{
     auth::{require_login_middleware, AuthData},
-    presentation::templates::FilesHomeUploadResult,
+    presentation::templates::files_home::FilesHomeUploadResult,
     AppState,
 };
 

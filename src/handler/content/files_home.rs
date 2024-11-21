@@ -12,7 +12,7 @@ use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_
 use crate::{
     auth::{require_login_middleware, AuthData},
     handler::routes::GetFilesHomePageQueryParameters,
-    presentation::templates::FilesHome,
+    presentation::templates::files_home::FilesHome,
     AppState,
 };
 
