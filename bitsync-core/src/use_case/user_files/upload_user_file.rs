@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use bitsync_database::entity::User;
 use bitsync_storage::{
     operation::{
-        read::{read_storage_item, ReadStorageItemError},
+        read::{read_dir_contents, read_storage_item, ReadDirContentsError, ReadStorageItemError},
         write::{
             ensure_user_storage_exists, write_file_stream, EnsureUserStorageExistsError,
             WriteFileStreamError,
@@ -27,9 +27,7 @@ where
 }
 
 pub struct UserFileResult {
-    pub storage_item: StorageItem,
-    pub mime: mime_guess::Mime,
-    pub path: StoragePath,
+    pub dir_contents: Vec<StorageItem>,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -38,7 +36,7 @@ pub enum UserFileUploadError {
     StorageEnsurance(#[from] EnsureUserStorageExistsError),
     WriteFileStream(#[from] WriteFileStreamError),
     StoragePath(#[from] StoragePathError),
-    ReadStorageItem(#[from] ReadStorageItemError),
+    ReadDirContents(#[from] ReadDirContentsError),
 }
 
 pub async fn upload_user_file<S, B, E>(
@@ -60,25 +58,22 @@ where
 
     ensure_user_storage_exists(&user_storage).await?;
 
-    let mut upload_path = PathBuf::from(path);
-    upload_path.push(file_name);
+    let mut scoped_destination_path = PathBuf::from(path);
+    scoped_destination_path.push(file_name);
 
-    let path = StoragePath::new(user_storage.clone(), upload_path)?;
+    let destination_storage_path = StoragePath::new(user_storage.clone(), scoped_destination_path)?;
 
     let file_upload_stream_with_io_error =
         file_upload_stream.map_err(|error| std::io::Error::other(error));
-
     let file_upload_stream_reader = StreamReader::new(file_upload_stream_with_io_error);
 
-    write_file_stream(&path, file_upload_stream_reader).await?;
+    write_file_stream(&destination_storage_path, file_upload_stream_reader).await?;
 
-    let storage_item = read_storage_item(&path).await?;
+    let directory_storage_path = StoragePath::new(user_storage.clone(), PathBuf::from(path))?;
+    let mut dir_contents = read_dir_contents(&directory_storage_path).await?;
 
-    let mime = mime_guess::from_path(&path.scoped_path).first_or_octet_stream();
+    dir_contents.sort_by_key(|item| item.path.path());
+    dir_contents.sort_by_key(|item| item.kind.clone());
 
-    Ok(UserFileResult {
-        storage_item,
-        mime,
-        path,
-    })
+    Ok(UserFileResult { dir_contents })
 }

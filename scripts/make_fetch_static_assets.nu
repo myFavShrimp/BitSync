@@ -5,7 +5,7 @@ let static_assets = [
 
     ["Meyer CSS reset" "https://unpkg.com/reset-css/reset.css" "css/reset.css"]
 
-    ["HTMX" "https://unpkg.com/htmx.org@2.0.1/dist/htmx.min.js" "htmx.js"]
+    ["HTMX" "https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js" "htmx.js"]
 
     ["Noto Latin Ext" "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr6zRAW_0.woff2" fonts/noto-sans/latin-ext.woff2]
     ["Noto Latin" "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr5TRA.woff2" fonts/noto-sans/latin.woff2]

@@ -1,0 +1,8 @@
+<form
+    id="{{ FilesHomeElementId::FileUploadForm.to_str() }}"
+    hx-post="{{ file_upload_url }}"
+    enctype="multipart/form-data"
+>
+    <input type="file" name="upload" />
+    <input type="submit" value="Upload" />
+</form>

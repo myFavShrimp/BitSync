@@ -14,38 +14,11 @@
     {% when None %}
     {% endmatch %}
 
-    <form
-        id="{{ FilesHomeElementId::FileUploadForm.to_str() }}"
-        hx-post="{{ file_upload_url }}"
-        enctype="multipart/form-data"
-        hx-swap-oob="true"
-    >
-        <input type="file" name="upload" />
-        <input type="submit" value="Upload" />
-    </form>
+    {% include "files_home/file_upload_form.html" %}
 
-    {% if dir_content.is_empty() %}
-    {% else %}
-    <table
-        class="{{ crate::scss::files_home::ClassName::TEST }}"
-        id="{{ FilesHomeElementId::FileStorageTable.to_str() }}"
-    >
-        <thead>
-            <tr>
-                <th class=""></th>
-                <th>Name</th>
-                <th class="">Size</th>
-                <th class=""></th>
-            </tr>
-        </thead>
-        <tbody id="{{ FilesHomeElementId::FileStorageTableBody.to_str() }}">
-            {% for dir_item in dir_content %}
-                <tr>
-                    {% include "files_home/file_storage_table_row_content.html" %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
+    <div id="{{ FilesHomeElementId::FileStorageTableWrapper.to_str() }}">
+        {% include "files_home/file_storage_table.html" %}
+    </div>
+
 </main>
 {% endblock %}

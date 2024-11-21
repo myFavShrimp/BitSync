@@ -6,16 +6,14 @@ use super::models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPre
 
 pub enum FilesHomeElementId {
     FileUploadForm,
-    FileStorageTable,
-    FileStorageTableBody,
+    FileStorageTableWrapper,
 }
 
 impl FilesHomeElementId {
     pub fn to_str(&self) -> &'static str {
         match self {
             FilesHomeElementId::FileUploadForm => "file_upload_form",
-            FilesHomeElementId::FileStorageTable => "file_storage_table",
-            FilesHomeElementId::FileStorageTableBody => "file_storage_table_body",
+            FilesHomeElementId::FileStorageTableWrapper => "file_storage_table_wrapper",
         }
     }
 }
@@ -46,14 +44,22 @@ impl From<UserDirectoryContentsResult> for FilesHome {
 
 #[derive(askama::Template)]
 #[template(path = "files_home/file_upload_result.html")]
-pub struct FilesHomeFileStorageTableRowOobSwap {
-    dir_item: StorageItemPresentation,
+pub struct FilesHomeUploadResult {
+    dir_content: Vec<StorageItemPresentation>,
+    file_upload_url: String,
 }
 
-impl From<UserFileResult> for FilesHomeFileStorageTableRowOobSwap {
+impl From<UserFileResult> for FilesHomeUploadResult {
     fn from(value: UserFileResult) -> Self {
-        let dir_item = value.storage_item.into();
+        let displayable_dir_content = value
+            .dir_contents
+            .into_iter()
+            .map(StorageItemPresentation::from)
+            .collect();
 
-        FilesHomeFileStorageTableRowOobSwap { dir_item }
+        FilesHomeUploadResult {
+            dir_content: displayable_dir_content,
+            file_upload_url: crate::handler::routes::PostUserFileUpload.to_string(),
+        }
     }
 }

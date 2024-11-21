@@ -1,3 +1,9 @@
-<tr hx-swap-oob="afterbegin:#{{ FilesHomeElementId::FileStorageTableBody.to_str() }}">
-    {% include "files_home/file_storage_table_row_content.html" %}
-</tr>
+{% include "files_home/file_upload_form.html" %}
+<template>
+    <div
+        id="{{ FilesHomeElementId::FileStorageTableWrapper.to_str() }}"
+        hx-swap-oob="outerHTML:#{{ FilesHomeElementId::FileStorageTableWrapper.to_str() }}"
+    >
+        {% include "files_home/file_storage_table.html" %}
+    </div>
+</template>

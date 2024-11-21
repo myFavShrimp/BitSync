@@ -20,7 +20,7 @@ use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_fil
 
 use crate::{
     auth::{require_login_middleware, AuthData},
-    presentation::templates::FilesHomeFileStorageTableRowOobSwap,
+    presentation::templates::FilesHomeUploadResult,
     AppState,
 };
 
@@ -96,7 +96,7 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomeFileStorageTableRowOobSwap::from(result).to_string()),
+        Ok(result) => Html(FilesHomeUploadResult::from(result).to_string()),
         Err(e) => todo!("{:#?}", e),
     }
 }
