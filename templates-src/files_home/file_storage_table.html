@@ -11,7 +11,7 @@
         </thead>
         <tbody>
             {% for dir_item in dir_content %}
-                <tr>
+                <tr hx-target="this">
                     <td>
                         <i class="">{{ dir_item.kind.icon() }}</i>
                     </td>
@@ -30,7 +30,7 @@
                     </td>
                     <td>
                         <a href="{{ dir_item.download_url }}">Download</a>
-                        <a href="{{ dir_item.delete_url }}">Delete</a>
+                        <button hx-get="{{ dir_item.delete_url }}">Delete</button>
                     </td>
                 </tr>
             {% endfor %}

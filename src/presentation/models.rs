@@ -6,7 +6,6 @@ use bitsync_storage::storage_item::{StorageItem, StorageItemKind};
 use super::format_file_size;
 
 pub struct StorageItemPresentation {
-    pub path: String,
     pub size: String,
     pub name: String,
     pub kind: StorageItemPresentationKind,
@@ -60,7 +59,6 @@ impl From<StorageItem> for StorageItemPresentation {
             .to_string();
 
         Self {
-            path: value.path.path(),
             size: format_file_size(value.size),
             name: value.path.file_name(),
             kind: StorageItemPresentationKind::from(value),
