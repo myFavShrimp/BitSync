@@ -3,7 +3,11 @@ use std::convert::Infallible;
 use axum::{
     extract::FromRequestParts,
     http::{request::Parts, HeaderMap},
+    response::{IntoResponse, Response},
 };
+use axum_extra::response::Html;
+
+use crate::presentation::templates::error_modal::ErrorModal;
 
 pub struct IsHxRequest(pub bool);
 
@@ -21,4 +25,12 @@ where
 
         Ok(Self(headers.contains_key(HX_REQUEST_HEADER)))
     }
+}
+
+pub fn build_error_modal_oob_swap_response<E: std::error::Error>(error: E) -> Response {
+    (
+        [("hx-reswap", "none")],
+        Html(ErrorModal::from(error).to_string()),
+    )
+        .into_response()
 }

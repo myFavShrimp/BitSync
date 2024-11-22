@@ -2,6 +2,10 @@ pub mod base {
     turf::style_sheet!("scss/base.scss");
 }
 
+pub mod error_modal {
+    turf::style_sheet!("scss/error_modal.scss");
+}
+
 pub mod login {
     turf::style_sheet!("scss/login.scss");
 }

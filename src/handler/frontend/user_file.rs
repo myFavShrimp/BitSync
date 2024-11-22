@@ -4,22 +4,20 @@ use axum::{
     extract::{FromRequest, Query, Request, State},
     http::StatusCode,
     middleware::from_fn_with_state,
-    response::{Html, IntoResponse, Response},
+    response::{IntoResponse, Response},
     Router,
 };
 use axum_extra::{
     body::AsyncReadBody,
-    extract::{
-        multipart::{Field, MultipartError},
-        Multipart,
-    },
-    response::Attachment,
+    extract::{multipart::Field, Multipart},
+    response::{Attachment, Html},
     routing::RouterExt,
 };
 use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
 
 use crate::{
     auth::{require_login_middleware, AuthData},
+    htmx::build_error_modal_oob_swap_response,
     presentation::templates::files_home::FilesHomeUploadResult,
     AppState,
 };
@@ -70,16 +68,6 @@ where
     }
 }
 
-#[derive(thiserror::Error, Debug)]
-#[error("Failed to read file stream")]
-pub struct MappedMultipartError(#[from] MultipartError);
-
-impl Into<std::io::Error> for MappedMultipartError {
-    fn into(self) -> std::io::Error {
-        todo!()
-    }
-}
-
 async fn user_file_upload_handler(
     _: routes::PostUserFileUpload,
     State(app_state): State<Arc<AppState>>,
@@ -96,8 +84,8 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomeUploadResult::from(result).to_string()),
-        Err(e) => todo!("{:#?}", e),
+        Ok(result) => Html(FilesHomeUploadResult::from(result).to_string()).into_response(),
+        Err(error) => build_error_modal_oob_swap_response(error),
     }
 }
 
@@ -123,7 +111,7 @@ async fn user_file_download_handler(
 
             (axum_extra::TypedHeader(content_type), attachment).into_response()
         }
-        Err(_) => todo!(),
+        Err(error) => build_error_modal_oob_swap_response(error),
     }
 }
 
@@ -140,7 +128,7 @@ async fn user_file_delete_handler(
     )
     .await
     {
-        Ok(_) => StatusCode::OK,
-        Err(_) => todo!(),
+        Ok(()) => StatusCode::OK.into_response(),
+        Err(error) => build_error_modal_oob_swap_response(error),
     }
 }
