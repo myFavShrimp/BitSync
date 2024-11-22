@@ -1,6 +1,6 @@
 {% if dir_content.is_empty() %}
 {% else %}
-    <table class="{{ crate::scss::files_home::ClassName::TEST }}">
+    <table class="{{ crate::scss::files_home_page::ClassName::TEST }}">
         <thead>
             <tr>
                 <th class=""></th>
@@ -25,7 +25,7 @@
                                 {{ dir_item.name }}
                         {% endmatch %}
                     </td>
-                    <td class="{{ crate::scss::files_home::ClassName::FILE_SIZE_COLUMN }}">
+                    <td class="{{ crate::scss::files_home_page::ClassName::FILE_SIZE_COLUMN }}">
                         {{ dir_item.size }}
                     </td>
                     <td>

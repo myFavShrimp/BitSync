@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<style>{{ crate::scss::files_home::STYLE_SHEET }}</style>
+<style>{{ crate::scss::files_home_page::STYLE_SHEET }}</style>
 <main>
     {% match parent_directory_url %}
     {% when Some with (link_data) %}
@@ -14,10 +14,10 @@
     {% when None %}
     {% endmatch %}
 
-    {% include "files_home/file_upload_form.html" %}
+    {% include "files_home_page/file_upload_form.html" %}
 
-    <div id="{{ FilesHomeElementId::FileStorageTableWrapper.to_str() }}">
-        {% include "files_home/file_storage_table.html" %}
+    <div id="{{ FilesHomePageElementId::FileStorageTableWrapper.to_str() }}">
+        {% include "files_home_page/file_storage_table.html" %}
     </div>
 
 </main>

@@ -3,14 +3,14 @@
 
 {% block content %}
 
-<main class="{{ crate::scss::register::ClassName::PAGE }}">
-    <style>{{ crate::scss::register::STYLE_SHEET }}</style>
+<main class="{{ crate::scss::register_page::ClassName::PAGE }}">
+    <style>{{ crate::scss::register_page::STYLE_SHEET }}</style>
 
     <form
-        class="{{ crate::scss::register::ClassName::FORM }}"
+        class="{{ crate::scss::register_page::ClassName::FORM }}"
         hx-post="{{ crate::handler::routes::PostRegisterAction.to_string() }}"
     >
-        {% call macros::logo(crate::scss::register::ClassName::LOGO) %}
+        {% call macros::logo(crate::scss::register_page::ClassName::LOGO) %}
 
         <div>
             <div>

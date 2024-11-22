@@ -18,7 +18,7 @@ use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_fil
 use crate::{
     auth::{require_login_middleware, AuthData},
     htmx::build_error_modal_oob_swap_response,
-    presentation::templates::files_home::FilesHomeUploadResult,
+    presentation::templates::files_home_page::FilesHomePageUploadResult,
     AppState,
 };
 
@@ -84,7 +84,7 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomeUploadResult::from(result).to_string()).into_response(),
+        Ok(result) => Html(FilesHomePageUploadResult::from(result).to_string()).into_response(),
         Err(error) => build_error_modal_oob_swap_response(error),
     }
 }

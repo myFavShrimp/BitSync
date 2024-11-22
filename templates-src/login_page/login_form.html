@@ -1,0 +1,27 @@
+<form
+    class="{{ crate::scss::login_page::ClassName::FORM }}"
+    hx-post="{{ crate::handler::routes::PostLoginAction.to_string() }}"
+    hx-target="this"
+>
+    <div>
+        <div>
+            <label>Username</label>
+            <input name="username" value="{{ username }}" required>
+        </div>
+        <div>
+            <label>Password</label>
+            <input name="password" required>
+        </div>
+
+        {% match error_message %}
+            {% when Some with (message) %}
+                <div>{{ message }}</div>
+            {% when None %}
+        {% endmatch %}
+
+        <div>
+            <a href="{{ crate::handler::routes::GetRegisterPage.to_string() }}">I don't have an account</a>
+            <button type="submit">Login</mdui-button>
+        </div>
+    </div>
+</form>

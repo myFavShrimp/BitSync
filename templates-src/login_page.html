@@ -1,0 +1,13 @@
+{% import "macros.html" as macros %}
+{% extends "shared/base_insecure.html" %}
+
+{% block content %}
+
+<main class="{{ crate::scss::login_page::ClassName::PAGE }}">
+    <style>{{ crate::scss::login_page::STYLE_SHEET }}</style>
+
+    {% call macros::logo(crate::scss::login_page::ClassName::LOGO) %}
+
+    {% include "login_page/login_form.html" %}
+</main>
+{% endblock %}

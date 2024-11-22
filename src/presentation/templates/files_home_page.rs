@@ -6,29 +6,29 @@ use crate::presentation::models::{
     ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind,
 };
 
-pub enum FilesHomeElementId {
+pub enum FilesHomePageElementId {
     FileUploadForm,
     FileStorageTableWrapper,
 }
 
-impl FilesHomeElementId {
+impl FilesHomePageElementId {
     pub fn to_str(&self) -> &'static str {
         match self {
-            FilesHomeElementId::FileUploadForm => "file_upload_form",
-            FilesHomeElementId::FileStorageTableWrapper => "file_storage_table_wrapper",
+            FilesHomePageElementId::FileUploadForm => "file_upload_form",
+            FilesHomePageElementId::FileStorageTableWrapper => "file_storage_table_wrapper",
         }
     }
 }
 
 #[derive(askama::Template)]
-#[template(path = "files_home.html")]
-pub struct FilesHome {
+#[template(path = "files_home_page.html")]
+pub struct FilesHomePage {
     dir_content: Vec<StorageItemPresentation>,
     parent_directory_url: Option<ParentDirectoryLink>,
     file_upload_url: String,
 }
 
-impl From<UserDirectoryContentsResult> for FilesHome {
+impl From<UserDirectoryContentsResult> for FilesHomePage {
     fn from(value: UserDirectoryContentsResult) -> Self {
         let displayable_dir_content = value
             .dir_contents
@@ -36,7 +36,7 @@ impl From<UserDirectoryContentsResult> for FilesHome {
             .map(StorageItemPresentation::from)
             .collect();
 
-        FilesHome {
+        FilesHomePage {
             dir_content: displayable_dir_content,
             parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
             file_upload_url: crate::handler::routes::PostUserFileUpload.to_string(),
@@ -45,13 +45,13 @@ impl From<UserDirectoryContentsResult> for FilesHome {
 }
 
 #[derive(askama::Template)]
-#[template(path = "files_home/file_upload_result.html")]
-pub struct FilesHomeUploadResult {
+#[template(path = "files_home_page/file_upload_result.html")]
+pub struct FilesHomePageUploadResult {
     dir_content: Vec<StorageItemPresentation>,
     file_upload_url: String,
 }
 
-impl From<UserFileResult> for FilesHomeUploadResult {
+impl From<UserFileResult> for FilesHomePageUploadResult {
     fn from(value: UserFileResult) -> Self {
         let displayable_dir_content = value
             .dir_contents
@@ -59,7 +59,7 @@ impl From<UserFileResult> for FilesHomeUploadResult {
             .map(StorageItemPresentation::from)
             .collect();
 
-        FilesHomeUploadResult {
+        FilesHomePageUploadResult {
             dir_content: displayable_dir_content,
             file_upload_url: crate::handler::routes::PostUserFileUpload.to_string(),
         }

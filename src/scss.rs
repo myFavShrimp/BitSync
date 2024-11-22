@@ -6,14 +6,14 @@ pub mod error_modal {
     turf::style_sheet!("scss/error_modal.scss");
 }
 
-pub mod login {
-    turf::style_sheet!("scss/login.scss");
+pub mod login_page {
+    turf::style_sheet!("scss/login_page.scss");
 }
 
-pub mod register {
-    turf::style_sheet!("scss/register.scss");
+pub mod register_page {
+    turf::style_sheet!("scss/register_page.scss");
 }
 
-pub mod files_home {
-    turf::style_sheet!("scss/files_home.scss");
+pub mod files_home_page {
+    turf::style_sheet!("scss/files_home_page.scss");
 }

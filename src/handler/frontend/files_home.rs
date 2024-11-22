@@ -12,7 +12,7 @@ use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_
 use crate::{
     auth::{require_login_middleware, AuthData},
     handler::routes::GetFilesHomePageQueryParameters,
-    presentation::templates::{error_page::ErrorPage, files_home::FilesHome},
+    presentation::templates::{error_page::ErrorPage, files_home_page::FilesHomePage},
     AppState,
 };
 
@@ -38,7 +38,7 @@ async fn files_home_page_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHome::from(result).to_string()),
+        Ok(result) => Html(FilesHomePage::from(result).to_string()),
         Err(error) => Html(ErrorPage::from(error).to_string()),
     }
 }

@@ -16,7 +16,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::require_logout_middleware, handler::redirect_response,
-    presentation::templates::login::Login,
+    presentation::templates::login_page::LoginPage,
 };
 
 use crate::AppState;
@@ -32,7 +32,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 }
 
 async fn login_page_handler(_: routes::GetLoginPage) -> impl IntoResponse {
-    Html(Login.to_string())
+    Html(LoginPage::default().to_string())
 }
 
 #[derive(Deserialize, Clone, Debug)]
