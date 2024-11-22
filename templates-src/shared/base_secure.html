@@ -10,9 +10,11 @@
     <link rel="stylesheet" type="text/css" href="static/external/css/reset.css">
     <link rel="stylesheet" type="text/css" href="static/external/css/Noto Sans.css">
 
-    <script src="static/js/dialog-helper.js"></script>
+    <script src="static/js/dialog-helper.js" defer></script>
     <style>{{ crate::scss::base::STYLE_SHEET }}</style>
     <style>{{ crate::scss::error_modal::STYLE_SHEET }}</style>
+
+    <meta name="htmx-config" content="{{ crate::htmx::retrieve_config() }}">
 </head>
 <body>
 

@@ -1,18 +1,16 @@
 <template>
     <div hx-swap-oob="beforeend:body">
 
-        <dialog open class="{{ crate::scss::error_modal::ClassName::MODAL }}">
-            <div class="{{ crate::scss::error_modal::ClassName::MODAL_CONTENT }}">
-                <h1>{{ message }}</h1>
+        <dialog class="{{ crate::scss::error_modal::ClassName::MODAL }}">
+            <h1>{{ message }}</h1>
 
-                {% match trace %}
-                    {% when Some with (trace) %}
-                        <pre>{{ trace }}</pre>
-                    {% when None %}
-                {% endmatch %}
+            {% match trace %}
+                {% when Some with (trace) %}
+                    <pre>{{ trace }}</pre>
+                {% when None %}
+            {% endmatch %}
 
-                <button onclick="closeNextDialog(this)">close</button>
-            </div>
+            <button onclick="closeClosestDialog(this)">close</button>
         </dialog>
 
     </div>
