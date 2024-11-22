@@ -10,11 +10,12 @@ use axum_extra::{
     extract::{cookie::SameSite, CookieJar, Form},
     routing::RouterExt,
 };
+use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::login::perform_login;
 use serde::Deserialize;
 
 use crate::{
-    auth::require_logout_middleware, handler::redirect_response, htmx::IsHxRequest,
+    auth::require_logout_middleware, handler::redirect_response,
     presentation::templates::login::Login,
 };
 
@@ -42,8 +43,8 @@ struct LoginActionFormData {
 
 async fn login_action_handler(
     _: routes::PostLoginAction,
-    IsHxRequest(is_hx_request): IsHxRequest,
     State(state): State<Arc<AppState>>,
+    HxRequest(is_hx_request): HxRequest,
     cookie_jar: CookieJar,
     Form(login_data): Form<LoginActionFormData>,
 ) -> impl IntoResponse {

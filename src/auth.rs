@@ -1,6 +1,6 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{handler::redirect_response, htmx::IsHxRequest, AppState};
+use crate::{handler::redirect_response, AppState};
 use axum::{
     extract::{FromRef, FromRequestParts, Request},
     http::request::Parts,
@@ -8,6 +8,7 @@ use axum::{
     response::Response,
 };
 use axum_extra::extract::CookieJar;
+use axum_htmx::HxRequest;
 use bitsync_core::jwt::JwtClaims;
 use bitsync_database::{database::ConnectionAcquisitionError, entity::User, repository};
 
@@ -50,7 +51,7 @@ where
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let app_state = Arc::<AppState>::from_ref(state);
-        let IsHxRequest(is_hx_request) = match IsHxRequest::from_request_parts(parts, state).await {
+        let HxRequest(is_hx_request) = match HxRequest::from_request_parts(parts, state).await {
             Ok(is_hx_request) => is_hx_request,
             Err(infallible) => match infallible {},
         };
@@ -114,7 +115,7 @@ where
 }
 pub async fn require_logout_middleware(
     auth_status: AuthStatus,
-    IsHxRequest(is_hx_request): IsHxRequest,
+    HxRequest(is_hx_request): HxRequest,
     request: Request,
     next: Next,
 ) -> Response {
@@ -129,7 +130,7 @@ pub async fn require_logout_middleware(
 
 pub async fn require_login_middleware(
     auth_status: AuthStatus,
-    IsHxRequest(is_hx_request): IsHxRequest,
+    HxRequest(is_hx_request): HxRequest,
     request: Request,
     next: Next,
 ) -> Response {

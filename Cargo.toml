@@ -26,8 +26,9 @@ license = "MPL-2.0"
 [dependencies]
 askama = "0.12.1"
 async-trait = "0.1.74"
-axum = { version = "0.7.2", features = ["http2"] }
-axum-extra = { version = "0.9.0", features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment", "multipart"] }
+axum = { version = "0.7.9", features = ["http2"] }
+axum-extra = { version = "0.9.6", features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment", "multipart"] }
+axum-htmx = "0.6.0"
 bitsync-core.workspace = true
 bitsync-database.workspace = true
 bitsync-storage.workspace = true
@@ -52,7 +53,3 @@ tracing.workspace = true
 tracing-subscriber = "0.3.18"
 turf = "0.9.3"
 uuid.workspace = true
-
-[patch.crates-io]
-axum-extra = { git = "https://github.com/tokio-rs/axum.git", rev = "52ae7bb904cc374ad0acdc08ae03760a71d95ac2" }
-axum = { git = "https://github.com/tokio-rs/axum.git", rev = "52ae7bb904cc374ad0acdc08ae03760a71d95ac2" }
