@@ -18,7 +18,7 @@ use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_fil
 use crate::{
     auth::{require_login_middleware, AuthData},
     presentation::templates::{
-        error_modal::ErrorModal, files_home_page::FilesHomePageUploadResult,
+        error_modal::ErrorModal, files_home_page::FilesHomePageChangeResult,
     },
     AppState,
 };
@@ -85,7 +85,7 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePageUploadResult::from(result).to_string()).into_response(),
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).to_string()).into_response(),
         Err(error) => Html(ErrorModal::from(error).to_string()).into_response(),
     }
 }
@@ -129,7 +129,7 @@ async fn user_file_delete_handler(
     )
     .await
     {
-        Ok(()) => StatusCode::OK.into_response(),
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).to_string()).into_response(),
         Err(error) => Html(ErrorModal::from(error).to_string()).into_response(),
     }
 }

@@ -1,4 +1,5 @@
 use bitsync_core::use_case::user_files::{
+    delete_user_file::UserFileDeletionResult,
     read_user_directory_contents::UserDirectoryContentsResult, upload_user_file::UserFileResult,
 };
 
@@ -45,13 +46,12 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
 }
 
 #[derive(askama::Template)]
-#[template(path = "files_home_page/file_upload_result.html")]
-pub struct FilesHomePageUploadResult {
+#[template(path = "files_home_page/file_change_result.html")]
+pub struct FilesHomePageChangeResult {
     dir_content: Vec<StorageItemPresentation>,
-    file_upload_url: String,
 }
 
-impl From<UserFileResult> for FilesHomePageUploadResult {
+impl From<UserFileResult> for FilesHomePageChangeResult {
     fn from(value: UserFileResult) -> Self {
         let displayable_dir_content = value
             .dir_contents
@@ -59,9 +59,22 @@ impl From<UserFileResult> for FilesHomePageUploadResult {
             .map(StorageItemPresentation::from)
             .collect();
 
-        FilesHomePageUploadResult {
+        FilesHomePageChangeResult {
             dir_content: displayable_dir_content,
-            file_upload_url: crate::handler::routes::PostUserFileUpload.to_string(),
+        }
+    }
+}
+
+impl From<UserFileDeletionResult> for FilesHomePageChangeResult {
+    fn from(value: UserFileDeletionResult) -> Self {
+        let displayable_dir_content = value
+            .dir_contents
+            .into_iter()
+            .map(StorageItemPresentation::from)
+            .collect();
+
+        FilesHomePageChangeResult {
+            dir_content: displayable_dir_content,
         }
     }
 }
