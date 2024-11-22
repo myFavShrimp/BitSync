@@ -1,7 +1,23 @@
+function openDialogById(id) {
+    const dialog = document.getElementById(id)
+
+    if (dialog == null || dialog.nodeName != 'DIALOG') return
+
+    dialog.showModal()
+}
+
 function closeClosestDialog(element) {
     const dialog = element.closest('dialog')
 
-    if (dialog == null) return
+    if (dialog == null || dialog.nodeName != 'DIALOG') return
+
+    dialog.close()
+}
+
+function closeClosestDialogAndRemoveElement(element) {
+    const dialog = element.closest('dialog')
+
+    if (dialog == null || dialog.nodeName != 'DIALOG') return
 
     dialog.close()
 

@@ -1,6 +1,6 @@
 {% if dir_content.is_empty() %}
 {% else %}
-    <table class="{{ crate::scss::files_home_page::ClassName::TEST }}">
+    <table>
         <thead>
             <tr>
                 <th class=""></th>
@@ -29,8 +29,25 @@
                         {{ dir_item.size }}
                     </td>
                     <td>
-                        <a href="{{ dir_item.download_url }}">Download</a>
-                        <button hx-get="{{ dir_item.delete_url }}">Delete</button>
+                        <button onclick="openDialogById('{{ dir_item.actions_popover_id }}')">actions</button>
+                        <dialog
+                            id="{{ dir_item.actions_popover_id }}"
+                            class="{{ crate::scss::files_home_page::ClassName::ACTIONS_POPOVER }}"
+                        >
+                            <a
+                                href="{{ dir_item.download_url }}"
+                                onclick="closeClosestDialog(this)"
+                            >
+                                Download
+                            </a>
+                            <button
+                                hx-get="{{ dir_item.delete_url }}"
+                                onclick="closeClosestDialog(this)"
+                            >
+                                Delete
+                            </button>
+                            <button onclick="closeClosestDialog(this)">close</button>
+                        </dialog>
                     </td>
                 </tr>
             {% endfor %}
