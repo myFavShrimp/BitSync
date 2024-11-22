@@ -3,27 +3,28 @@
 
 {% block content %}
 
-{% let (style_sheet, class_name) = turf::style_sheet_values!("scss/register.scss") %}
+<main class="{{ crate::scss::register::ClassName::PAGE }}">
+    <style>{{ crate::scss::register::STYLE_SHEET }}</style>
 
-<main class="{{ class_name.page }}">
-    <style>{{ style_sheet }}</style>
-
-    <form class="{{ class_name.form }}" hx-post="{{ crate::handler::routes::PostRegisterAction.to_string() }}">
-        {% call macros::logo(class_name.logo) %}
+    <form
+        class="{{ crate::scss::register::ClassName::FORM }}"
+        hx-post="{{ crate::handler::routes::PostRegisterAction.to_string() }}"
+    >
+        {% call macros::logo(crate::scss::register::ClassName::LOGO) %}
 
         <div>
-            <div class="">
-                <input name="username" required>
+            <div>
                 <label>Username</label>
+                <input name="username" required>
             </div>
-            <div class="">
-                <input name="password" required>
+            <div>
                 <label>Password</label>
+                <input name="password" required>
             </div>
 
-            <div class="{# { class_name.button_group } #}">
-                <a class="button border large" href="{{ crate::handler::routes::GetLoginPage.to_string() }}">Login</a>
-                <button class="" type="submit">Register</button>
+            <div>
+                <a class="button border large" href="{{ crate::handler::routes::GetLoginPage.to_string() }}">I already have an account</a>
+                <button type="submit">Register</button>
             </div>
         </div>
     </form>

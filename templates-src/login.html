@@ -6,22 +6,26 @@
 <main class="{{ crate::scss::login::ClassName::PAGE }}">
     <style>{{ crate::scss::login::STYLE_SHEET }}</style>
 
-    <form class="{{ crate::scss::login::ClassName::FORM }}" hx-post="{{ crate::handler::routes::PostLoginAction.to_string() }}">
+    <form
+        class="{{ crate::scss::login::ClassName::FORM }}"
+        hx-post="{{ crate::handler::routes::PostLoginAction.to_string() }}"
+        hx-target="this"
+    >
         {% call macros::logo(crate::scss::login::ClassName::LOGO) %}
 
         <div>
-            <div class="">
-                <input name="username" required>
+            <div>
                 <label>Username</label>
+                <input name="username" required>
             </div>
-            <div class="">
-                <input name="password" required>
+            <div>
                 <label>Password</label>
+                <input name="password" required>
             </div>
 
-            <div class="{# { crate::scss::login::ClassName::BUTTON_GROUP } #}">
-                <a class="" href="{{ crate::handler::routes::GetRegisterPage.to_string() }}">Register</a>
-                <button class="" type="submit">Login</mdui-button>
+            <div>
+                <a href="{{ crate::handler::routes::GetRegisterPage.to_string() }}">I don't have an account</a>
+                <button type="submit">Login</mdui-button>
             </div>
         </div>
     </form>
