@@ -2,4 +2,4 @@
 /templates
 .env
 dist
-*.graphql
+static/external/

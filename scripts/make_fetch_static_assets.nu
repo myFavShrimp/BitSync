@@ -9,6 +9,8 @@ let static_assets = [
 
     ["Noto Latin Ext" "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr6zRAW_0.woff2" fonts/noto-sans/latin-ext.woff2]
     ["Noto Latin" "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr5TRA.woff2" fonts/noto-sans/latin.woff2]
+
+    ["Anchor Positioning Polyfill" "https://unpkg.com/@oddbird/css-anchor-positioning" "anchor-positioning-polyfill.js"]
 ]
 
 def main [
