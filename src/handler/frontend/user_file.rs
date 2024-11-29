@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use axum::{
     extract::{FromRequest, Query, Request, State},
-    http::StatusCode,
     middleware::from_fn_with_state,
     response::{IntoResponse, Response},
     Router,
@@ -30,6 +29,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_post(user_file_upload_handler)
         .typed_get(user_file_download_handler)
         .typed_get(user_file_delete_handler)
+        .typed_get(user_file_move_handler)
         .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
         .with_state(state)
 }
@@ -123,6 +123,24 @@ async fn user_file_delete_handler(
     query_parameters: Query<routes::GetUserFileDeleteQueryParameters>,
 ) -> impl IntoResponse {
     match use_case::user_files::delete_user_file::delete_user_file(
+        &app_state.config.fs_storage_root_dir,
+        &query_parameters.path,
+        &auth_data.user,
+    )
+    .await
+    {
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).to_string()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).to_string()).into_response(),
+    }
+}
+
+async fn user_file_move_handler(
+    _: routes::GetUserFileMove,
+    State(app_state): State<Arc<AppState>>,
+    auth_data: AuthData,
+    query_parameters: Query<routes::GetUserFileMoveQueryParameters>,
+) -> impl IntoResponse {
+    match use_case::user_files::move_user_file::move_user_file(
         &app_state.config.fs_storage_root_dir,
         &query_parameters.path,
         &auth_data.user,

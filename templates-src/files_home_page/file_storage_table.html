@@ -35,6 +35,28 @@
                             id="{{ dir_item.actions_popover_id }}"
                             class="{{ crate::scss::files_home_page::ClassName::ACTIONS_POPOVER }}"
                         >
+                            <h1>{{ dir_item.name }}</h1>
+
+                            <hr />
+
+                            <button onclick="openPopoverById('{{ dir_item.actions_move_popover_id }}')">
+                                Move
+                            </button>
+                            <dialog
+                                popover
+                                id="{{ dir_item.actions_move_popover_id }}"
+                                class="{{ crate::scss::files_home_page::ClassName::ACTIONS_POPOVER }}"
+                            >
+                                {{ dir_item.path }}
+                                <input type="text" value="{{ dir_item.path }}" />
+                                <button onclick="openPopoverById('{{ dir_item.actions_move_popover_id }}')">
+                                    Move
+                                </button>
+                                <button onclick="closeClosestPopover(this)">
+                                    Cancel
+                                </button>
+                            </dialog>
+
                             <a
                                 href="{{ dir_item.download_url }}"
                                 onclick="closeClosestDialog(this)"
@@ -47,6 +69,7 @@
                             >
                                 Delete
                             </button>
+
                             <button onclick="closeClosestPopover(this)">close</button>
                         </dialog>
                     </td>
