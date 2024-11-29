@@ -1,4 +1,6 @@
-function openDialogById(id) {
+// dialog elements
+
+function openDialogModalById(id) {
     const dialog = document.getElementById(id)
 
     if (dialog == null || dialog.nodeName != 'DIALOG') return
@@ -26,6 +28,26 @@ function closeClosestDialogAndRemoveElement(element) {
         10000,
     )
 }
+
+// popover
+
+function openPopoverById(id) {
+    const popover = document.getElementById(id)
+
+    if (popover == null) return
+
+    popover.showPopover()
+}
+
+function closeClosestPopover(element) {
+    const dialog = element.closest('[popover]')
+
+    if (dialog == null) return
+
+    dialog.hidePopover()
+}
+
+// dialog swap listener
 
 document.body.addEventListener('htmx:load', function (event) {
     const element = event.detail.elt
