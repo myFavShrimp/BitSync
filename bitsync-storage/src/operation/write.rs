@@ -103,3 +103,26 @@ pub async fn delete_file(path: &StoragePath) -> Result<(), DeleteFileError> {
 
     Ok(())
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("Failed to rename item")]
+pub struct RenameItemError {
+    pub source: IoError,
+    pub from_path: PathBuf,
+    pub to_path: PathBuf,
+}
+
+pub async fn rename_item(
+    from_path: &StoragePath,
+    to_path: &StoragePath,
+) -> Result<(), RenameItemError> {
+    tokio::fs::rename(from_path.local_directory(), to_path.local_directory())
+        .await
+        .map_err(|error| RenameItemError {
+            source: error,
+            from_path: from_path.local_directory(),
+            to_path: to_path.local_directory(),
+        })?;
+
+    Ok(())
+}

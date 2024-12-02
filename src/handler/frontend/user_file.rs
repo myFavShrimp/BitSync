@@ -8,11 +8,12 @@ use axum::{
 };
 use axum_extra::{
     body::AsyncReadBody,
-    extract::{multipart::Field, Multipart},
+    extract::{multipart::Field, Form, Multipart},
     response::{Attachment, Html},
     routing::RouterExt,
 };
 use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
+use serde::Deserialize;
 
 use crate::{
     auth::{require_login_middleware, AuthData},
@@ -29,7 +30,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_post(user_file_upload_handler)
         .typed_get(user_file_download_handler)
         .typed_get(user_file_delete_handler)
-        .typed_get(user_file_move_handler)
+        .typed_post(user_file_move_handler)
         .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
         .with_state(state)
 }
@@ -134,15 +135,22 @@ async fn user_file_delete_handler(
     }
 }
 
+#[derive(Deserialize)]
+struct MoveItemFormData {
+    pub destination_path: String,
+}
+
 async fn user_file_move_handler(
-    _: routes::GetUserFileMove,
+    _: routes::PostUserFileMove,
     State(app_state): State<Arc<AppState>>,
     auth_data: AuthData,
-    query_parameters: Query<routes::GetUserFileMoveQueryParameters>,
+    query_parameters: Query<routes::PostUserFileMoveQueryParameters>,
+    Form(MoveItemFormData { destination_path }): Form<MoveItemFormData>,
 ) -> impl IntoResponse {
     match use_case::user_files::move_user_file::move_user_file(
         &app_state.config.fs_storage_root_dir,
         &query_parameters.path,
+        &destination_path,
         &auth_data.user,
     )
     .await

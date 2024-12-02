@@ -100,13 +100,13 @@ pub mod routes {
     pub struct GetUserFileDelete;
 
     #[derive(Deserialize, Serialize, Debug)]
-    pub struct GetUserFileMoveQueryParameters {
+    pub struct PostUserFileMoveQueryParameters {
         #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,
     }
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/user-file/move")]
-    pub struct GetUserFileMove;
+    pub struct PostUserFileMove;
 }
 
 pub fn http_redirect_response(redirect_route: &str) -> Response {

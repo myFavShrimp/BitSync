@@ -13,6 +13,7 @@ pub struct StorageItemPresentation {
     pub actions_popover_id: String,
     pub actions_move_popover_id: String,
     pub download_url: String,
+    pub move_url: String,
     pub delete_url: String,
 }
 
@@ -59,6 +60,12 @@ impl From<StorageItem> for StorageItemPresentation {
             })
             .to_string();
 
+        let move_url = crate::handler::routes::PostUserFileMove
+            .with_query_params(crate::handler::routes::PostUserFileMoveQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
         let delete_url = crate::handler::routes::GetUserFileDelete
             .with_query_params(crate::handler::routes::GetUserFileDeleteQueryParameters {
                 path: value.path.path(),
@@ -77,6 +84,7 @@ impl From<StorageItem> for StorageItemPresentation {
             actions_popover_id,
             actions_move_popover_id,
             download_url,
+            move_url,
             delete_url,
         }
     }

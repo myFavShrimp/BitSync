@@ -47,14 +47,20 @@
                                 id="{{ dir_item.actions_move_popover_id }}"
                                 class="{{ crate::scss::files_home_page::ClassName::ACTIONS_POPOVER }}"
                             >
-                                {{ dir_item.path }}
-                                <input type="text" value="{{ dir_item.path }}" />
-                                <button onclick="openPopoverById('{{ dir_item.actions_move_popover_id }}')">
-                                    Move
-                                </button>
-                                <button onclick="closeClosestPopover(this)">
-                                    Cancel
-                                </button>
+                                <form
+                                    hx-post="{{ dir_item.move_url }}"
+                                    hx-target="this"
+                                >
+                                    {{ dir_item.path }}
+                                    <input type="text" name="destination_path" value="{{ dir_item.path }}" />
+                                    <button>Move</button>
+                                    <button 
+                                        type="button"
+                                        onclick="closeClosestPopover(this)"
+                                    >
+                                        Cancel
+                                    </button>
+                                <form>
                             </dialog>
 
                             <a

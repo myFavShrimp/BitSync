@@ -1,5 +1,5 @@
 use bitsync_core::use_case::user_files::{
-    delete_user_file::UserFileDeletionResult,
+    delete_user_file::UserFileDeletionResult, move_user_file::UserFileMoveResult,
     read_user_directory_contents::UserDirectoryContentsResult, upload_user_file::UserFileResult,
 };
 
@@ -67,6 +67,20 @@ impl From<UserFileResult> for FilesHomePageChangeResult {
 
 impl From<UserFileDeletionResult> for FilesHomePageChangeResult {
     fn from(value: UserFileDeletionResult) -> Self {
+        let displayable_dir_content = value
+            .dir_contents
+            .into_iter()
+            .map(StorageItemPresentation::from)
+            .collect();
+
+        FilesHomePageChangeResult {
+            dir_content: displayable_dir_content,
+        }
+    }
+}
+
+impl From<UserFileMoveResult> for FilesHomePageChangeResult {
+    fn from(value: UserFileMoveResult) -> Self {
         let displayable_dir_content = value
             .dir_contents
             .into_iter()
