@@ -83,7 +83,6 @@ pub mod routes {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct GetUserFileDownloadQueryParameters {
-        #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,
     }
     #[derive(TypedPath, Deserialize)]
@@ -92,7 +91,6 @@ pub mod routes {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct GetUserFileDeleteQueryParameters {
-        #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,
     }
     #[derive(TypedPath, Deserialize)]
@@ -101,12 +99,20 @@ pub mod routes {
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct PostUserFileMoveQueryParameters {
-        #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,
     }
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/user-file/move")]
     pub struct PostUserFileMove;
+
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct PostUserFileDirectoryCreationQueryParameters {
+        #[serde(default = "build_default_files_query_parameter_path")]
+        pub path: String,
+    }
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-file/create_directory")]
+    pub struct PostUserFileDirectoryCreation;
 }
 
 pub fn http_redirect_response(redirect_route: &str) -> Response {

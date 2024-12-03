@@ -126,3 +126,21 @@ pub async fn rename_item(
 
     Ok(())
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("Failed to rename item")]
+pub struct CreateDirectoryError {
+    pub source: IoError,
+    pub direcory_path: PathBuf,
+}
+
+pub async fn create_directory(directory_path: &StoragePath) -> Result<(), CreateDirectoryError> {
+    tokio::fs::create_dir(directory_path.local_directory())
+        .await
+        .map_err(|error| CreateDirectoryError {
+            source: error,
+            direcory_path: directory_path.local_directory(),
+        })?;
+
+    Ok(())
+}

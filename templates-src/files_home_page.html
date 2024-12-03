@@ -16,6 +16,27 @@
 
     {% include "files_home_page/file_upload_form.html" %}
 
+    <button onclick="openPopoverById('{{ directory_creation_popover_id }}')">add directory</button>
+    <dialog
+        popover
+        id="{{ directory_creation_popover_id }}"
+        class="{{ crate::scss::files_home_page::ClassName::ACTIONS_POPOVER }}"
+    >
+        <form
+            hx-post="{{ directory_creation_url }}"
+            hx-target="this"
+        >
+            <input type="text" name="directory_name" />
+            <button>Create</button>
+            <button 
+                type="button"
+                onclick="closeClosestPopover(this)"
+            >
+                Cancel
+            </button>
+        </form>
+    </dialog>
+
     <div id="{{ FilesHomePageElementId::FileStorageTableWrapper.to_str() }}">
         {% include "files_home_page/file_storage_table.html" %}
     </div>

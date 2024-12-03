@@ -31,6 +31,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_get(user_file_download_handler)
         .typed_get(user_file_delete_handler)
         .typed_post(user_file_move_handler)
+        .typed_post(user_file_directory_creation_handler)
         .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
         .with_state(state)
 }
@@ -151,6 +152,31 @@ async fn user_file_move_handler(
         &app_state.config.fs_storage_root_dir,
         &query_parameters.path,
         &destination_path,
+        &auth_data.user,
+    )
+    .await
+    {
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).to_string()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).to_string()).into_response(),
+    }
+}
+
+#[derive(Deserialize)]
+struct AddDirectoryFormData {
+    pub directory_name: String,
+}
+
+async fn user_file_directory_creation_handler(
+    _: routes::PostUserFileDirectoryCreation,
+    State(app_state): State<Arc<AppState>>,
+    auth_data: AuthData,
+    query_parameters: Query<routes::PostUserFileDirectoryCreationQueryParameters>,
+    Form(AddDirectoryFormData { directory_name }): Form<AddDirectoryFormData>,
+) -> impl IntoResponse {
+    match use_case::user_files::create_directory::create_direcory(
+        &app_state.config.fs_storage_root_dir,
+        &query_parameters.path,
+        &directory_name,
         &auth_data.user,
     )
     .await
