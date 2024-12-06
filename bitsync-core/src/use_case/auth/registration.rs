@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use bitsync_database::{
-    database::{Database, TransactionBeginError},
+    database::{transaction::TransactionCommitError, Database, TransactionBeginError},
     entity::User,
     repository,
 };
@@ -16,7 +16,8 @@ use crate::hash::{hash_password, PasswordHashCreationError};
 #[error("user registration failed")]
 pub enum RegistrationError {
     PasswordHash(#[from] PasswordHashCreationError),
-    Database(#[from] repository::QueryError),
+    DatabaseQuery(#[from] repository::QueryError),
+    DatabaseTransaction(#[from] TransactionCommitError),
     TransactionBegin(#[from] TransactionBeginError),
     UserExists,
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
@@ -43,6 +44,8 @@ pub async fn perform_registration(
     };
 
     ensure_user_storage_exists(&user_storage).await?;
+
+    transaction.commit().await?;
 
     Ok(user)
 }

@@ -43,14 +43,7 @@ pub mod routes {
         pub file_path: String,
     }
 
-    #[derive(TypedPath, Deserialize)]
-    #[typed_path("/")]
-    pub struct GetFilesHomePage;
-    #[derive(Deserialize, Serialize, Debug)]
-    pub struct GetFilesHomePageQueryParameters {
-        #[serde(default = "build_default_files_query_parameter_path")]
-        pub path: String,
-    }
+    // auth
 
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/login")]
@@ -72,14 +65,26 @@ pub mod routes {
     #[typed_path("/register")]
     pub struct PostRegisterAction;
 
+    // home
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/")]
+    pub struct GetFilesHomePage;
     #[derive(Deserialize, Serialize, Debug)]
-    pub struct PostUserFileUploadQueryParameters {
+    pub struct GetFilesHomePageQueryParameters {
         #[serde(default = "build_default_files_query_parameter_path")]
         pub path: String,
     }
+
+    // home actions
+
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/user-file/upload")]
     pub struct PostUserFileUpload;
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct PostUserFileUploadQueryParameters {
+        pub path: String,
+    }
 
     #[derive(Deserialize, Serialize, Debug)]
     pub struct GetUserFileDownloadQueryParameters {
@@ -105,14 +110,23 @@ pub mod routes {
     #[typed_path("/user-file/move")]
     pub struct PostUserFileMove;
 
-    #[derive(Deserialize, Serialize, Debug)]
-    pub struct PostUserFileDirectoryCreationQueryParameters {
-        #[serde(default = "build_default_files_query_parameter_path")]
-        pub path: String,
-    }
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/user-file/create_directory")]
     pub struct PostUserFileDirectoryCreation;
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct PostUserFileDirectoryCreationQueryParameters {
+        pub path: String,
+    }
+
+    // account
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-settings")]
+    pub struct GetUserSettingsPage;
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-settings/change-password")]
+    pub struct PostUserSettingsChangePassword;
 }
 
 pub fn http_redirect_response(redirect_route: &str) -> Response {

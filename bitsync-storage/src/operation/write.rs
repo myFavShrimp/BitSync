@@ -17,7 +17,7 @@ pub struct EnsureUserStorageExistsError(#[from] DirectoryCreationError);
 pub async fn ensure_user_storage_exists(
     storage: &UserStorage,
 ) -> Result<(), EnsureUserStorageExistsError> {
-    tokio::fs::create_dir_all(&storage.storage_root)
+    tokio::fs::create_dir_all(&storage.data_directory())
         .await
         .map_err(|error| DirectoryCreationError {
             source: error,

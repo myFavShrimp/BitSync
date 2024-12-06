@@ -1,4 +1,7 @@
-use sqlx::{migrate::MigrateDatabase, pool::PoolConnection, PgPool, Postgres, Transaction};
+use sqlx::{migrate::MigrateDatabase, pool::PoolConnection, PgPool, Postgres};
+use transaction::Transaction;
+
+pub mod transaction;
 
 #[derive(Debug, Clone)]
 pub struct Database(sqlx::PgPool);
@@ -71,10 +74,8 @@ pub struct TransactionBeginError(#[from] sqlx::Error);
 pub struct ConnectionAcquisitionError(#[from] sqlx::Error);
 
 impl Database {
-    pub async fn begin_transaction(
-        &self,
-    ) -> Result<Transaction<'static, Postgres>, TransactionBeginError> {
-        Ok(self.0.begin().await?)
+    pub async fn begin_transaction(&self) -> Result<Transaction, TransactionBeginError> {
+        Ok(Transaction(self.0.begin().await?))
     }
 
     pub async fn acquire_connection(

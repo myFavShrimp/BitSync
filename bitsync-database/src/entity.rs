@@ -7,5 +7,4 @@ pub struct User {
     pub username: String,
     pub password: String,
     pub is_admin: bool,
-    pub color_palette: Option<String>,
 }

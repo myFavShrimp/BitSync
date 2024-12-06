@@ -8,7 +8,7 @@ link-env:
 
 init-db:
 	sqlx database create
-	sqlx migrate run
+	cd bitsync-database && sqlx migrate run
 
 lint:
 	cargo check

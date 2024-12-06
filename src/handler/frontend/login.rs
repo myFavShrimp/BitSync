@@ -76,6 +76,6 @@ async fn login_action_handler(
                 redirect_response(is_hx_request, &routes::GetFilesHomePage.to_string()),
             )
         }
-        Err(_) => todo!(),
+        Err(e) => todo!("login error handling - {:#?}", e),
     }
 }

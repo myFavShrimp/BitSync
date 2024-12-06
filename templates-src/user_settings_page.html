@@ -1,0 +1,31 @@
+{% import "macros.html" as macros %}
+{% extends "shared/base_secure.html" %}
+
+{% block content %}
+
+<style>{{ crate::scss::files_home_page::STYLE_SHEET }}</style>
+<main>
+    <h1>Account</h1>
+    <form
+        hx-post="{{ change_password_url }}"
+        hx-target="this"
+    >
+        <label>
+            change password
+            <input type="text" name="directory_name" />
+        </label>
+        <label>
+            repeat password
+            <input type="text" name="directory_name" />
+        </label>
+        <button>Create</button>
+        <button 
+            type="button"
+            onclick="closeClosestPopover(this)"
+        >
+            Cancel
+        </button>
+    </form>
+
+</main>
+{% endblock %}

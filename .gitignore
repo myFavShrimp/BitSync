@@ -3,3 +3,4 @@
 .env
 dist
 static/external/
+Cargo.lock

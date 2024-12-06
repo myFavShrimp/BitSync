@@ -7,11 +7,14 @@ use axum::{
     Router,
 };
 use axum_extra::{extract::Form, routing::RouterExt};
+use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::registration::perform_registration;
 use serde::Deserialize;
 
 use crate::{
-    auth::require_logout_middleware, presentation::templates::register_page::RegisterPage,
+    auth::require_logout_middleware,
+    handler::{redirect_response, routes::GetLoginPage},
+    presentation::templates::register_page::RegisterPage,
 };
 
 use crate::AppState;
@@ -38,6 +41,7 @@ struct RegisterActionFormData {
 
 async fn register_action_handler(
     _: routes::PostRegisterAction,
+    HxRequest(is_hx_request): HxRequest,
     State(state): State<Arc<AppState>>,
     Form(registration_data): Form<RegisterActionFormData>,
 ) -> impl IntoResponse {
@@ -49,11 +53,12 @@ async fn register_action_handler(
     )
     .await
     {
-        Ok(_) => todo!(),
+        Ok(_) => redirect_response(is_hx_request, &GetLoginPage.to_string()),
         Err(error) => RegisterPage {
             username: Some(registration_data.username),
             error_message: Some(error.to_string()),
         }
-        .to_string(),
+        .to_string()
+        .into_response(),
     }
 }
