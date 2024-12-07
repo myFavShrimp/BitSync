@@ -11,9 +11,15 @@ use serde::Deserialize;
 pub struct Config {
     pub address: ServiceAddress,
     pub database_url: String,
+    pub fs_storage_root_dir: PathBuf,
+    pub auth: Auth,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Auth {
     pub jwt_secret: String,
     pub jwt_expiration_seconds: i64,
-    pub fs_storage_root_dir: PathBuf,
+    pub enforce_totp: bool,
 }
 
 #[derive(Deserialize, Debug)]

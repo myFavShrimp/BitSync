@@ -65,6 +65,10 @@ pub mod routes {
     #[typed_path("/register")]
     pub struct PostRegisterAction;
 
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/totp-auth")]
+    pub struct GetTotpAuthPage;
+
     // home
 
     #[derive(TypedPath, Deserialize)]
@@ -127,6 +131,14 @@ pub mod routes {
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/user-settings/change-password")]
     pub struct PostUserSettingsChangePassword;
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-settings/totp-setup")]
+    pub struct GetTotpSetupPage;
+
+    #[derive(TypedPath, Deserialize)]
+    #[typed_path("/user-settings/totp-setup")]
+    pub struct PostTotpSetup;
 }
 
 pub fn http_redirect_response(redirect_route: &str) -> Response {

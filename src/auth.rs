@@ -26,7 +26,7 @@ async fn decode_auth_token(
 ) -> Result<AuthData, AuthTokenDecodeError> {
     let mut connection = app_state.database.acquire_connection().await?;
 
-    let claims = JwtClaims::decode_and_validate(token, &app_state.config.jwt_secret)?;
+    let claims = JwtClaims::decode_and_validate(token, &app_state.config.auth.jwt_secret)?;
     let user = repository::user::find_by_id(&mut *connection, &claims.sub).await?;
 
     Ok(AuthData { claims, user })

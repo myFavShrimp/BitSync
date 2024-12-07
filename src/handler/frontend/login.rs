@@ -52,8 +52,8 @@ async fn login_action_handler(
         &state.database,
         &login_data.username,
         &login_data.password,
-        state.config.jwt_expiration_seconds,
-        &state.config.jwt_secret,
+        state.config.auth.jwt_expiration_seconds,
+        &state.config.auth.jwt_secret,
     )
     .await
     {
