@@ -4,7 +4,7 @@ use axum::{
     extract::{FromRequest, Query, Request, State},
     middleware::from_fn_with_state,
     response::{IntoResponse, Response},
-    Router,
+    Extension, Router,
 };
 use axum_extra::{
     body::AsyncReadBody,
@@ -16,7 +16,7 @@ use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_fil
 use serde::Deserialize;
 
 use crate::{
-    auth::{require_login_middleware, AuthData},
+    auth::{require_login_and_user_setup_middleware, AuthData},
     presentation::templates::{
         error_modal::ErrorModal, files_home_page::FilesHomePageChangeResult,
     },
@@ -32,7 +32,10 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_get(user_file_delete_handler)
         .typed_post(user_file_move_handler)
         .typed_post(user_file_directory_creation_handler)
-        .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
+        .route_layer(from_fn_with_state(
+            state.clone(),
+            require_login_and_user_setup_middleware,
+        ))
         .with_state(state)
 }
 
@@ -74,7 +77,7 @@ where
 async fn user_file_upload_handler(
     _: routes::PostUserFileUpload,
     State(app_state): State<Arc<AppState>>,
-    auth_data: AuthData,
+    Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<routes::PostUserFileUploadQueryParameters>,
     multipart_data: UserFileMultipartField,
 ) -> impl IntoResponse {
@@ -95,7 +98,7 @@ async fn user_file_upload_handler(
 async fn user_file_download_handler(
     _: routes::GetUserFileDownload,
     State(app_state): State<Arc<AppState>>,
-    auth_data: AuthData,
+    Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<routes::GetUserFileDownloadQueryParameters>,
 ) -> impl IntoResponse {
     match use_case::user_files::download_user_file::download_user_file(
@@ -121,7 +124,7 @@ async fn user_file_download_handler(
 async fn user_file_delete_handler(
     _: routes::GetUserFileDelete,
     State(app_state): State<Arc<AppState>>,
-    auth_data: AuthData,
+    Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<routes::GetUserFileDeleteQueryParameters>,
 ) -> impl IntoResponse {
     match use_case::user_files::delete_user_file::delete_user_file(
@@ -144,7 +147,7 @@ struct MoveItemFormData {
 async fn user_file_move_handler(
     _: routes::PostUserFileMove,
     State(app_state): State<Arc<AppState>>,
-    auth_data: AuthData,
+    Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<routes::PostUserFileMoveQueryParameters>,
     Form(MoveItemFormData { destination_path }): Form<MoveItemFormData>,
 ) -> impl IntoResponse {
@@ -169,7 +172,7 @@ struct AddDirectoryFormData {
 async fn user_file_directory_creation_handler(
     _: routes::PostUserFileDirectoryCreation,
     State(app_state): State<Arc<AppState>>,
-    auth_data: AuthData,
+    Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<routes::PostUserFileDirectoryCreationQueryParameters>,
     Form(AddDirectoryFormData { directory_name }): Form<AddDirectoryFormData>,
 ) -> impl IntoResponse {

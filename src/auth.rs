@@ -41,45 +41,6 @@ pub struct AuthData {
     pub user: User,
 }
 
-#[async_trait::async_trait]
-impl<S> FromRequestParts<S> for AuthData
-where
-    Arc<AppState>: FromRef<S>,
-    S: Send + Sync,
-{
-    type Rejection = Response;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let app_state = Arc::<AppState>::from_ref(state);
-        let HxRequest(is_hx_request) = match HxRequest::from_request_parts(parts, state).await {
-            Ok(is_hx_request) => is_hx_request,
-            Err(infallible) => match infallible {},
-        };
-
-        match CookieJar::from_request_parts(parts, state).await {
-            Ok(cookie_jar) => match cookie_jar.get(AUTH_COOKIE_NAME) {
-                Some(auth_cookie) => {
-                    match decode_auth_token(app_state, auth_cookie.value()).await {
-                        Ok(auth) => Ok(auth),
-                        Err(..) => Err(redirect_response(
-                            is_hx_request,
-                            &crate::handler::routes::GetLoginPage.to_string(),
-                        )),
-                    }
-                }
-                None => Err(redirect_response(
-                    is_hx_request,
-                    &crate::handler::routes::GetLoginPage.to_string(),
-                )),
-            },
-            Err(..) => Err(redirect_response(
-                is_hx_request,
-                &crate::handler::routes::GetLoginPage.to_string(),
-            )),
-        }
-    }
-}
-
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum AuthStatus {
@@ -128,10 +89,10 @@ pub async fn require_logout_middleware(
     }
 }
 
-pub async fn require_login_middleware(
+pub async fn require_login_and_user_setup_middleware(
     auth_status: AuthStatus,
     HxRequest(is_hx_request): HxRequest,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Response {
     match auth_status {
@@ -139,6 +100,18 @@ pub async fn require_login_middleware(
             is_hx_request,
             &crate::handler::routes::GetLoginPage.to_string(),
         ),
-        AuthStatus::User(..) => next.run(request).await,
+        AuthStatus::User(auth_data) => {
+            if !auth_data.user.is_totp_set_up {
+                return redirect_response(
+                    is_hx_request,
+                    &crate::handler::routes::GetTotpSetupPage.to_string(),
+                );
+            }
+
+            let extensions = request.extensions_mut();
+            extensions.insert(auth_data);
+
+            next.run(request).await
+        }
     }
 }

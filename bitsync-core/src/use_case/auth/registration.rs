@@ -36,7 +36,13 @@ pub async fn perform_registration(
     }
 
     let hashed_password = hash_password(password)?;
-    let user = repository::user::create(&mut *transaction, username, &hashed_password).await?;
+    let user = repository::user::create(
+        &mut *transaction,
+        username,
+        &hashed_password,
+        &uuid::Uuid::nil().into_bytes(),
+    )
+    .await?;
 
     let user_storage = UserStorage {
         user_id: user.id,

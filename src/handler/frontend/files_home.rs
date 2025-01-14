@@ -4,13 +4,13 @@ use axum::{
     extract::{Query, State},
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
-    Router,
+    Extension, Router,
 };
 use axum_extra::routing::RouterExt;
 use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_directory_contents;
 
 use crate::{
-    auth::{require_login_middleware, AuthData},
+    auth::{require_login_and_user_setup_middleware, AuthData},
     handler::routes::GetFilesHomePageQueryParameters,
     presentation::templates::{error_page::ErrorPage, files_home_page::FilesHomePage},
     AppState,
@@ -21,14 +21,17 @@ use super::routes;
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(files_home_page_handler)
-        .route_layer(from_fn_with_state(state.clone(), require_login_middleware))
+        .route_layer(from_fn_with_state(
+            state.clone(),
+            require_login_and_user_setup_middleware,
+        ))
         .with_state(state)
 }
 
 async fn files_home_page_handler(
     _: routes::GetFilesHomePage,
     State(app_state): State<Arc<AppState>>,
-    auth_data: AuthData,
+    Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<GetFilesHomePageQueryParameters>,
 ) -> impl IntoResponse {
     match read_user_directory_contents(

@@ -9,15 +9,17 @@ pub async fn create<'e, E>(
     connection: E,
     username: &str,
     password: &str,
+    totp_secret: &[u8],
 ) -> Result<User, QueryError>
 where
     E: PgExecutor<'e>,
 {
     Ok(sqlx::query_as!(
         User,
-        r#"INSERT INTO "user" (username, password) VALUES ($1, $2) RETURNING *"#,
+        r#"INSERT INTO "user" (username, password, totp_secret) VALUES ($1, $2, $3) RETURNING *"#,
         username,
-        password
+        password,
+        totp_secret,
     )
     .fetch_one(connection)
     .await?)
