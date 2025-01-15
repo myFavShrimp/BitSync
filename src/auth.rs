@@ -101,11 +101,10 @@ pub async fn require_login_and_user_setup_middleware(
             &crate::handler::routes::GetLoginPage.to_string(),
         ),
         AuthStatus::User(auth_data) => {
-            if !auth_data.user.is_totp_set_up {
-                return redirect_response(
-                    is_hx_request,
-                    &crate::handler::routes::GetTotpSetupPage.to_string(),
-                );
+            let totp_setup_route = crate::handler::routes::GetTotpSetupPage.to_string();
+
+            if !auth_data.user.is_totp_set_up && dbg!(request.uri().path()) != totp_setup_route {
+                return redirect_response(is_hx_request, &totp_setup_route);
             }
 
             let extensions = request.extensions_mut();
