@@ -10,3 +10,9 @@ pub struct User {
     pub totp_secret: Vec<u8>,
     pub is_totp_set_up: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct TotpRecoveryCode {
+    pub user_id: Uuid,
+    pub code: String,
+}

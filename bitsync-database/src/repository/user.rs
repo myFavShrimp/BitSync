@@ -86,3 +86,21 @@ where
     .fetch_one(executor)
     .await?)
 }
+
+pub async fn set_totp_setup_state<'e, E>(
+    executor: E,
+    user_id: &Uuid,
+    is_totp_setup: bool,
+) -> Result<User, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"UPDATE "user" SET is_totp_set_up = $2 WHERE id = $1 RETURNING *"#,
+        user_id,
+        is_totp_setup,
+    )
+    .fetch_one(executor)
+    .await?)
+}

@@ -1,0 +1,16 @@
+<form hx-post="" hx-target="">
+    <img src="{{ totp_secret_image_base64_img_src }}"/>
+    <p>Scan the QR code to add the totp code to your authenticator app.</p>
+
+    <details>
+        <summary>or add the totp manually</summary>
+
+        Insert the following secret into your authenticator:
+
+        <code>`{{ totp_secret }}`</code>
+
+    </details>
+
+    <input name="totp" required>
+    <button>send</button>
+</form>

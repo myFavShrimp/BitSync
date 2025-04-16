@@ -1,3 +1,4 @@
+pub mod totp_recovery_code;
 pub mod user;
 
 #[derive(thiserror::Error, Debug)]

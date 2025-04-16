@@ -2,6 +2,8 @@ use bitsync_database::entity::User;
 
 use crate::handler::routes::PostUserSettingsChangePassword;
 
+pub mod totp_setup_page;
+
 #[derive(askama::Template)]
 #[template(path = "user_settings_page.html")]
 pub struct UserSettingsPage {

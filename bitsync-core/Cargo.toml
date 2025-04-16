@@ -19,5 +19,6 @@ thiserror.workspace = true
 time = { version = "0.3.30", features = ["serde-human-readable"] }
 tokio-stream = "0.1.15"
 tokio-util.workspace = true
+totp-rs = { version = "5.6.0", features = ["qr", "serde_support"] }
 tracing.workspace = true
 uuid.workspace = true
