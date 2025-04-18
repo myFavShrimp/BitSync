@@ -9,8 +9,6 @@ mod auth;
 pub mod config;
 mod handler;
 mod htmx;
-mod presentation;
-mod scss;
 
 pub struct AppState {
     pub(crate) config: Config,

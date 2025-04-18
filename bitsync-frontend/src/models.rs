@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
-use axum_extra::routing::TypedPath;
+use bitsync_routes::TypedPath;
 use bitsync_storage::storage_item::{StorageItem, StorageItemKind};
 
 use super::format_file_size;
 
+#[derive(Clone)]
 pub struct StorageItemPresentation {
     pub size: String,
     pub name: String,
@@ -17,6 +18,7 @@ pub struct StorageItemPresentation {
     pub delete_url: String,
 }
 
+#[derive(Clone)]
 pub enum StorageItemPresentationKind {
     File,
     Directory { url: String },

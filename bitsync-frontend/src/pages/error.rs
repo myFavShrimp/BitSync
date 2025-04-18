@@ -1,5 +1,7 @@
-#[derive(askama::Template)]
-#[template(path = "error_page.html")]
+use maud::Render;
+
+use super::base::LoggedInDocument;
+
 pub struct ErrorPage {
     pub error_message: String,
 }
@@ -22,5 +24,17 @@ where
         }
 
         Self { error_message }
+    }
+}
+
+impl Render for ErrorPage {
+    fn render(&self) -> maud::Markup {
+        LoggedInDocument(maud::html!(
+            main {
+                h1 { "An unexpected error occurred" }
+                pre { (self.error_message) }
+            }
+        ))
+        .render()
     }
 }

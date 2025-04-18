@@ -21,7 +21,6 @@ fmt:
 install-tools:
 	cargo install --locked sqlx-cli
 	cargo install --locked cargo-watch
-	cargo install --locked minhtml
 	cargo install --locked nu
 
 static-assets: fetch-static-assets font-css
@@ -31,8 +30,5 @@ fetch-static-assets:
 
 font-css:
 	nu ./scripts/make_font_css.nu
-
-templates:
-	nu ./scripts/make_templates.nu
 
 ws: watch-server

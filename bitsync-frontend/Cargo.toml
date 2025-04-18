@@ -1,0 +1,14 @@
+[package]
+name = "bitsync-frontend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bitsync-core.workspace = true
+bitsync-database.workspace = true
+bitsync-routes.workspace = true
+bitsync-storage.workspace = true
+maud = "0.27.0"
+serde_json.workspace = true
+size = "0.4.1"
+turf = "0.10.0"

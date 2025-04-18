@@ -7,11 +7,14 @@ use axum::{
 };
 use axum_extra::{extract::Form, routing::RouterExt};
 use bitsync_core::use_case::user_settings::retrieve_totp_setup_data::retrieve_totp_setup_data;
+use bitsync_frontend::{
+    pages::user_settings::{TotpSetupForm, TotpSetupPage},
+    Render,
+};
 use serde::Deserialize;
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
-    presentation::templates::user_settings_page::totp_setup_page::{TotpSetupForm, TotpSetupPage},
     AppState,
 };
 
@@ -31,7 +34,7 @@ async fn user_settings_totp_setup_page_handler(
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
-        Ok(totp_setup_data) => Html(TotpSetupPage::from(totp_setup_data).to_string()),
+        Ok(totp_setup_data) => Html(TotpSetupPage::from(totp_setup_data).render().into_string()),
         Err(_) => todo!(),
     }
 }
@@ -47,7 +50,7 @@ async fn user_settings_totp_setup_submit_handler(
     Form(login_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
-        Ok(totp_setup_data) => Html(TotpSetupForm::from(totp_setup_data).to_string()),
+        Ok(totp_setup_data) => Html(TotpSetupForm::from(totp_setup_data).render().into_string()),
         Err(_) => todo!(),
     }
 }

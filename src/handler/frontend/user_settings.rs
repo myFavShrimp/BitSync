@@ -9,11 +9,11 @@ use axum::{
 };
 use axum_extra::{extract::Form, routing::RouterExt};
 use bitsync_core::use_case::user_settings::update_user_password::update_user_password;
+use bitsync_frontend::{pages::user_settings::UserSettingsPage, Render};
 use serde::Deserialize;
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
-    presentation::templates::user_settings_page::UserSettingsPage,
     AppState,
 };
 
@@ -35,7 +35,11 @@ async fn user_settings_page_handler(
     _: bitsync_routes::GetUserSettingsPage,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    Html(UserSettingsPage::from(auth_data.user).to_string())
+    Html(
+        UserSettingsPage::from(auth_data.user)
+            .render()
+            .into_string(),
+    )
 }
 
 #[derive(Deserialize)]

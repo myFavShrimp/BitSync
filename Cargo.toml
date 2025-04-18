@@ -1,19 +1,21 @@
 [workspace]
 members = [
-    "bitsync-core", "bitsync-database", "bitsync-routes", "bitsync-storage",
+    "bitsync-core", "bitsync-database", "bitsync-frontend", "bitsync-routes", "bitsync-storage",
 ]
 
 [workspace.dependencies]
-axum.version = "0.7.9"
-axum-extra.version = "0.9.6"
+axum = "0.7.9"
+axum-extra = "0.9.6"
 bitsync-core.path = "bitsync-core"
 bitsync-database.path = "bitsync-database"
+bitsync-frontend.path = "bitsync-frontend"
 bitsync-routes.path = "bitsync-routes"
 bitsync-storage.path = "bitsync-storage"
 bytes = "1.6.0"
 futures = "0.3.30"
 mime_guess = "2.0.5"
 serde = { version = "1.0.193", features = ["derive"] }
+serde_json = "1.0.133"
 tokio = { version = "1.34.0", features = ["full"] }
 tokio-util = { version = "0.7.11", features = ["io"] }
 thiserror = "1.0.51"
@@ -27,13 +29,13 @@ edition = "2021"
 license = "MPL-2.0"
 
 [dependencies]
-askama = "0.12.1"
 async-trait = "0.1.74"
 axum = { workspace = true, features = ["http2"] }
 axum-extra = { workspace = true, features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment", "multipart"] }
 axum-htmx = "0.6.0"
 bitsync-core.workspace = true
 bitsync-database.workspace = true
+bitsync-frontend.workspace = true
 bitsync-routes.workspace = true
 bitsync-storage.workspace = true
 bytes.workspace = true
@@ -45,8 +47,7 @@ mime_guess.workspace = true
 nucleo-matcher = "0.3.0"
 serde.workspace = true
 serde-env = "0.2.0"
-serde_json = "1.0.133"
-size = "0.4.1"
+serde_json.workspace = true
 thiserror.workspace = true
 time = { version = "0.3.30", features = ["serde-human-readable"] }
 tokio.workspace = true

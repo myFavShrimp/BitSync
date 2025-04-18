@@ -9,12 +9,10 @@ use axum::{
 use axum_extra::{extract::Form, routing::RouterExt};
 use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::registration::perform_registration;
+use bitsync_frontend::{pages::register::RegisterPage, Render};
 use serde::Deserialize;
 
-use crate::{
-    auth::require_logout_middleware, handler::redirect_response,
-    presentation::templates::register_page::RegisterPage,
-};
+use crate::{auth::require_logout_middleware, handler::redirect_response};
 
 use crate::AppState;
 
@@ -27,7 +25,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 }
 
 async fn register_page_handler(_: bitsync_routes::GetRegisterPage) -> impl IntoResponse {
-    Html(RegisterPage::default().to_string())
+    Html(RegisterPage::default().render().into_string())
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -55,7 +53,8 @@ async fn register_action_handler(
             username: Some(registration_data.username),
             error_message: Some(error.to_string()),
         }
-        .to_string()
+        .render()
+        .into_string()
         .into_response(),
     }
 }

@@ -8,10 +8,13 @@ use axum::{
 };
 use axum_extra::routing::RouterExt;
 use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_directory_contents;
+use bitsync_frontend::{
+    pages::{error::ErrorPage, files::FilesHomePage},
+    Render,
+};
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
-    presentation::templates::{error_page::ErrorPage, files_home_page::FilesHomePage},
     AppState,
 };
 
@@ -38,7 +41,7 @@ async fn files_home_page_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePage::from(result).to_string()),
-        Err(error) => Html(ErrorPage::from(error).to_string()),
+        Ok(result) => Html(FilesHomePage::from(result).render().into_string()),
+        Err(error) => Html(ErrorPage::from(error).render().into_string()),
     }
 }
