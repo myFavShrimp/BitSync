@@ -20,7 +20,7 @@ struct Asset {
     pub contents_bytes: &'static [u8],
 }
 
-async fn serve(routes::Static { file_path }: routes::Static) -> impl IntoResponse {
+async fn serve(routes::GetStaticFile { file_path }: routes::GetStaticFile) -> impl IntoResponse {
     match ASSETS
         .iter()
         .position(|asset| asset.relative_path == file_path)

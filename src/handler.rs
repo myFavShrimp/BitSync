@@ -39,7 +39,7 @@ pub mod routes {
 
     #[derive(TypedPath, Deserialize)]
     #[typed_path("/static/*file_path")]
-    pub struct Static {
+    pub struct GetStaticFile {
         pub file_path: String,
     }
 
