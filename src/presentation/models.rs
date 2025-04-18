@@ -35,8 +35,8 @@ impl From<StorageItem> for StorageItemPresentationKind {
     fn from(value: StorageItem) -> Self {
         match value.kind {
             StorageItemKind::Directory => {
-                let directory_url = crate::handler::routes::GetFilesHomePage
-                    .with_query_params(crate::handler::routes::GetFilesHomePageQueryParameters {
+                let directory_url = bitsync_routes::GetFilesHomePage
+                    .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
                         path: value.path.path(),
                     })
                     .to_string();
@@ -54,20 +54,20 @@ impl From<StorageItem> for StorageItemPresentation {
     fn from(value: StorageItem) -> Self {
         let path = value.path.path();
 
-        let download_url = crate::handler::routes::GetUserFileDownload
-            .with_query_params(crate::handler::routes::GetUserFileDownloadQueryParameters {
+        let download_url = bitsync_routes::GetUserFileDownload
+            .with_query_params(bitsync_routes::GetUserFileDownloadQueryParameters {
                 path: value.path.path(),
             })
             .to_string();
 
-        let move_url = crate::handler::routes::PostUserFileMove
-            .with_query_params(crate::handler::routes::PostUserFileMoveQueryParameters {
+        let move_url = bitsync_routes::PostUserFileMove
+            .with_query_params(bitsync_routes::PostUserFileMoveQueryParameters {
                 path: value.path.path(),
             })
             .to_string();
 
-        let delete_url = crate::handler::routes::GetUserFileDelete
-            .with_query_params(crate::handler::routes::GetUserFileDeleteQueryParameters {
+        let delete_url = bitsync_routes::GetUserFileDelete
+            .with_query_params(bitsync_routes::GetUserFileDeleteQueryParameters {
                 path: value.path.path(),
             })
             .to_string();
@@ -102,8 +102,8 @@ impl ParentDirectoryLink {
                 let current_directory_name = value.to_string_lossy().to_string();
                 let parent_directory_string = parent_directory.to_string_lossy().to_string();
 
-                let parent_directory_url = crate::handler::routes::GetFilesHomePage
-                    .with_query_params(crate::handler::routes::GetFilesHomePageQueryParameters {
+                let parent_directory_url = bitsync_routes::GetFilesHomePage
+                    .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
                         path: parent_directory_string,
                     })
                     .to_string();

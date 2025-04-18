@@ -10,16 +10,17 @@ use crate::auth::require_login_and_user_setup_middleware;
 use crate::handler::redirect_response;
 use crate::AppState;
 
-use super::routes;
-
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(logout_action_handler)
-        .route_layer(from_fn_with_state(state.clone(), require_login_and_user_setup_middleware))
+        .route_layer(from_fn_with_state(
+            state.clone(),
+            require_login_and_user_setup_middleware,
+        ))
 }
 
 async fn logout_action_handler(
-    _: routes::GetLogoutAction,
+    _: bitsync_routes::GetLogoutAction,
     HxRequest(is_hx_request): HxRequest,
     cookie_jar: CookieJar,
 ) -> impl IntoResponse {
@@ -27,6 +28,6 @@ async fn logout_action_handler(
 
     (
         cookie_jar,
-        redirect_response(is_hx_request, &routes::GetLoginPage.to_string()),
+        redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string()),
     )
 }

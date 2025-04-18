@@ -4,8 +4,6 @@ use axum::Router;
 
 use crate::AppState;
 
-use super::routes;
-
 mod files_home;
 mod login;
 mod logout;

@@ -353,6 +353,7 @@ dependencies = [
  "axum-htmx",
  "bitsync-core",
  "bitsync-database",
+ "bitsync-routes",
  "bitsync-storage",
  "bytes",
  "color-eyre",
@@ -409,6 +410,15 @@ dependencies = [
  "sqlx",
  "thiserror",
  "uuid",
+]
+
+[[package]]
+name = "bitsync-routes"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-extra",
+ "serde",
 ]
 
 [[package]]

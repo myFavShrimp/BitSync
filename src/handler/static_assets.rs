@@ -3,8 +3,6 @@ use axum_extra::routing::RouterExt;
 
 use crate::handler::handler_404;
 
-use super::routes;
-
 pub(crate) async fn create_routes() -> Router {
     Router::new().typed_get(serve)
 }
@@ -20,7 +18,9 @@ struct Asset {
     pub contents_bytes: &'static [u8],
 }
 
-async fn serve(routes::GetStaticFile { file_path }: routes::GetStaticFile) -> impl IntoResponse {
+async fn serve(
+    bitsync_routes::GetStaticFile { file_path }: bitsync_routes::GetStaticFile,
+) -> impl IntoResponse {
     match ASSETS
         .iter()
         .position(|asset| asset.relative_path == file_path)

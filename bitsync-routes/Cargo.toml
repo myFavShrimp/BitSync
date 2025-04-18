@@ -1,0 +1,9 @@
+[package]
+name = "bitsync-routes"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { workspace =  true, default-features = false }
+axum-extra = { workspace = true, default-features = false, features = ["typed-routing"] }
+serde.workspace = true

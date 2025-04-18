@@ -5,14 +5,8 @@ use bitsync_core::use_case::user_files::{
     upload_user_file::UserFileResult,
 };
 
-use crate::{
-    handler::routes::{
-        PostUserFileDirectoryCreation, PostUserFileDirectoryCreationQueryParameters,
-        PostUserFileUpload, PostUserFileUploadQueryParameters,
-    },
-    presentation::models::{
-        ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind,
-    },
+use crate::presentation::models::{
+    ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind,
 };
 
 pub enum FilesHomePageElementId {
@@ -49,16 +43,18 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
             .map(StorageItemPresentation::from)
             .collect();
 
-        let file_upload_url = PostUserFileUpload
-            .with_query_params(PostUserFileUploadQueryParameters {
+        let file_upload_url = bitsync_routes::PostUserFileUpload
+            .with_query_params(bitsync_routes::PostUserFileUploadQueryParameters {
                 path: value.path.path(),
             })
             .to_string();
 
-        let directory_creation_url = PostUserFileDirectoryCreation
-            .with_query_params(PostUserFileDirectoryCreationQueryParameters {
-                path: value.path.path(),
-            })
+        let directory_creation_url = bitsync_routes::PostUserFileDirectoryCreation
+            .with_query_params(
+                bitsync_routes::PostUserFileDirectoryCreationQueryParameters {
+                    path: value.path.path(),
+                },
+            )
             .to_string();
 
         FilesHomePage {

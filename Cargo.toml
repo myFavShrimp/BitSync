@@ -1,11 +1,14 @@
 [workspace]
 members = [
-    "bitsync-core", "bitsync-database", "bitsync-storage",
+    "bitsync-core", "bitsync-database", "bitsync-routes", "bitsync-storage",
 ]
 
 [workspace.dependencies]
+axum.version = "0.7.9"
+axum-extra.version = "0.9.6"
 bitsync-core.path = "bitsync-core"
 bitsync-database.path = "bitsync-database"
+bitsync-routes.path = "bitsync-routes"
 bitsync-storage.path = "bitsync-storage"
 bytes = "1.6.0"
 futures = "0.3.30"
@@ -26,11 +29,12 @@ license = "MPL-2.0"
 [dependencies]
 askama = "0.12.1"
 async-trait = "0.1.74"
-axum = { version = "0.7.9", features = ["http2"] }
-axum-extra = { version = "0.9.6", features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment", "multipart"] }
+axum = { workspace = true, features = ["http2"] }
+axum-extra = { workspace = true, features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment", "multipart"] }
 axum-htmx = "0.6.0"
 bitsync-core.workspace = true
 bitsync-database.workspace = true
+bitsync-routes.workspace = true
 bitsync-storage.workspace = true
 bytes.workspace = true
 color-eyre = "0.6.2"

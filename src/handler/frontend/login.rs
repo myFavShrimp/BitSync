@@ -21,8 +21,6 @@ use crate::{
 
 use crate::AppState;
 
-use super::routes;
-
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(login_page_handler)
@@ -31,7 +29,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .with_state(state)
 }
 
-async fn login_page_handler(_: routes::GetLoginPage) -> impl IntoResponse {
+async fn login_page_handler(_: bitsync_routes::GetLoginPage) -> impl IntoResponse {
     Html(LoginPage::default().to_string())
 }
 
@@ -42,7 +40,7 @@ struct LoginActionFormData {
 }
 
 async fn login_action_handler(
-    _: routes::PostLoginAction,
+    _: bitsync_routes::PostLoginAction,
     State(state): State<Arc<AppState>>,
     HxRequest(is_hx_request): HxRequest,
     cookie_jar: CookieJar,
@@ -73,7 +71,7 @@ async fn login_action_handler(
 
             (
                 cookie_jar,
-                redirect_response(is_hx_request, &routes::GetFilesHomePage.to_string()),
+                redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
             )
         }
         Err(e) => todo!("login error handling - {:#?}", e),

@@ -1,6 +1,6 @@
 <form
     class="{{ crate::scss::login_page::ClassName::FORM }}"
-    hx-post="{{ crate::handler::routes::PostLoginAction.to_string() }}"
+    hx-post="{{ bitsync_routes::PostLoginAction.to_string() }}"
     hx-target="this"
 >
     <div>
@@ -20,7 +20,7 @@
         {% endmatch %}
 
         <div>
-            <a href="{{ crate::handler::routes::GetRegisterPage.to_string() }}">I don't have an account</a>
+            <a href="{{ bitsync_routes::GetRegisterPage.to_string() }}">I don't have an account</a>
             <button type="submit">Login</button>
         </div>
     </div>

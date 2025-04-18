@@ -11,12 +11,9 @@ use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
-    handler::routes::GetFilesHomePageQueryParameters,
     presentation::templates::{error_page::ErrorPage, files_home_page::FilesHomePage},
     AppState,
 };
-
-use super::routes;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
@@ -29,10 +26,10 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 }
 
 async fn files_home_page_handler(
-    _: routes::GetFilesHomePage,
+    _: bitsync_routes::GetFilesHomePage,
     State(app_state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    query_parameters: Query<GetFilesHomePageQueryParameters>,
+    query_parameters: Query<bitsync_routes::GetFilesHomePageQueryParameters>,
 ) -> impl IntoResponse {
     match read_user_directory_contents(
         &app_state.config.fs_storage_root_dir,

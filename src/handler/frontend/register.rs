@@ -12,14 +12,11 @@ use bitsync_core::use_case::auth::registration::perform_registration;
 use serde::Deserialize;
 
 use crate::{
-    auth::require_logout_middleware,
-    handler::{redirect_response, routes::GetLoginPage},
+    auth::require_logout_middleware, handler::redirect_response,
     presentation::templates::register_page::RegisterPage,
 };
 
 use crate::AppState;
-
-use super::routes;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
@@ -29,7 +26,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .with_state(state)
 }
 
-async fn register_page_handler(_: routes::GetRegisterPage) -> impl IntoResponse {
+async fn register_page_handler(_: bitsync_routes::GetRegisterPage) -> impl IntoResponse {
     Html(RegisterPage::default().to_string())
 }
 
@@ -40,7 +37,7 @@ struct RegisterActionFormData {
 }
 
 async fn register_action_handler(
-    _: routes::PostRegisterAction,
+    _: bitsync_routes::PostRegisterAction,
     HxRequest(is_hx_request): HxRequest,
     State(state): State<Arc<AppState>>,
     Form(registration_data): Form<RegisterActionFormData>,
@@ -53,7 +50,7 @@ async fn register_action_handler(
     )
     .await
     {
-        Ok(_) => redirect_response(is_hx_request, &GetLoginPage.to_string()),
+        Ok(_) => redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string()),
         Err(error) => RegisterPage {
             username: Some(registration_data.username),
             error_message: Some(error.to_string()),

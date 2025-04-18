@@ -1,6 +1,6 @@
 use bitsync_database::entity::User;
 
-use crate::handler::routes::PostUserSettingsChangePassword;
+use bitsync_routes::PostUserSettingsChangePassword;
 
 pub mod totp_setup_page;
 

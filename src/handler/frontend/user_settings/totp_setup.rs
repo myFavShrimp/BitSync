@@ -11,7 +11,6 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
-    handler::routes::{GetTotpSetupPage, PostTotpSetup},
     presentation::templates::user_settings_page::totp_setup_page::{TotpSetupForm, TotpSetupPage},
     AppState,
 };
@@ -28,7 +27,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 }
 
 async fn user_settings_totp_setup_page_handler(
-    _: GetTotpSetupPage,
+    _: bitsync_routes::GetTotpSetupPage,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
@@ -43,7 +42,7 @@ struct TotpSetupFormData {
 }
 
 async fn user_settings_totp_setup_submit_handler(
-    _: PostTotpSetup,
+    _: bitsync_routes::PostTotpSetup,
     Extension(auth_data): Extension<AuthData>,
     Form(login_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {

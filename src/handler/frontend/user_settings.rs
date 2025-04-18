@@ -13,7 +13,6 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
-    handler::routes::{GetUserSettingsPage, PostUserSettingsChangePassword},
     presentation::templates::user_settings_page::UserSettingsPage,
     AppState,
 };
@@ -33,7 +32,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 }
 
 async fn user_settings_page_handler(
-    _: GetUserSettingsPage,
+    _: bitsync_routes::GetUserSettingsPage,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
     Html(UserSettingsPage::from(auth_data.user).to_string())
@@ -47,7 +46,7 @@ struct ChangePasswordFormData {
 }
 
 async fn user_settings_password_change_handler(
-    _: PostUserSettingsChangePassword,
+    _: bitsync_routes::PostUserSettingsChangePassword,
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
     Form(change_password_form_data): Form<ChangePasswordFormData>,

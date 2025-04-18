@@ -20,13 +20,13 @@
 
 {% block nav %}
 <nav>
-    <a class="{{ crate::scss::files_home_page::ClassName::LOGO }}" href="{{ crate::handler::routes::GetFilesHomePage.to_string() }}">
+    <a class="{{ crate::scss::files_home_page::ClassName::LOGO }}" href="{{ bitsync_routes::GetFilesHomePage.to_string() }}">
         {% call macros::logo(crate::scss::base::ClassName::TOP_BAR_LOGO) %}
     </a>
-    <a href="{{ crate::handler::routes::GetUserSettingsPage.to_string() }}">
+    <a href="{{ bitsync_routes::GetUserSettingsPage.to_string() }}">
         User Settings
     </a>
-    <a href="{{ crate::handler::routes::GetLogoutAction.to_string() }}">
+    <a href="{{ bitsync_routes::GetLogoutAction.to_string() }}">
         Log out
     </a>
 </nav>

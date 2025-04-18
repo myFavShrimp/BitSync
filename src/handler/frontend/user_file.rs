@@ -23,8 +23,6 @@ use crate::{
     AppState,
 };
 
-use super::routes;
-
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_post(user_file_upload_handler)
@@ -75,10 +73,10 @@ where
 }
 
 async fn user_file_upload_handler(
-    _: routes::PostUserFileUpload,
+    _: bitsync_routes::PostUserFileUpload,
     State(app_state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    query_parameters: Query<routes::PostUserFileUploadQueryParameters>,
+    query_parameters: Query<bitsync_routes::PostUserFileUploadQueryParameters>,
     multipart_data: UserFileMultipartField,
 ) -> impl IntoResponse {
     match upload_user_file(
@@ -96,10 +94,10 @@ async fn user_file_upload_handler(
 }
 
 async fn user_file_download_handler(
-    _: routes::GetUserFileDownload,
+    _: bitsync_routes::GetUserFileDownload,
     State(app_state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    query_parameters: Query<routes::GetUserFileDownloadQueryParameters>,
+    query_parameters: Query<bitsync_routes::GetUserFileDownloadQueryParameters>,
 ) -> impl IntoResponse {
     match use_case::user_files::download_user_file::download_user_file(
         &app_state.config.fs_storage_root_dir,
@@ -122,10 +120,10 @@ async fn user_file_download_handler(
 }
 
 async fn user_file_delete_handler(
-    _: routes::GetUserFileDelete,
+    _: bitsync_routes::GetUserFileDelete,
     State(app_state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    query_parameters: Query<routes::GetUserFileDeleteQueryParameters>,
+    query_parameters: Query<bitsync_routes::GetUserFileDeleteQueryParameters>,
 ) -> impl IntoResponse {
     match use_case::user_files::delete_user_file::delete_user_file(
         &app_state.config.fs_storage_root_dir,
@@ -145,10 +143,10 @@ struct MoveItemFormData {
 }
 
 async fn user_file_move_handler(
-    _: routes::PostUserFileMove,
+    _: bitsync_routes::PostUserFileMove,
     State(app_state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    query_parameters: Query<routes::PostUserFileMoveQueryParameters>,
+    query_parameters: Query<bitsync_routes::PostUserFileMoveQueryParameters>,
     Form(MoveItemFormData { destination_path }): Form<MoveItemFormData>,
 ) -> impl IntoResponse {
     match use_case::user_files::move_user_file::move_user_file(
@@ -170,10 +168,10 @@ struct AddDirectoryFormData {
 }
 
 async fn user_file_directory_creation_handler(
-    _: routes::PostUserFileDirectoryCreation,
+    _: bitsync_routes::PostUserFileDirectoryCreation,
     State(app_state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    query_parameters: Query<routes::PostUserFileDirectoryCreationQueryParameters>,
+    query_parameters: Query<bitsync_routes::PostUserFileDirectoryCreationQueryParameters>,
     Form(AddDirectoryFormData { directory_name }): Form<AddDirectoryFormData>,
 ) -> impl IntoResponse {
     match use_case::user_files::create_directory::create_direcory(

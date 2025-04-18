@@ -8,7 +8,7 @@
 
     <form
         class="{{ crate::scss::register_page::ClassName::FORM }}"
-        hx-post="{{ crate::handler::routes::PostRegisterAction.to_string() }}"
+        hx-post="{{ bitsync_routes::PostRegisterAction.to_string() }}"
     >
         {% call macros::logo(crate::scss::register_page::ClassName::LOGO) %}
 
@@ -23,7 +23,7 @@
             </div>
 
             <div>
-                <a class="button border large" href="{{ crate::handler::routes::GetLoginPage.to_string() }}">I already have an account</a>
+                <a class="button border large" href="{{ bitsync_routes::GetLoginPage.to_string() }}">I already have an account</a>
                 <button type="submit">Register</button>
             </div>
         </div>
