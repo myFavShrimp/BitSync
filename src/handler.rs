@@ -9,7 +9,7 @@ use axum::{
 };
 use headers::Header;
 use tower::limit::RateLimitLayer;
-use tower_http::trace::TraceLayer;
+use tower_http::{limit::RequestBodyLimitLayer, trace::TraceLayer};
 
 mod frontend;
 mod static_assets;
@@ -21,6 +21,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .fallback(handler_404)
         .layer(Extension(RateLimitLayer::new(1000, Duration::from_secs(1))))
         .layer(DefaultBodyLimit::max(10240))
+        .layer(RequestBodyLimitLayer::new(10240))
         .layer(TraceLayer::new_for_http())
 }
 
