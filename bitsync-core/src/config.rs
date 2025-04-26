@@ -49,7 +49,7 @@ impl TryFrom<RawServiceAddress> for ServiceAddress {
 impl Config {
     pub fn tracing_level() -> tracing::level_filters::LevelFilter {
         #[cfg(debug_assertions)]
-        return tracing::level_filters::LevelFilter::TRACE;
+        return tracing::level_filters::LevelFilter::DEBUG;
         #[cfg(not(debug_assertions))]
         return tracing::level_filters::LevelFilter::INFO;
     }

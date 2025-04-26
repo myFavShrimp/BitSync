@@ -1,14 +1,17 @@
 use std::sync::Arc;
 
 use axum::{
+    extract::State,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
     Extension, Router,
 };
 use axum_extra::{extract::Form, routing::RouterExt};
-use bitsync_core::use_case::user_settings::retrieve_totp_setup_data::retrieve_totp_setup_data;
+use bitsync_core::use_case::user_settings::{
+    retrieve_totp_setup_data::retrieve_totp_setup_data, setup_totp::setup_totp,
+};
 use bitsync_frontend::{
-    pages::user_settings::{TotpSetupForm, TotpSetupPage},
+    pages::totp_setup::{TotpRecoveryCodesPrompt, TotpSetupPage},
     Render,
 };
 use serde::Deserialize;
@@ -46,11 +49,16 @@ struct TotpSetupFormData {
 
 async fn user_settings_totp_setup_submit_handler(
     _: bitsync_routes::PostTotpSetup,
+    State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    Form(login_data): Form<TotpSetupFormData>,
+    Form(totp_setup_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {
-    match retrieve_totp_setup_data(&auth_data.user).await {
-        Ok(totp_setup_data) => Html(TotpSetupForm::from(totp_setup_data).render().into_string()),
-        Err(_) => todo!(),
+    match setup_totp(&state.database, &auth_data.user, &totp_setup_data.totp).await {
+        Ok(totp_setup_data) => Html(
+            TotpRecoveryCodesPrompt::from(totp_setup_data)
+                .render()
+                .into_string(),
+        ),
+        Err(e) => todo!("{:?}", e),
     }
 }

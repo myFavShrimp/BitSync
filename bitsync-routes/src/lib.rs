@@ -7,7 +7,7 @@ fn build_default_files_query_parameter_path() -> String {
 }
 
 #[derive(TypedPath, Deserialize)]
-#[typed_path("/static/*file_path")]
+#[typed_path("/static/{*file_path}")]
 pub struct GetStaticFile {
     pub file_path: String,
 }
@@ -102,9 +102,9 @@ pub struct GetUserSettingsPage;
 pub struct PostUserSettingsChangePassword;
 
 #[derive(TypedPath, Deserialize)]
-#[typed_path("/user-settings/totp-setup")]
+#[typed_path("/totp-setup")]
 pub struct GetTotpSetupPage;
 
 #[derive(TypedPath, Deserialize)]
-#[typed_path("/user-settings/totp-setup")]
+#[typed_path("/totp-setup")]
 pub struct PostTotpSetup;

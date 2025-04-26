@@ -3,13 +3,13 @@ use std::sync::Arc;
 use axum::{
     extract::{FromRequest, Query, Request, State},
     middleware::from_fn_with_state,
-    response::{IntoResponse, Response},
+    response::{Html, IntoResponse, Response},
     Extension, Router,
 };
 use axum_extra::{
     body::AsyncReadBody,
     extract::{multipart::Field, Form, Multipart},
-    response::{Attachment, Html},
+    response::Attachment,
     routing::RouterExt,
 };
 use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
@@ -40,7 +40,6 @@ struct UserFileMultipartField {
     pub file_name: String,
 }
 
-#[async_trait::async_trait]
 impl<S> FromRequest<S> for UserFileMultipartField
 where
     S: Send + Sync,
@@ -55,7 +54,8 @@ where
 
         let multipart_field = match multipart_data.next_field().await {
             Ok(Some(multipart_field)) => multipart_field,
-            Err(_) | Ok(None) => todo!("error - no file"),
+            Ok(None) => todo!("error - no file"),
+            Err(error) => return Err(error.body_text().into_response()),
         };
 
         let file_name = match multipart_field.file_name() {

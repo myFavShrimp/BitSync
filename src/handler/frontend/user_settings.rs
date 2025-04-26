@@ -17,8 +17,6 @@ use crate::{
     AppState,
 };
 
-mod totp_setup;
-
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(user_settings_page_handler)
@@ -28,7 +26,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
             require_login_and_user_setup_middleware,
         ))
         .with_state(state.clone())
-        .merge(totp_setup::create_routes(state).await)
 }
 
 async fn user_settings_page_handler(

@@ -49,7 +49,6 @@ pub enum AuthStatus {
     User(AuthData),
 }
 
-#[async_trait::async_trait]
 impl<S> FromRequestParts<S> for AuthStatus
 where
     Arc<AppState>: FromRef<S>,
@@ -81,10 +80,9 @@ pub async fn require_logout_middleware(
     next: Next,
 ) -> Response {
     match auth_status {
-        AuthStatus::User(..) => redirect_response(
-            is_hx_request,
-            &bitsync_routes::GetFilesHomePage.to_string(),
-        ),
+        AuthStatus::User(..) => {
+            redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string())
+        }
         AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
     }
 }
@@ -96,10 +94,9 @@ pub async fn require_login_and_user_setup_middleware(
     next: Next,
 ) -> Response {
     match auth_status {
-        AuthStatus::Missing | AuthStatus::Invalid => redirect_response(
-            is_hx_request,
-            &bitsync_routes::GetLoginPage.to_string(),
-        ),
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
+        }
         AuthStatus::User(auth_data) => {
             let totp_setup_route = bitsync_routes::GetTotpSetupPage.to_string();
 

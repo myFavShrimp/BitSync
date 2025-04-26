@@ -8,7 +8,6 @@ use tower_http::cors::CorsLayer;
 mod auth;
 pub mod config;
 mod handler;
-mod htmx;
 
 pub struct AppState {
     pub(crate) config: Config,
