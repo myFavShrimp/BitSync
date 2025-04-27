@@ -1,5 +1,5 @@
 use bitsync_database::{
-    database::{ConnectionAcquisitionError, Database},
+    database::{transaction::TransactionCommitError, Database, TransactionBeginError},
     entity::User,
     repository::{self, QueryError},
 };
@@ -16,14 +16,20 @@ pub enum RetrieveTotpSetupDataError {
     TotpSecretBase64QrCode(#[from] TotpSecretBase64QrCodeError),
     SystemTime(#[from] std::time::SystemTimeError),
     TotpInvalid(#[from] TotpInvalid),
-    ConnectionAquisition(#[from] ConnectionAcquisitionError),
+    TransactionBegin(#[from] TransactionBeginError),
+    TransactionCommit(#[from] TransactionCommitError),
     Query(#[from] QueryError),
     PasswordHashCreation(#[from] PasswordHashCreationError),
+    TotpAlreadySetUp(#[from] TotpAlreadySetUp),
 }
 
 #[derive(thiserror::Error, Debug)]
 #[error("user provided an invalid totp value")]
 pub struct TotpInvalid;
+
+#[derive(thiserror::Error, Debug)]
+#[error("totp is already set up")]
+pub struct TotpAlreadySetUp;
 
 #[derive(thiserror::Error, Debug)]
 #[error("Failed to create totp qr code - {0}")]
@@ -41,12 +47,16 @@ pub async fn setup_totp(
     user: &User,
     totp_value: &str,
 ) -> Result<TotpSetupResult, RetrieveTotpSetupDataError> {
+    if user.is_totp_set_up {
+        return Err(TotpAlreadySetUp)?;
+    }
+
     let totp = build_totp_for_user(user)?;
 
     match totp.check_current(totp_value)? {
         true => {
-            let mut conn = database.acquire_connection().await?;
-            repository::user::set_totp_setup_state(&mut *conn, &user.id, true).await?;
+            let mut transaction = database.begin_transaction().await?;
+            repository::user::set_totp_setup_state(&mut *transaction, &user.id, true).await?;
 
             let mut recovery_codes = Vec::with_capacity(RECOVERY_CODE_COUNT);
             for _ in 0..(RECOVERY_CODE_COUNT / 4) {
@@ -59,13 +69,16 @@ pub async fn setup_totp(
                     hash_password(&codes[3])?,
                 ];
 
-                repository::totp_recovery_code::create(&mut *conn, user.id, &hashed_codes).await?;
+                repository::totp_recovery_code::create(&mut *transaction, user.id, &hashed_codes)
+                    .await?;
 
                 recovery_codes.push(codes[0].clone());
                 recovery_codes.push(codes[1].clone());
                 recovery_codes.push(codes[2].clone());
                 recovery_codes.push(codes[3].clone());
             }
+
+            transaction.commit().await?;
 
             Ok(TotpSetupResult { recovery_codes })
         }

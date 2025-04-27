@@ -7,11 +7,16 @@ use crate::totp::{build_totp_for_user, TotpCreationError};
 pub enum RetrieveTotpSetupDataError {
     TotpCreation(#[from] TotpCreationError),
     TotpSecretBase64QrCode(#[from] TotpSecretBase64QrCodeError),
+    TotpAlreadySetUp(#[from] TotpAlreadySetUp),
 }
 
 #[derive(thiserror::Error, Debug)]
 #[error("Failed to create totp qr code - {0}")]
 pub struct TotpSecretBase64QrCodeError(String);
+
+#[derive(thiserror::Error, Debug)]
+#[error("totp is already set up")]
+pub struct TotpAlreadySetUp;
 
 pub struct TotpSetupData {
     pub secret_base32: String,
@@ -21,6 +26,10 @@ pub struct TotpSetupData {
 pub async fn retrieve_totp_setup_data(
     user: &User,
 ) -> Result<TotpSetupData, RetrieveTotpSetupDataError> {
+    if user.is_totp_set_up {
+        return Err(TotpAlreadySetUp)?;
+    }
+
     let totp = build_totp_for_user(user)?;
 
     let secret_base32 = totp.get_secret_base32();

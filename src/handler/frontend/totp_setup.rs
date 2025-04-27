@@ -7,6 +7,7 @@ use axum::{
     Extension, Router,
 };
 use axum_extra::{extract::Form, routing::RouterExt};
+use axum_htmx::HxRequest;
 use bitsync_core::use_case::user_settings::{
     retrieve_totp_setup_data::retrieve_totp_setup_data, setup_totp::setup_totp,
 };
@@ -18,6 +19,7 @@ use serde::Deserialize;
 
 use crate::{
     auth::{require_login_and_user_setup_middleware, AuthData},
+    handler::redirect_response,
     AppState,
 };
 
@@ -35,10 +37,16 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 async fn user_settings_totp_setup_page_handler(
     _: bitsync_routes::GetTotpSetupPage,
     Extension(auth_data): Extension<AuthData>,
+    HxRequest(is_hx_request): HxRequest,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
-        Ok(totp_setup_data) => Html(TotpSetupPage::from(totp_setup_data).render().into_string()),
-        Err(_) => todo!(),
+        Ok(totp_setup_data) => Html(TotpSetupPage::from(totp_setup_data).render().into_string()).into_response(),
+        Err(error) => {
+            match error {
+                bitsync_core::use_case::user_settings::retrieve_totp_setup_data::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
+                _ => todo!(),
+            }
+        },
     }
 }
 
@@ -51,6 +59,7 @@ async fn user_settings_totp_setup_submit_handler(
     _: bitsync_routes::PostTotpSetup,
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
+    HxRequest(is_hx_request): HxRequest,
     Form(totp_setup_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {
     match setup_totp(&state.database, &auth_data.user, &totp_setup_data.totp).await {
@@ -58,7 +67,10 @@ async fn user_settings_totp_setup_submit_handler(
             TotpRecoveryCodesPrompt::from(totp_setup_data)
                 .render()
                 .into_string(),
-        ),
-        Err(e) => todo!("{:?}", e),
+        ).into_response(),
+        Err(error) => match error {
+            bitsync_core::use_case::user_settings::setup_totp::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
+            _ => todo!(),
+        },
     }
 }
