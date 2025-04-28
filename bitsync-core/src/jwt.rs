@@ -9,9 +9,16 @@ pub struct Error(#[from] jsonwebtoken::errors::Error);
 pub use jsonwebtoken::errors::{Error as InnerError, ErrorKind as InnerErrorKind};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub enum LoginState {
+    Basic,
+    TwoFactor,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct JwtClaims {
     pub sub: Uuid,
     pub exp: i64,
+    pub login_state: LoginState,
 }
 
 impl JwtClaims {

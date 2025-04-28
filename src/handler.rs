@@ -20,13 +20,13 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(frontend::create_routes(state).await)
         .fallback(handler_404)
         .layer(Extension(RateLimitLayer::new(1000, Duration::from_secs(1))))
-        .layer(DefaultBodyLimit::max(10240))
-        .layer(RequestBodyLimitLayer::new(10240))
+        .layer(DefaultBodyLimit::max(10240000))
+        .layer(RequestBodyLimitLayer::new(10240000))
         .layer(TraceLayer::new_for_http())
 }
 
 pub async fn handler_404() -> impl IntoResponse {
-    StatusCode::NOT_FOUND.into_response()
+    (StatusCode::NOT_FOUND, StatusCode::NOT_FOUND.to_string()).into_response()
 }
 
 pub fn http_redirect_response(redirect_route: &str) -> Response {

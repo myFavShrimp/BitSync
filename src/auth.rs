@@ -9,7 +9,7 @@ use axum::{
 };
 use axum_extra::extract::CookieJar;
 use axum_htmx::HxRequest;
-use bitsync_core::jwt::JwtClaims;
+use bitsync_core::jwt::{JwtClaims, LoginState};
 use bitsync_database::{database::ConnectionAcquisitionError, entity::User, repository};
 
 #[derive(Debug, thiserror::Error)]
@@ -73,6 +73,7 @@ where
         })
     }
 }
+
 pub async fn require_logout_middleware(
     auth_status: AuthStatus,
     HxRequest(is_hx_request): HxRequest,
@@ -98,10 +99,16 @@ pub async fn require_login_and_user_setup_middleware(
             redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
         }
         AuthStatus::User(auth_data) => {
+            let request_path = request.uri().path();
+
             let totp_setup_route = bitsync_routes::GetTotpSetupPage.to_string();
 
-            if !auth_data.user.is_totp_set_up && dbg!(request.uri().path()) != totp_setup_route {
+            if !auth_data.user.is_totp_set_up && request_path != totp_setup_route {
                 return redirect_response(is_hx_request, &totp_setup_route);
+            }
+
+            if auth_data.claims.login_state != LoginState::TwoFactor {
+                return redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string());
             }
 
             let extensions = request.extensions_mut();

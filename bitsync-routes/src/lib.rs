@@ -34,10 +34,6 @@ pub struct GetRegisterPage;
 #[typed_path("/register")]
 pub struct PostRegisterAction;
 
-#[derive(TypedPath, Deserialize)]
-#[typed_path("/totp-auth")]
-pub struct GetTotpAuthPage;
-
 // home
 
 #[derive(TypedPath, Deserialize)]

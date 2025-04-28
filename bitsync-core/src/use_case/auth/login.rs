@@ -1,7 +1,7 @@
 use bitsync_database::database::{ConnectionAcquisitionError, Database};
 use bitsync_database::repository;
 
-use crate::jwt::JwtClaims;
+use crate::jwt::{JwtClaims, LoginState};
 
 use crate::hash::{verify_password_hash, PasswordHashVerificationError};
 
@@ -32,6 +32,7 @@ pub async fn perform_login(
     Ok(JwtClaims {
         sub: user.id,
         exp: jwt_expiration,
+        login_state: LoginState::Basic,
     }
     .encode(jwt_secret)?)
 }
