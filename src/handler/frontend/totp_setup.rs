@@ -25,7 +25,7 @@ use crate::{
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
-        .typed_get(user_settings_totp_setup_page_handler)
+        .typed_get(totp_setup_page_handler)
         .typed_post(user_settings_totp_setup_submit_handler)
         .route_layer(from_fn_with_state(
             state.clone(),
@@ -34,8 +34,8 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .with_state(state)
 }
 
-async fn user_settings_totp_setup_page_handler(
-    _: bitsync_routes::GetTotpSetupPage,
+async fn totp_setup_page_handler(
+    _: bitsync_routes::GetRegisterTotpSetupPage,
     Extension(auth_data): Extension<AuthData>,
     HxRequest(is_hx_request): HxRequest,
 ) -> impl IntoResponse {
@@ -56,7 +56,7 @@ struct TotpSetupFormData {
 }
 
 async fn user_settings_totp_setup_submit_handler(
-    _: bitsync_routes::PostTotpSetup,
+    _: bitsync_routes::PostRegisterTotpSetupAction,
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
     HxRequest(is_hx_request): HxRequest,

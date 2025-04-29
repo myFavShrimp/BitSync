@@ -81,10 +81,19 @@ pub async fn require_logout_middleware(
     next: Next,
 ) -> Response {
     match auth_status {
+        AuthStatus::Missing
+        | AuthStatus::Invalid
+        | AuthStatus::User(AuthData {
+            claims:
+                JwtClaims {
+                    login_state: LoginState::Basic,
+                    ..
+                },
+            ..
+        }) => next.run(request).await,
         AuthStatus::User(..) => {
             redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string())
         }
-        AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
     }
 }
 
@@ -101,14 +110,17 @@ pub async fn require_login_and_user_setup_middleware(
         AuthStatus::User(auth_data) => {
             let request_path = request.uri().path();
 
-            let totp_setup_route = bitsync_routes::GetTotpSetupPage.to_string();
+            let totp_setup_route = bitsync_routes::GetRegisterPage.to_string();
+            let login_totp_auth_route = bitsync_routes::GetLoginTotpAuthPage.to_string();
 
             if !auth_data.user.is_totp_set_up && request_path != totp_setup_route {
                 return redirect_response(is_hx_request, &totp_setup_route);
             }
 
-            if auth_data.claims.login_state != LoginState::TwoFactor {
-                return redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string());
+            if auth_data.claims.login_state == LoginState::Basic
+                && request_path != login_totp_auth_route
+            {
+                return redirect_response(is_hx_request, &login_totp_auth_route);
             }
 
             let extensions = request.extensions_mut();

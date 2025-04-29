@@ -23,6 +23,14 @@ pub struct GetLoginPage;
 pub struct PostLoginAction;
 
 #[derive(TypedPath, Deserialize)]
+#[typed_path("/login/totp-auth")]
+pub struct GetLoginTotpAuthPage;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/login/totp-auth")]
+pub struct PostLoginTotpAuthAction;
+
+#[derive(TypedPath, Deserialize)]
 #[typed_path("/logout")]
 pub struct GetLogoutAction;
 
@@ -33,6 +41,14 @@ pub struct GetRegisterPage;
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/register")]
 pub struct PostRegisterAction;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/register/totp-setup")]
+pub struct GetRegisterTotpSetupPage;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/register/totp-setup")]
+pub struct PostRegisterTotpSetupAction;
 
 // home
 
@@ -96,11 +112,3 @@ pub struct GetUserSettingsPage;
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/change-password")]
 pub struct PostUserSettingsChangePassword;
-
-#[derive(TypedPath, Deserialize)]
-#[typed_path("/totp-setup")]
-pub struct GetTotpSetupPage;
-
-#[derive(TypedPath, Deserialize)]
-#[typed_path("/totp-setup")]
-pub struct PostTotpSetup;
