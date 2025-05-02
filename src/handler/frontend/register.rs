@@ -16,16 +16,15 @@ use bitsync_core::use_case::auth::{
     setup_totp::setup_totp,
 };
 use bitsync_frontend::{
-    pages::{
-        register::{RegisterForm, RegisterPage, TotpRecoveryCodesPrompt},
-        totp_setup::TotpSetupPage,
-    },
+    pages::register::{RegisterForm, RegisterPage, TotpRecoveryCodesPrompt, TotpSetupForm},
     Render,
 };
 use serde::Deserialize;
 
 use crate::{
-    auth::{require_login_and_no_totp_setup_middleware, require_logout_middleware, AuthData},
+    auth::{
+        jwt_cookie, require_login_and_no_totp_setup_middleware, require_logout_middleware, AuthData,
+    },
     handler::redirect_response,
 };
 
@@ -34,7 +33,7 @@ use crate::AppState;
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     let totp_setup_router = Router::new()
         .typed_get(register_totp_setup_page_handler)
-        .typed_post(login_totp_setup_submit_handler)
+        .typed_post(register_totp_setup_submit_handler)
         .route_layer(from_fn_with_state(
             state.clone(),
             require_login_and_no_totp_setup_middleware,
@@ -77,18 +76,7 @@ async fn register_action_handler(
     .await
     {
         Ok(result) => {
-            let cookie_jar = cookie_jar.add({
-                let mut auth_cookie = axum_extra::extract::cookie::Cookie::new(
-                    crate::auth::AUTH_COOKIE_NAME,
-                    result.jwt,
-                );
-                auth_cookie.set_same_site(SameSite::Strict);
-
-                #[cfg(not(debug_assertions))]
-                auth_cookie.set_secure(true);
-
-                auth_cookie
-            });
+            let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
 
             (
                 cookie_jar,
@@ -112,7 +100,7 @@ async fn register_totp_setup_page_handler(
     HxRequest(is_hx_request): HxRequest,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
-        Ok(totp_setup_data) => Html(TotpSetupPage::from(totp_setup_data).render().into_string()).into_response(),
+        Ok(totp_setup_data) => Html(RegisterPage::TotpSetup(TotpSetupForm::from(totp_setup_data)).render().into_string()).into_response(),
         Err(error) => {
             match error {
                 bitsync_core::use_case::auth::retrieve_totp_setup_data::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
@@ -127,19 +115,26 @@ struct TotpSetupFormData {
     totp: String,
 }
 
-async fn login_totp_setup_submit_handler(
+async fn register_totp_setup_submit_handler(
     _: bitsync_routes::PostRegisterTotpSetupAction,
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
     HxRequest(is_hx_request): HxRequest,
+    cookie_jar: CookieJar,
     Form(totp_setup_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {
-    match setup_totp(&state.database, &auth_data.user, &totp_setup_data.totp).await {
-        Ok(totp_setup_data) => Html(
-            TotpRecoveryCodesPrompt::from(totp_setup_data)
-                .render()
-                .into_string(),
-        ).into_response(),
+    match setup_totp(&state.database, &auth_data.user, &totp_setup_data.totp, state.config.auth.jwt_expiration_seconds, &state.config.auth.jwt_secret).await {
+        Ok(result) => {
+            let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
+
+            (
+                cookie_jar,
+                Html(
+                    TotpRecoveryCodesPrompt::from(result)
+                    .render()
+                    .into_string(),
+                )
+            ).into_response()},
         Err(error) => match error {
             bitsync_core::use_case::auth::setup_totp::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
             _ => todo!(),

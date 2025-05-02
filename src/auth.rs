@@ -181,9 +181,9 @@ pub async fn require_login_and_no_totp_setup_middleware(
     }
 }
 
-pub fn jwt_cookie<'a>(jwt: String) -> Cookie<'a> {
+pub fn jwt_cookie<'a>(jwt: &str) -> Cookie<'a> {
     let mut auth_cookie =
-        axum_extra::extract::cookie::Cookie::new(crate::auth::AUTH_COOKIE_NAME, jwt);
+        axum_extra::extract::cookie::Cookie::new(crate::auth::AUTH_COOKIE_NAME, jwt.to_owned());
     auth_cookie.set_same_site(SameSite::Strict);
     auth_cookie.set_path("/");
 

@@ -1,5 +1,9 @@
-use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
+use bitsync_core::use_case::auth::{
+    retrieve_totp_setup_data::TotpSetupData, setup_totp::TotpSetupResult,
+};
 use maud::Render;
+
+use crate::totp::totp_qr_src;
 
 pub enum RegisterPage {
     UserRegistration(RegisterForm),
@@ -73,6 +77,16 @@ pub struct TotpSetupForm {
     pub totp_secret_image_base64_img_src: String,
     pub totp_secret: String,
     pub error_message: Option<String>,
+}
+
+impl From<TotpSetupData> for TotpSetupForm {
+    fn from(value: TotpSetupData) -> Self {
+        Self {
+            totp_secret_image_base64_img_src: totp_qr_src(value.secret_base64_qr_code),
+            totp_secret: value.secret_base32,
+            error_message: None,
+        }
+    }
 }
 
 impl Render for TotpSetupForm {

@@ -7,7 +7,7 @@ use axum::{
     Extension, Router,
 };
 use axum_extra::{
-    extract::{cookie::SameSite, CookieJar, Form},
+    extract::{CookieJar, Form},
     routing::RouterExt,
 };
 use axum_htmx::HxRequest;
@@ -73,7 +73,7 @@ async fn login_action_handler(
     .await
     {
         Ok(result) => {
-            let cookie_jar = cookie_jar.add(jwt_cookie(result.jwt));
+            let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
 
             let redirect_url = match result.user.is_totp_set_up {
                 true => bitsync_routes::GetFilesHomePage.to_string(),
@@ -120,7 +120,7 @@ async fn login_totp_auth_submit_handler(
     .await
     {
         Ok(jwt) => {
-            let cookie_jar = cookie_jar.add(jwt_cookie(jwt));
+            let cookie_jar = cookie_jar.add(jwt_cookie(&jwt));
 
             (
                 cookie_jar,
