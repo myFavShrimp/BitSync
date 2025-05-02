@@ -1,19 +1,84 @@
-.Page {
-    width: 100%;
+@import "vars";
+
+body {
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: $text-secondary;
+
+    .Logo {
+        margin-top: 3em;
+        margin-bottom: .75em;
+        width: 200px;
+        margin-left: 4px;
+        fill: white;
+    }
+
+    .PageHint {
+        margin-bottom: 1em;
+    }
     
     .Form {
+        position: relative;
+        overflow: hidden;
+        background-color: $item-background-color;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        padding: 2rem;
         display: flex;
         flex-direction: column;
-        width: 500px;
+        width: 420px;
         margin: 1em;
+        gap: 1.5rem;
 
-        .Logo {
-            width: 200px;
-            height: 100px;
-            margin-left: 4px;
-            fill: white;
+        &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.05),
+                transparent
+            );
+            transform: skewX(-25deg);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        &:hover:before {
+            left: 150%;
+            transition: 0.7s ease-in-out;
+        }
+
+        .InputWrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            color: $text-color;
+
+            .Input {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                input {
+                    width: 100%;
+                    padding: 1em 1.2em;
+                }
+            }
+        }
+
+        .Actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
     }
 }

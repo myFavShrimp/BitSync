@@ -12,3 +12,7 @@ maud = "0.27.0"
 serde_json.workspace = true
 size = "0.4.1"
 turf = "0.10.0"
+
+[package.metadata.turf]
+load_paths = ["scss-vars"]
+browser_targets = ["defaults"]

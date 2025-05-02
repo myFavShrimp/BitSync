@@ -1,18 +1,18 @@
 use maud::Render;
 
 #[derive(Default)]
-pub struct Logo(Option<&'static str>);
+pub struct Logo(&'static str);
 
 impl Logo {
     pub fn with_class(class: &'static str) -> Self {
-        Self(Some(class))
+        Self(class)
     }
 }
 
 impl Render for Logo {
     fn render(&self) -> maud::Markup {
         maud::html! {
-            svg class=[&self.0] viewbox="0 0 973 224" xmlns="http://www.w3.org/2000/svg" width="973" height="224" {
+            svg class=(&self.0) viewbox="0 0 973 224" xmlns="http://www.w3.org/2000/svg" {
                 defs {}
                 g transform="matrix(1, 0, 0, 1, 0, 1.586033950617388)" {
                     g."artboard" transform="matrix(1, 0, 0, 1, 0, 0)" {
