@@ -1,9 +1,8 @@
-use bitsync_core::use_case::user_settings::{
-    retrieve_totp_setup_data::TotpSetupData, setup_totp::TotpSetupResult,
-};
+use bitsync_core::use_case::auth::retrieve_totp_setup_data::TotpSetupData;
+use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
 use maud::Render;
 
-static BASE64_PNG_IMG_SRC_PREFIX: &str = "data:image/png;base64";
+use crate::totp::totp_qr_src;
 
 pub struct TotpSetupPage {
     pub totp_secret_image_base64_img_src: String,
@@ -13,10 +12,7 @@ pub struct TotpSetupPage {
 impl From<TotpSetupData> for TotpSetupPage {
     fn from(value: TotpSetupData) -> Self {
         Self {
-            totp_secret_image_base64_img_src: format!(
-                "{},{}",
-                BASE64_PNG_IMG_SRC_PREFIX, value.secret_base64_qr_code
-            ),
+            totp_secret_image_base64_img_src: totp_qr_src(value.secret_base64_qr_code),
             totp_secret: value.secret_base32,
         }
     }
@@ -44,10 +40,7 @@ pub struct TotpSetupForm {
 impl From<TotpSetupData> for TotpSetupForm {
     fn from(value: TotpSetupData) -> Self {
         Self {
-            totp_secret_image_base64_img_src: format!(
-                "{},{}",
-                BASE64_PNG_IMG_SRC_PREFIX, value.secret_base64_qr_code
-            ),
+            totp_secret_image_base64_img_src: totp_qr_src(value.secret_base64_qr_code),
             totp_secret: value.secret_base32,
         }
     }

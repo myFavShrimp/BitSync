@@ -11,7 +11,7 @@ pub use jsonwebtoken::errors::{Error as InnerError, ErrorKind as InnerErrorKind}
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum LoginState {
     Basic,
-    TwoFactor,
+    Full,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]

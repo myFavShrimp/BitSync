@@ -17,21 +17,30 @@ use bitsync_frontend::{error_modal::ErrorModal, pages::files::FilesHomePageChang
 use serde::Deserialize;
 
 use crate::{
-    auth::{require_login_and_user_setup_middleware, AuthData},
+    auth::{require_login_and_totp_setup_middleware, AuthData},
     AppState,
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
-    Router::new()
+    let auth_middleware =
+        from_fn_with_state(state.clone(), require_login_and_totp_setup_middleware);
+
+    let upload_router = Router::new()
         .typed_post(user_file_upload_handler)
+        .route_layer(axum::middleware::from_fn_with_state(
+            state.clone(),
+            crate::body_limit::dynamic_body_size_limit,
+        ))
+        .route_layer(auth_middleware.clone())
+        .with_state(state.clone());
+
+    Router::new()
+        .merge(upload_router)
         .typed_get(user_file_download_handler)
         .typed_get(user_file_delete_handler)
         .typed_post(user_file_move_handler)
         .typed_post(user_file_directory_creation_handler)
-        .route_layer(from_fn_with_state(
-            state.clone(),
-            require_login_and_user_setup_middleware,
-        ))
+        .route_layer(auth_middleware)
         .with_state(state)
 }
 

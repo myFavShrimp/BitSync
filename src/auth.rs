@@ -7,7 +7,10 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use axum_extra::extract::CookieJar;
+use axum_extra::extract::{
+    cookie::{Cookie, SameSite},
+    CookieJar,
+};
 use axum_htmx::HxRequest;
 use bitsync_core::jwt::{JwtClaims, LoginState};
 use bitsync_database::{database::ConnectionAcquisitionError, entity::User, repository};
@@ -81,23 +84,14 @@ pub async fn require_logout_middleware(
     next: Next,
 ) -> Response {
     match auth_status {
-        AuthStatus::Missing
-        | AuthStatus::Invalid
-        | AuthStatus::User(AuthData {
-            claims:
-                JwtClaims {
-                    login_state: LoginState::Basic,
-                    ..
-                },
-            ..
-        }) => next.run(request).await,
+        AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
         AuthStatus::User(..) => {
             redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string())
         }
     }
 }
 
-pub async fn require_login_and_user_setup_middleware(
+pub async fn require_login_and_totp_setup_middleware(
     auth_status: AuthStatus,
     HxRequest(is_hx_request): HxRequest,
     mut request: Request,
@@ -108,19 +102,17 @@ pub async fn require_login_and_user_setup_middleware(
             redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
         }
         AuthStatus::User(auth_data) => {
-            let request_path = request.uri().path();
-
-            let totp_setup_route = bitsync_routes::GetRegisterPage.to_string();
-            let login_totp_auth_route = bitsync_routes::GetLoginTotpAuthPage.to_string();
-
-            if !auth_data.user.is_totp_set_up && request_path != totp_setup_route {
-                return redirect_response(is_hx_request, &totp_setup_route);
+            if !auth_data.user.is_totp_set_up {
+                return redirect_response(
+                    is_hx_request,
+                    &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
+                );
             }
-
-            if auth_data.claims.login_state == LoginState::Basic
-                && request_path != login_totp_auth_route
-            {
-                return redirect_response(is_hx_request, &login_totp_auth_route);
+            if auth_data.claims.login_state == LoginState::Basic {
+                return redirect_response(
+                    is_hx_request,
+                    &bitsync_routes::GetLoginTotpAuthPage.to_string(),
+                );
             }
 
             let extensions = request.extensions_mut();
@@ -129,4 +121,74 @@ pub async fn require_login_and_user_setup_middleware(
             next.run(request).await
         }
     }
+}
+
+pub async fn require_basic_login_and_totp_setup_middleware(
+    auth_status: AuthStatus,
+    HxRequest(is_hx_request): HxRequest,
+    mut request: Request,
+    next: Next,
+) -> Response {
+    match auth_status {
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) => {
+            if !auth_data.user.is_totp_set_up {
+                return redirect_response(
+                    is_hx_request,
+                    &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
+                );
+            }
+            if auth_data.claims.login_state == LoginState::Full {
+                return redirect_response(
+                    is_hx_request,
+                    &bitsync_routes::GetFilesHomePage.to_string(),
+                );
+            }
+
+            let extensions = request.extensions_mut();
+            extensions.insert(auth_data);
+
+            next.run(request).await
+        }
+    }
+}
+
+pub async fn require_login_and_no_totp_setup_middleware(
+    auth_status: AuthStatus,
+    HxRequest(is_hx_request): HxRequest,
+    mut request: Request,
+    next: Next,
+) -> Response {
+    match auth_status {
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) => {
+            if auth_data.user.is_totp_set_up && auth_data.claims.login_state == LoginState::Basic {
+                return redirect_response(
+                    is_hx_request,
+                    &bitsync_routes::GetLoginTotpAuthPage.to_string(),
+                );
+            }
+
+            let extensions = request.extensions_mut();
+            extensions.insert(auth_data);
+
+            next.run(request).await
+        }
+    }
+}
+
+pub fn jwt_cookie<'a>(jwt: String) -> Cookie<'a> {
+    let mut auth_cookie =
+        axum_extra::extract::cookie::Cookie::new(crate::auth::AUTH_COOKIE_NAME, jwt);
+    auth_cookie.set_same_site(SameSite::Strict);
+    auth_cookie.set_path("/");
+
+    #[cfg(not(debug_assertions))]
+    auth_cookie.set_secure(true);
+
+    auth_cookie
 }

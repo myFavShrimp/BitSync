@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{atomic::AtomicU64, Arc};
 
 use axum::{routing::IntoMakeService, Router};
 use bitsync_core::config::Config;
@@ -6,12 +6,14 @@ use bitsync_database::database::{ConnectAndMigrateError, Database};
 use tower_http::cors::CorsLayer;
 
 mod auth;
+mod body_limit;
 pub mod config;
 mod handler;
 
 pub struct AppState {
     pub(crate) config: Config,
     pub(crate) database: Database,
+    pub(crate) current_file_upload_limit: AtomicU64,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -23,6 +25,7 @@ impl AppState {
         let state = Self {
             database: Database::connect_and_migrate(&config.database_url).await?,
             config,
+            current_file_upload_limit: AtomicU64::new(0),
         };
 
         Ok(state)

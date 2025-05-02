@@ -5,7 +5,7 @@ use axum_extra::extract::CookieJar;
 use axum_extra::routing::RouterExt;
 use axum_htmx::HxRequest;
 
-use crate::auth::require_login_and_user_setup_middleware;
+use crate::auth::require_login_and_totp_setup_middleware;
 
 use crate::handler::redirect_response;
 use crate::AppState;
@@ -15,7 +15,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_get(logout_action_handler)
         .route_layer(from_fn_with_state(
             state.clone(),
-            require_login_and_user_setup_middleware,
+            require_login_and_totp_setup_middleware,
         ))
 }
 

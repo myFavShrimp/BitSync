@@ -52,9 +52,9 @@ impl Render for GuestDocument {
                 head {
                     meta content="text/html; charset=UTF-8" http-equiv="Content-Type";
                     meta content="width=device-width,initial-scale=1.0" name="viewport";
-                    script src="static/external/htmx.js" {}
-                    link rel="stylesheet" type="text/css" href="static/external/css/reset.css";
-                    link type="text/css" href="static/external/css/Noto Sans.css" rel="stylesheet";
+                    script src="/static/external/htmx.js" {}
+                    link rel="stylesheet" type="text/css" href="/static/external/css/reset.css";
+                    link type="text/css" href="/static/external/css/Noto Sans.css" rel="stylesheet";
                     style { (crate::styles::base::STYLE_SHEET) }
                 }
                 body {

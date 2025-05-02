@@ -13,7 +13,7 @@ use bitsync_frontend::{pages::user_settings::UserSettingsPage, Render};
 use serde::Deserialize;
 
 use crate::{
-    auth::{require_login_and_user_setup_middleware, AuthData},
+    auth::{require_login_and_totp_setup_middleware, AuthData},
     AppState,
 };
 
@@ -23,7 +23,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_post(user_settings_password_change_handler)
         .route_layer(from_fn_with_state(
             state.clone(),
-            require_login_and_user_setup_middleware,
+            require_login_and_totp_setup_middleware,
         ))
         .with_state(state.clone())
 }

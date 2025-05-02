@@ -1,4 +1,5 @@
 use bitsync_database::database::{ConnectionAcquisitionError, Database};
+use bitsync_database::entity::User;
 use bitsync_database::repository;
 
 use crate::jwt::{JwtClaims, LoginState};
@@ -14,13 +15,18 @@ pub enum LoginError {
     Jwt(#[from] crate::jwt::Error),
 }
 
+pub struct LoginResult {
+    pub user: User,
+    pub jwt: String,
+}
+
 pub async fn perform_login(
     database: &Database,
     username: &str,
     password: &str,
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
-) -> Result<String, LoginError> {
+) -> Result<LoginResult, LoginError> {
     let mut connection = database.acquire_connection().await?;
 
     let user = repository::user::find_by_username(&mut *connection, username).await?;
@@ -28,11 +34,12 @@ pub async fn perform_login(
     verify_password_hash(&user.password, password)?;
 
     let jwt_expiration = time::OffsetDateTime::now_utc().unix_timestamp() + jwt_expiration_seconds;
-
-    Ok(JwtClaims {
+    let jwt = JwtClaims {
         sub: user.id,
         exp: jwt_expiration,
         login_state: LoginState::Basic,
     }
-    .encode(jwt_secret)?)
+    .encode(jwt_secret)?;
+
+    Ok(LoginResult { user, jwt })
 }
