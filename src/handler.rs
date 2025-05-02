@@ -1,14 +1,13 @@
-use std::{sync::Arc, time::Duration};
+use std::sync::Arc;
 
 use crate::AppState;
 use axum::{
     extract::DefaultBodyLimit,
     http::StatusCode,
     response::{IntoResponse, Response},
-    Extension, Router,
+    Router,
 };
 use headers::Header;
-use tower::limit::RateLimitLayer;
 use tower_http::{limit::RequestBodyLimitLayer, trace::TraceLayer};
 
 mod frontend;
@@ -19,7 +18,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(static_assets::create_routes().await)
         .merge(frontend::create_routes(state.clone()).await)
         .fallback(handler_404)
-        .layer(Extension(RateLimitLayer::new(1000, Duration::from_secs(1))))
         .layer(DefaultBodyLimit::max(10240000))
         .layer(RequestBodyLimitLayer::new(10240000))
         .layer(TraceLayer::new_for_http())

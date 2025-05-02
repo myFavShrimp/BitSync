@@ -7,7 +7,7 @@ use axum::{
     Extension, Router,
 };
 use axum_extra::{
-    extract::{cookie::SameSite, CookieJar, Form},
+    extract::{CookieJar, Form},
     routing::RouterExt,
 };
 use axum_htmx::HxRequest;
