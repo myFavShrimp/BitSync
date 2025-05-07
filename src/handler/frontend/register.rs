@@ -100,13 +100,18 @@ async fn register_totp_setup_page_handler(
     HxRequest(is_hx_request): HxRequest,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
-        Ok(totp_setup_data) => Html(RegisterPage::TotpSetup(TotpSetupForm::from(totp_setup_data)).render().into_string()).into_response(),
+        Ok(totp_setup_data) => Html(
+            RegisterPage::TotpSetup(TotpSetupForm::from(totp_setup_data))
+                .render()
+                .into_string(),
+        )
+        .into_response(),
         Err(error) => {
             match error {
                 bitsync_core::use_case::auth::retrieve_totp_setup_data::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
                 _ => todo!(),
             }
-        },
+        }
     }
 }
 

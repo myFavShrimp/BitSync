@@ -74,6 +74,29 @@ body {
             }
         }
 
+        .TotpInputWrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+
+            .TotpTimer {
+                --timer-pie-color: #{$primary-color};
+
+                width: 2.5rem;
+                height: 2.5rem;
+                min-width: 2.5rem;
+
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.875rem;
+                background: conic-gradient(var(--timer-pie-color) 360deg, rgba(255, 255, 255, 0.1) 0deg);
+            }
+        }
+
         .Actions {
             display: flex;
             flex-direction: column;

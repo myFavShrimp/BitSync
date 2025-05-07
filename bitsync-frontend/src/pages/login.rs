@@ -81,24 +81,34 @@ impl Render for TotpForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
             form class=(crate::styles::login_page::ClassName::FORM) hx-post=(bitsync_routes::PostLoginTotpAuthAction.to_string()) hx-target="this" {
-                div {
-                    div {
-                        label {
-                            "TOTP Code"
+                label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
+                    "TOTP Code"
+
+                    div class=(crate::styles::login_page::ClassName::TOTP_INPUT_WRAPPER) {
+                        input class=(crate::styles::base::ClassName::FORM_CONTROL) name="totp" placeholder="Enter your one-time password" required;
+
+                        p id="totp-timer" class=(crate::styles::login_page::ClassName::TOTP_TIMER) {"30"}
+
+                        script {(maud::PreEscaped(r#"
+                            setInterval(() => {
+                                const totpTimer = document.querySelector('#totp-timer');
+                                const time = 30 - (Math.floor(Date.now() / 1000) % 30);
+                                totpTimer.textContent = time;
+                                totpTimer.style.background = `conic-gradient(var(--timer-pie-color) ${time/30*360}deg, rgba(255, 255, 255, 0.1) 0deg)`;
+                            }, 100);
+                        "#))}
+                    }
+                }
+                @match &self.error_message {
+                    Some(message) => {
+                        div {
+                            (message)
                         }
-                        input name="totp" required;
                     }
-                    @match &self.error_message {
-                        Some(message) => {
-                            div {
-                                (message)
-                            }
-                        }
-                        None => {}
-                    }
-                    button type="submit" {
-                        "Login"
-                    }
+                    None => {}
+                }
+                button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                    "Login"
                 }
             }
         }
