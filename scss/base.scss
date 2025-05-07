@@ -30,6 +30,7 @@ body {
         cursor: pointer;
         transition: all 0.3s ease;
         backdrop-filter: blur(8px);
+        text-decoration: none;
 
         &:hover {
             background: rgba(255, 255, 255, 0.1);

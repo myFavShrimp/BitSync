@@ -19,9 +19,12 @@ impl Default for RegisterPage {
 impl Render for RegisterPage {
     fn render(&self) -> maud::Markup {
         super::base::GuestDocument(maud::html! {
-            main class=(crate::styles::register_page::ClassName::PAGE) {
-                style { (crate::styles::register_page::STYLE_SHEET) }
+            style { (maud::PreEscaped(crate::styles::register_page::STYLE_SHEET)) }
 
+            (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
+            p class=(crate::styles::register_page::ClassName::PAGE_HINT) {("Create an account to get started")}
+
+            main {
                 @match &self {
                     Self::UserRegistration(register_form) => (register_form),
                     Self::TotpSetup(totp_setup_form) => (totp_setup_form),
@@ -43,28 +46,25 @@ static PAGE_FORM_SWAP_ID: &str = "register-page-form";
 impl Render for RegisterForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
-            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterAction.to_string()) id=(PAGE_FORM_SWAP_ID) {
-                (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
-                div {
-                    div {
-                        label {
-                            "Username"
-                        }
-                        input name="username" required;
+            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterAction.to_string()) {
+                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                    "Username"
+                    div class=(crate::styles::register_page::ClassName::INPUT) {
+                        input class=(crate::styles::base::ClassName::FORM_CONTROL) value=[&self.username] name="username" placeholder="Enter your username" required;
                     }
-                    div {
-                        label {
-                            "Password"
-                        }
-                        input required type="password" name="password";
+                }
+                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                    "Password"
+                    div class=(crate::styles::register_page::ClassName::INPUT) {
+                        input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" placeholder="Enter your password" required name="password";
                     }
-                    div {
-                        a."button border large" href=(bitsync_routes::GetLoginPage.to_string()) {
-                            "I already have an account"
-                        }
-                        button type="submit" {
-                            "Register"
-                        }
+                }
+                div class=(crate::styles::register_page::ClassName::ACTIONS) {
+                    button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                        "Register"
+                    }
+                    a href=(bitsync_routes::GetLoginPage.to_string()) class=(crate::styles::base::ClassName::TEXT_LINK) {
+                        "I already have an account"
                     }
                 }
             }
@@ -92,20 +92,42 @@ impl From<TotpSetupData> for TotpSetupForm {
 impl Render for TotpSetupForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
-            form hx-target="this" id=(PAGE_FORM_SWAP_ID) {
-                img src=(self.totp_secret_image_base64_img_src);
-                p {
-                    "Scan the QR code to add the totp code to your authenticator app."
+            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) {
+                div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
+                    h1 {"Two-Factor Authentication Setup"}
+                    p {"Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)"}
                 }
-                details {
+                div class=(crate::styles::register_page::ClassName::TOTP_QR_WRAPPER) {
+                    img src=(self.totp_secret_image_base64_img_src);
+                }
+                details class=(crate::styles::register_page::ClassName::TOTP_SECRET) {
                     summary {
-                        "or add the totp manually"
+                        "Can't scan? Show manual entry code"
                     }
-                    "Insert the following secret into your authenticator:"
-                    code { "`" (self.totp_secret) "`" }
+                    pre { code { (self.totp_secret) } }
                 }
-                input name="totp" required;
-                button hx-post {
+
+                hr;
+
+                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                    "TOTP Code"
+
+                    div class=(crate::styles::register_page::ClassName::TOTP_INPUT_WRAPPER) {
+                        input class=(crate::styles::base::ClassName::FORM_CONTROL) name="totp" placeholder="Enter your one-time password" required;
+
+                        p id="totp-timer" class=(crate::styles::register_page::ClassName::TOTP_TIMER) {"30"}
+
+                        script {(maud::PreEscaped(r#"
+                            setInterval(() => {
+                                const totpTimer = document.querySelector('#totp-timer');
+                                const time = 30 - (Math.floor(Date.now() / 1000) % 30);
+                                totpTimer.textContent = time;
+                                totpTimer.style.background = `conic-gradient(var(--timer-pie-color) ${time/30*360}deg, rgba(255, 255, 255, 0.1) 0deg)`;
+                            }, 100);
+                        "#))}
+                    }
+                }
+                button hx-post type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                     "send"
                 }
             }
@@ -129,19 +151,32 @@ impl Render for TotpRecoveryCodesPrompt {
     fn render(&self) -> maud::Markup {
         maud::html! {
             template {
-                div hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) id=(PAGE_FORM_SWAP_ID) {
-                    p {
-                        "Save the recovery codes:"
+                div class=(crate::styles::register_page::ClassName::FORM) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) id=(PAGE_FORM_SWAP_ID) {
+                    div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
+                        h1 {"Save Your Recovery Codes"}
+                        p {"Your two-factor authentication is now active."}
                     }
-                    ul {
-                        @for recovery_code in &self.recovery_codes {
-                            li {
-                                code { "`" (recovery_code) "`" }
+
+                    p {"To ensure you don't lose access to your account, please save these recovery codes in a secure location."}
+                    p {"These codes will only be shown once. If you navigate away without saving them, you'll need to generate new codes."}
+
+                    details class=(crate::styles::register_page::ClassName::TOTP_SECRET) open {
+                        summary {
+                            "Recovery Codes"
+                        }
+
+                        div class=(crate::styles::register_page::ClassName::RECOVERY_CODES) {
+                            @for recovery_code in &self.recovery_codes {
+                                pre {
+                                    code {
+                                        (recovery_code)
+                                    }
+                                }
                             }
                         }
                     }
-                    a href=(bitsync_routes::GetFilesHomePage.to_string()) {
-                        "I saved the codes"
+                    a class=(crate::styles::base::ClassName::BUTTON) href=(bitsync_routes::GetFilesHomePage.to_string()) {
+                        "Continue"
                     }
                 }
             }
