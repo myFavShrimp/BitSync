@@ -19,88 +19,92 @@ body {
         margin-bottom: 1em;
     }
     
-    .Form {
-        position: relative;
-        overflow: hidden;
-        background-color: $item-background-color;
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        padding: 2rem;
-        display: flex;
-        flex-direction: column;
-        width: 26rem;
-        margin: 1rem;
-        gap: 1.5rem;
-
-        &:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -50%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.05),
-                transparent
-            );
-            transform: skewX(-25deg);
-            transition: 0.5s;
-            pointer-events: none;
-        }
-
-        &:hover:before {
-            left: 150%;
-            transition: 0.7s ease-in-out;
-        }
-
-        .InputWrapper {
+    main {
+        width: 100vw;
+        max-width: 26rem;
+    
+        .Form {
+            position: relative;
+            overflow: hidden;
+            background-color: $item-background-color;
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            color: $text-color;
+            margin: 1rem;
+            gap: 1.5rem;
 
-            .Input {
+            &:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -50%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.05),
+                    transparent
+                );
+                transform: skewX(-25deg);
+                transition: 0.5s;
+                pointer-events: none;
+            }
+
+            &:hover:before {
+                left: 150%;
+                transition: 0.7s ease-in-out;
+            }
+
+            .InputWrapper {
                 display: flex;
-                align-items: center;
-                justify-content: center;
+                flex-direction: column;
+                gap: 0.75rem;
+                color: $text-color;
 
-                input {
-                    width: 100%;
-                    padding: 1em 1.2em;
+                .Input {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    input {
+                        width: 100%;
+                        padding: 1em 1.2em;
+                    }
                 }
             }
-        }
 
-        .TotpInputWrapper {
-            display: flex;
-            flex-direction: row;
-            gap: 1rem;
-            align-items: center;
-            justify-content: center;
-
-            .TotpTimer {
-                --timer-pie-color: #{$primary-color};
-
-                width: 2.5rem;
-                height: 2.5rem;
-                min-width: 2.5rem;
-
-                border-radius: 50%;
+            .TotpInputWrapper {
                 display: flex;
+                flex-direction: row;
+                gap: 1rem;
                 align-items: center;
                 justify-content: center;
-                font-size: 0.875rem;
-                background: conic-gradient(var(--timer-pie-color) 360deg, rgba(255, 255, 255, 0.1) 0deg);
-            }
-        }
 
-        .Actions {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+                .TotpTimer {
+                    --timer-pie-color: #{$primary-color};
+
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    min-width: 2.5rem;
+
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.875rem;
+                    background: conic-gradient(var(--timer-pie-color) 360deg, rgba(255, 255, 255, 0.1) 0deg);
+                }
+            }
+
+            .Actions {
+                display: flex;
+                flex-direction: column;
+                gap: 1.25rem;
+            }
         }
     }
 }

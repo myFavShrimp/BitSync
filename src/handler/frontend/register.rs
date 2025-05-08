@@ -80,7 +80,10 @@ async fn register_action_handler(
 
             (
                 cookie_jar,
-                redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string()),
+                redirect_response(
+                    is_hx_request,
+                    &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
+                ),
             )
                 .into_response()
         }

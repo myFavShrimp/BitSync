@@ -14,12 +14,9 @@ impl Render for LoggedInDocument {
                     link href="/static/external/css/reset.css" rel="stylesheet" type="text/css";
                     link href="/static/external/css/Noto Sans.css" rel="stylesheet" type="text/css";
                     script src="/static/js/dialog-helper.js" defer {}
-                    style {
-                        (crate::styles::base::STYLE_SHEET)
-                    }
-                    style {
-                        (crate::styles::error_modal::STYLE_SHEET)
-                    }
+                    style { (crate::styles::base::STYLE_SHEET) }
+                    style { (crate::styles::error_modal::STYLE_SHEET) }
+                    style { (crate::styles::error_banner::STYLE_SHEET) }
                     meta name="htmx-config" content=(*crate::htmx::CONFIG);
                 }
                 body {
@@ -56,6 +53,7 @@ impl Render for GuestDocument {
                     link rel="stylesheet" type="text/css" href="/static/external/css/reset.css";
                     link type="text/css" href="/static/external/css/Noto Sans.css" rel="stylesheet";
                     style { (crate::styles::base::STYLE_SHEET) }
+                    style { (crate::styles::error_banner::STYLE_SHEET) }
                 }
                 body {
                     (self.0)

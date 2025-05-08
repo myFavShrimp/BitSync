@@ -1,5 +1,7 @@
 use maud::Render;
 
+use crate::error_banner::optional_error_banner;
+
 pub enum LoginPage {
     Login(LoginForm),
     Totp(TotpForm),
@@ -40,6 +42,8 @@ impl Render for LoginForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
             form class=(crate::styles::login_page::ClassName::FORM) hx-post=(bitsync_routes::PostLoginAction.to_string()) hx-target="this" {
+                (optional_error_banner(&self.error_message))
+
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "Username"
                     div class=(crate::styles::login_page::ClassName::INPUT) {
@@ -81,6 +85,8 @@ impl Render for TotpForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
             form class=(crate::styles::login_page::ClassName::FORM) hx-post=(bitsync_routes::PostLoginTotpAuthAction.to_string()) hx-target="this" {
+                (optional_error_banner(&self.error_message))
+
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
 

@@ -3,7 +3,7 @@ use bitsync_core::use_case::auth::{
 };
 use maud::Render;
 
-use crate::totp::totp_qr_src;
+use crate::{error_banner::optional_error_banner, totp::totp_qr_src};
 
 pub enum RegisterPage {
     UserRegistration(RegisterForm),
@@ -47,6 +47,8 @@ impl Render for RegisterForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
             form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterAction.to_string()) {
+                (optional_error_banner(&self.error_message))
+
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "Username"
                     div class=(crate::styles::register_page::ClassName::INPUT) {
@@ -93,6 +95,8 @@ impl Render for TotpSetupForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
             form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) {
+                (optional_error_banner(&self.error_message))
+
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Two-Factor Authentication Setup"}
                     p {"Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)"}

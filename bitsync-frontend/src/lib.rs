@@ -1,3 +1,4 @@
+pub mod error_banner;
 pub mod error_modal;
 pub mod htmx;
 pub mod icons;
