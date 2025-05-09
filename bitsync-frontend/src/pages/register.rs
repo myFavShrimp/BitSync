@@ -1,6 +1,4 @@
-use bitsync_core::use_case::auth::{
-    retrieve_totp_setup_data::TotpSetupData, setup_totp::TotpSetupResult,
-};
+use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
 use maud::Render;
 
 use crate::{error_banner::optional_error_banner, totp::totp_qr_src};
@@ -46,7 +44,7 @@ static PAGE_FORM_SWAP_ID: &str = "register-page-form";
 impl Render for RegisterForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
-            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterAction.to_string()) {
+            form class=(crate::styles::register_page::ClassName::FORM) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) hx-post=(bitsync_routes::PostRegisterAction.to_string()) id=(PAGE_FORM_SWAP_ID) {
                 (optional_error_banner(&self.error_message))
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
@@ -81,28 +79,16 @@ pub struct TotpSetupForm {
     pub error_message: Option<String>,
 }
 
-impl From<TotpSetupData> for TotpSetupForm {
-    fn from(value: TotpSetupData) -> Self {
-        Self {
-            totp_secret_image_base64_img_src: totp_qr_src(value.secret_base64_qr_code),
-            totp_secret: value.secret_base32,
-            error_message: None,
-        }
-    }
-}
-
 impl Render for TotpSetupForm {
     fn render(&self) -> maud::Markup {
         maud::html! {
-            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) {
-                (optional_error_banner(&self.error_message))
-
+            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Two-Factor Authentication Setup"}
                     p {"Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)"}
                 }
                 div class=(crate::styles::register_page::ClassName::TOTP_QR_WRAPPER) {
-                    img src=(self.totp_secret_image_base64_img_src);
+                    img src=(totp_qr_src(&self.totp_secret_image_base64_img_src));
                 }
                 details class=(crate::styles::register_page::ClassName::TOTP_SECRET) {
                     summary {
@@ -112,6 +98,8 @@ impl Render for TotpSetupForm {
                 }
 
                 hr;
+
+                (optional_error_banner(&self.error_message))
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
@@ -154,34 +142,32 @@ impl From<TotpSetupResult> for TotpRecoveryCodesPrompt {
 impl Render for TotpRecoveryCodesPrompt {
     fn render(&self) -> maud::Markup {
         maud::html! {
-            template {
-                div class=(crate::styles::register_page::ClassName::FORM) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) id=(PAGE_FORM_SWAP_ID) {
-                    div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
-                        h1 {"Save Your Recovery Codes"}
-                        p {"Your two-factor authentication is now active."}
+            div class=(crate::styles::register_page::ClassName::FORM) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) id=(PAGE_FORM_SWAP_ID) {
+                div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
+                    h1 {"Save Your Recovery Codes"}
+                    p {"Your two-factor authentication is now active."}
+                }
+
+                p {"To ensure you don't lose access to your account, please save these recovery codes in a secure location."}
+                p {"These codes will only be shown once. If you navigate away without saving them, you'll need to generate new codes."}
+
+                details class=(crate::styles::register_page::ClassName::TOTP_SECRET) open {
+                    summary {
+                        "Recovery Codes"
                     }
 
-                    p {"To ensure you don't lose access to your account, please save these recovery codes in a secure location."}
-                    p {"These codes will only be shown once. If you navigate away without saving them, you'll need to generate new codes."}
-
-                    details class=(crate::styles::register_page::ClassName::TOTP_SECRET) open {
-                        summary {
-                            "Recovery Codes"
-                        }
-
-                        div class=(crate::styles::register_page::ClassName::RECOVERY_CODES) {
-                            @for recovery_code in &self.recovery_codes {
-                                pre {
-                                    code {
-                                        (recovery_code)
-                                    }
+                    div class=(crate::styles::register_page::ClassName::RECOVERY_CODES) {
+                        @for recovery_code in &self.recovery_codes {
+                            pre {
+                                code {
+                                    (recovery_code)
                                 }
                             }
                         }
                     }
-                    a class=(crate::styles::base::ClassName::BUTTON) href=(bitsync_routes::GetFilesHomePage.to_string()) {
-                        "Continue"
-                    }
+                }
+                a class=(crate::styles::base::ClassName::BUTTON) href=(bitsync_routes::GetFilesHomePage.to_string()) {
+                    "Continue"
                 }
             }
         }

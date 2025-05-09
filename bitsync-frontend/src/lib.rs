@@ -15,3 +15,9 @@ fn format_file_size(bytes: u64) -> String {
         .with_style(size::Style::Abbreviated)
         .to_string()
 }
+
+pub fn template_wrap(markup: maud::Markup) -> maud::Markup {
+    maud::html! {
+        template { (markup) }
+    }
+}

@@ -12,12 +12,13 @@ use axum_extra::{
 };
 use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::{
-    registration::perform_registration, retrieve_totp_setup_data::retrieve_totp_setup_data,
-    setup_totp::setup_totp,
+    registration::{perform_registration, RegistrationError},
+    retrieve_totp_setup_data::{retrieve_totp_setup_data, RetrieveTotpSetupDataError},
+    setup_totp::{setup_totp, TotpSetupError},
 };
 use bitsync_frontend::{
     pages::register::{RegisterForm, RegisterPage, TotpRecoveryCodesPrompt, TotpSetupForm},
-    Render,
+    template_wrap, Render,
 };
 use serde::Deserialize;
 
@@ -29,6 +30,8 @@ use crate::{
 };
 
 use crate::AppState;
+
+use super::UNEXPECTED_ERROR_MESSAGE;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     let totp_setup_router = Router::new()
@@ -87,11 +90,25 @@ async fn register_action_handler(
             )
                 .into_response()
         }
-        Err(error) => RegisterPage::UserRegistration(RegisterForm {
-            username: Some(registration_data.username),
-            error_message: Some(error.to_string()),
-        })
-        .render()
+        Err(error) => template_wrap(
+            RegisterForm {
+                username: Some(registration_data.username),
+                error_message: Some(match error {
+                    RegistrationError::EnsureUserStorageExists(..)
+                    | RegistrationError::Jwt(..)
+                    | RegistrationError::PasswordHash(..)
+                    | RegistrationError::DatabaseQuery(..)
+                    | RegistrationError::DatabaseTransaction(..)
+                    | RegistrationError::TransactionBegin(..) => {
+                        String::from(UNEXPECTED_ERROR_MESSAGE)
+                    }
+                    RegistrationError::UserExists(..) => {
+                        String::from("The username is already taken.")
+                    }
+                }),
+            }
+            .render(),
+        )
         .into_string()
         .into_response(),
     }
@@ -104,16 +121,39 @@ async fn register_totp_setup_page_handler(
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
         Ok(totp_setup_data) => Html(
-            RegisterPage::TotpSetup(TotpSetupForm::from(totp_setup_data))
-                .render()
-                .into_string(),
+            RegisterPage::TotpSetup(TotpSetupForm {
+                totp_secret_image_base64_img_src: totp_setup_data.secret_base64_qr_code,
+                totp_secret: totp_setup_data.secret_base32,
+                error_message: None,
+            })
+            .render()
+            .into_string(),
         )
         .into_response(),
         Err(error) => {
-            match error {
-                bitsync_core::use_case::auth::retrieve_totp_setup_data::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
-                _ => todo!(),
-            }
+            Html(
+                RegisterPage::TotpSetup(TotpSetupForm {
+                    // TODO: make optional
+                    totp_secret_image_base64_img_src: String::new(),
+                    totp_secret: String::new(),
+                    // TODO: display load errors at the top?
+                    error_message: Some(match error {
+                        RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => {
+                            return redirect_response(
+                                is_hx_request,
+                                &bitsync_routes::GetFilesHomePage.to_string(),
+                            )
+                        }
+                        RetrieveTotpSetupDataError::TotpCreation(..)
+                        | RetrieveTotpSetupDataError::TotpSecretBase64QrCode(..) => {
+                            String::from(UNEXPECTED_ERROR_MESSAGE)
+                        }
+                    }),
+                })
+                .render()
+                .into_string(),
+            )
+            .into_response()
         }
     }
 }
@@ -131,21 +171,92 @@ async fn register_totp_setup_submit_handler(
     cookie_jar: CookieJar,
     Form(totp_setup_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {
-    match setup_totp(&state.database, &auth_data.user, &totp_setup_data.totp, state.config.auth.jwt_expiration_seconds, &state.config.auth.jwt_secret).await {
+    match setup_totp(
+        &state.database,
+        &auth_data.user,
+        &totp_setup_data.totp,
+        state.config.auth.jwt_expiration_seconds,
+        &state.config.auth.jwt_secret,
+    )
+    .await
+    {
         Ok(result) => {
             let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
 
             (
                 cookie_jar,
-                Html(
-                    TotpRecoveryCodesPrompt::from(result)
-                    .render()
-                    .into_string(),
-                )
-            ).into_response()},
+                Html(template_wrap(TotpRecoveryCodesPrompt::from(result).render()).into_string()),
+            )
+                .into_response()
+        }
         Err(error) => match error {
-            bitsync_core::use_case::auth::setup_totp::RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
-            _ => todo!(),
+            TotpSetupError::TotpAlreadySetUp(..) => {
+                redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string())
+            }
+            TotpSetupError::TotpCreation(..)
+            | TotpSetupError::SystemTime(..)
+            | TotpSetupError::TransactionBegin(..)
+            | TotpSetupError::TransactionCommit(..)
+            | TotpSetupError::Query(..)
+            | TotpSetupError::PasswordHashCreation(..)
+            | TotpSetupError::Jwt(..) => Html(
+                template_wrap(
+                    TotpSetupForm {
+                        // TODO: make optional
+                        totp_secret_image_base64_img_src: String::new(),
+                        totp_secret: String::new(),
+                        error_message: Some(String::from(UNEXPECTED_ERROR_MESSAGE)),
+                    }
+                    .render(),
+                )
+                .render()
+                .into_string(),
+            )
+            .into_response(),
+            TotpSetupError::TotpInvalid(..) => {
+                match retrieve_totp_setup_data(&auth_data.user).await {
+                    Ok(totp_setup_data) => Html(
+                        template_wrap(
+                            TotpSetupForm {
+                                totp_secret_image_base64_img_src: totp_setup_data
+                                    .secret_base64_qr_code,
+                                totp_secret: totp_setup_data.secret_base32,
+                                error_message: Some(String::from(
+                                    "The entered totp code is invalid.",
+                                )),
+                            }
+                            .render(),
+                        )
+                        .render()
+                        .into_string(),
+                    )
+                    .into_response(),
+                    Err(error) => {
+                        Html(
+                            RegisterPage::TotpSetup(TotpSetupForm {
+                                // TODO: make optional
+                                totp_secret_image_base64_img_src: String::new(),
+                                totp_secret: String::new(),
+                                error_message: Some(match error {
+                                    RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => {
+                                        return redirect_response(
+                                            is_hx_request,
+                                            &bitsync_routes::GetFilesHomePage.to_string(),
+                                        )
+                                    }
+                                    RetrieveTotpSetupDataError::TotpCreation(..)
+                                    | RetrieveTotpSetupDataError::TotpSecretBase64QrCode(..) => {
+                                        String::from(UNEXPECTED_ERROR_MESSAGE)
+                                    }
+                                }),
+                            })
+                            .render()
+                            .into_string(),
+                        )
+                        .into_response()
+                    }
+                }
+            }
         },
     }
 }

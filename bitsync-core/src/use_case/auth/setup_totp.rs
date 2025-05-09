@@ -12,7 +12,7 @@ use crate::{
 
 #[derive(thiserror::Error, Debug)]
 #[error("Failed to setup totp")]
-pub enum RetrieveTotpSetupDataError {
+pub enum TotpSetupError {
     TotpCreation(#[from] TotpCreationError),
     SystemTime(#[from] std::time::SystemTimeError),
     TotpInvalid(#[from] TotpInvalid),
@@ -46,7 +46,7 @@ pub async fn setup_totp(
     totp_value: &str,
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
-) -> Result<TotpSetupResult, RetrieveTotpSetupDataError> {
+) -> Result<TotpSetupResult, TotpSetupError> {
     if user.is_totp_set_up {
         return Err(TotpAlreadySetUp)?;
     }
