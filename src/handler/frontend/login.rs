@@ -11,10 +11,13 @@ use axum_extra::{
     routing::RouterExt,
 };
 use axum_htmx::HxRequest;
-use bitsync_core::use_case::auth::{login::perform_login, verify_totp::verify_totp};
+use bitsync_core::use_case::auth::{
+    login::{perform_login, LoginError},
+    verify_totp::verify_totp,
+};
 use bitsync_frontend::{
-    pages::login::{LoginPage, TotpForm},
-    Render,
+    pages::login::{LoginForm, LoginPage, TotpForm},
+    template_wrap, Render,
 };
 use serde::Deserialize;
 
@@ -27,6 +30,8 @@ use crate::{
 };
 
 use crate::AppState;
+
+use super::UNEXPECTED_ERROR_MESSAGE;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     let totp_auth_router = Router::new()
@@ -80,9 +85,25 @@ async fn login_action_handler(
                 false => bitsync_routes::GetRegisterTotpSetupPage.to_string(),
             };
 
-            (cookie_jar, redirect_response(is_hx_request, &redirect_url))
+            (cookie_jar, redirect_response(is_hx_request, &redirect_url)).into_response()
         }
-        Err(e) => todo!("login error handling - {:#?}", e),
+        Err(error) => match error {
+            LoginError::DatabaseQuery(..)
+            | LoginError::DatabaseConnectionAcquisition(..)
+            | LoginError::Jwt(..) => Html(
+                template_wrap(
+                    LoginForm {
+                        username: Some(login_data.username),
+                        error_message: Some(String::from(UNEXPECTED_ERROR_MESSAGE)),
+                    }
+                    .render(),
+                )
+                .render()
+                .into_string(),
+            )
+            .into_response(),
+            LoginError::PasswordHashVerification(password_hash_verification_error) => todo!(),
+        },
     }
 }
 
