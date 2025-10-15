@@ -1,6 +1,6 @@
-use maud::Render;
+use hypertext::{Raw, prelude::*};
 
-use crate::error_banner::optional_error_banner;
+use crate::{error_banner::OptionalErrorBanner, pages::base::GuestDocument};
 
 pub enum LoginPage {
     Login(LoginForm),
@@ -13,22 +13,24 @@ impl Default for LoginPage {
     }
 }
 
-impl Render for LoginPage {
-    fn render(&self) -> maud::Markup {
-        super::base::GuestDocument(maud::html! {
-            style { (maud::PreEscaped(crate::styles::login_page::STYLE_SHEET)) }
+impl Renderable for LoginPage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            GuestDocument {
+                style { (Raw::dangerously_create(crate::styles::login_page::STYLE_SHEET)) }
 
-            (crate::icons::logo::Logo::with_class(crate::styles::login_page::ClassName::LOGO))
-            p class=(crate::styles::login_page::ClassName::PAGE_HINT) {("Sign in to access your secure storage")}
+                // (crate::icons::logo::Logo::with_class(crate::styles::login_page::ClassName::LOGO)) TODO
+                p class=(crate::styles::login_page::ClassName::PAGE_HINT) {("Sign in to access your secure storage")}
 
-            main {
-                @match &self {
-                    LoginPage::Login(login_form) => (login_form),
-                    LoginPage::Totp(totp_form) => (totp_form),
+                main {
+                    @match &self {
+                        LoginPage::Login(login_form) => (login_form),
+                        LoginPage::Totp(totp_form) => (totp_form),
+                    }
                 }
             }
-        })
-        .render()
+        }
+        .render_to(buffer);
     }
 }
 
@@ -38,11 +40,11 @@ pub struct LoginForm {
     pub error_message: Option<String>,
 }
 
-impl Render for LoginForm {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            form class=(crate::styles::login_page::ClassName::FORM) hx-post=(bitsync_routes::PostLoginAction.to_string()) hx-target="this" {
-                (optional_error_banner(&self.error_message))
+impl Renderable for LoginForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form class=(crate::styles::login_page::ClassName::FORM) /*hx-post=(bitsync_routes::PostLoginAction.to_string()) hx-target="this" TODO */ {
+                OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "Username"
@@ -73,7 +75,7 @@ impl Render for LoginForm {
                     }
                 }
             }
-        }
+        }.render_to(buffer);
     }
 }
 
@@ -81,11 +83,11 @@ pub struct TotpForm {
     pub error_message: Option<String>,
 }
 
-impl Render for TotpForm {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            form class=(crate::styles::login_page::ClassName::FORM) hx-post=(bitsync_routes::PostLoginTotpAuthAction.to_string()) hx-target="this" {
-                (optional_error_banner(&self.error_message))
+impl Renderable for TotpForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form class=(crate::styles::login_page::ClassName::FORM) /*hx-post=(bitsync_routes::PostLoginTotpAuthAction.to_string()) hx-target="this" TODO*/ {
+                OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
@@ -95,7 +97,7 @@ impl Render for TotpForm {
 
                         p id="totp-timer" class=(crate::styles::login_page::ClassName::TOTP_TIMER) {"30"}
 
-                        script {(maud::PreEscaped(r#"
+                        script {(Raw::dangerously_create(r#"
                             setInterval(() => {
                                 const totpTimer = document.querySelector('#totp-timer');
                                 const time = 30 - (Math.floor(Date.now() / 1000) % 30);
@@ -117,6 +119,6 @@ impl Render for TotpForm {
                     "Login"
                 }
             }
-        }
+        }.render_to(buffer);
     }
 }

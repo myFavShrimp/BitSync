@@ -1,4 +1,4 @@
-use maud::Render;
+use hypertext::prelude::*;
 
 #[derive(Default)]
 pub struct Logo(&'static str);
@@ -9,9 +9,9 @@ impl Logo {
     }
 }
 
-impl Render for Logo {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
+impl Renderable for Logo {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
             svg class=(&self.0) viewbox="0 0 973 224" xmlns="http://www.w3.org/2000/svg" {
                 defs {}
                 g transform="matrix(1, 0, 0, 1, 0, 1.586033950617388)" {

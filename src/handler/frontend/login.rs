@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use axum::{
+    Extension, Router,
     extract::State,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
-    Extension, Router,
 };
 use axum_extra::{
     extract::{CookieJar, Form},
@@ -12,19 +12,19 @@ use axum_extra::{
 };
 use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::{
-    login::{perform_login, LoginError},
+    login::{LoginError, perform_login},
     verify_totp::verify_totp,
 };
 use bitsync_frontend::{
+    Render,
     pages::login::{LoginForm, LoginPage, TotpForm},
-    template_wrap, Render,
 };
 use serde::Deserialize;
 
 use crate::{
     auth::{
-        jwt_cookie, require_basic_login_and_totp_setup_middleware, require_logout_middleware,
-        AuthData,
+        AuthData, jwt_cookie, require_basic_login_and_totp_setup_middleware,
+        require_logout_middleware,
     },
     handler::redirect_response,
 };
@@ -52,7 +52,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 }
 
 async fn login_page_handler(_: bitsync_routes::GetLoginPage) -> impl IntoResponse {
-    Html(LoginPage::default().render().into_string())
+    Html(LoginPage::default().render())
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -91,15 +91,11 @@ async fn login_action_handler(
             LoginError::DatabaseQuery(..)
             | LoginError::DatabaseConnectionAcquisition(..)
             | LoginError::Jwt(..) => Html(
-                template_wrap(
-                    LoginForm {
-                        username: Some(login_data.username),
-                        error_message: Some(String::from(UNEXPECTED_ERROR_MESSAGE)),
-                    }
-                    .render(),
-                )
-                .render()
-                .into_string(),
+                LoginForm {
+                    username: Some(login_data.username),
+                    error_message: Some(String::from(UNEXPECTED_ERROR_MESSAGE)),
+                }
+                .render(),
             )
             .into_response(),
             LoginError::PasswordHashVerification(password_hash_verification_error) => todo!(),
@@ -114,8 +110,7 @@ async fn login_totp_auth_page_handler(
         LoginPage::Totp(TotpForm {
             error_message: None,
         })
-        .render()
-        .into_string(),
+        .render(),
     )
 }
 

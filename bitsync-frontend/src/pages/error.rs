@@ -1,4 +1,4 @@
-use maud::Render;
+use hypertext::prelude::*;
 
 use super::base::LoggedInDocument;
 
@@ -27,14 +27,16 @@ where
     }
 }
 
-impl Render for ErrorPage {
-    fn render(&self) -> maud::Markup {
-        LoggedInDocument(maud::html!(
-            main {
-                h1 { "An unexpected error occurred" }
-                pre { (self.error_message) }
+impl Renderable for ErrorPage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            LoggedInDocument {
+                main {
+                    h1 { "An unexpected error occurred" }
+                    pre { (self.error_message) }
+                }
             }
-        ))
-        .render()
+        }
+        .render_to(buffer);
     }
 }

@@ -1,7 +1,7 @@
 use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
-use maud::Render;
+use hypertext::{Raw, prelude::*};
 
-use crate::{error_banner::optional_error_banner, totp::totp_qr_src};
+use crate::{error_banner::OptionalErrorBanner, pages::base::GuestDocument, totp::totp_qr_src};
 
 pub enum RegisterPage {
     UserRegistration(RegisterForm),
@@ -14,22 +14,24 @@ impl Default for RegisterPage {
     }
 }
 
-impl Render for RegisterPage {
-    fn render(&self) -> maud::Markup {
-        super::base::GuestDocument(maud::html! {
-            style { (maud::PreEscaped(crate::styles::register_page::STYLE_SHEET)) }
+impl Renderable for RegisterPage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            GuestDocument {
+                style { (Raw::dangerously_create(crate::styles::register_page::STYLE_SHEET)) }
 
-            (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
-            p class=(crate::styles::register_page::ClassName::PAGE_HINT) {("Create an account to get started")}
+                // (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO)) TODO
+                p class=(crate::styles::register_page::ClassName::PAGE_HINT) {("Create an account to get started")}
 
-            main {
-                @match &self {
-                    Self::UserRegistration(register_form) => (register_form),
-                    Self::TotpSetup(totp_setup_form) => (totp_setup_form),
+                main {
+                    @match &self {
+                        Self::UserRegistration(register_form) => (register_form),
+                        Self::TotpSetup(totp_setup_form) => (totp_setup_form),
+                    }
                 }
             }
-        })
-        .render()
+        }
+        .render_to(buffer);
     }
 }
 
@@ -41,11 +43,11 @@ pub struct RegisterForm {
 
 static PAGE_FORM_SWAP_ID: &str = "register-page-form";
 
-impl Render for RegisterForm {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            form class=(crate::styles::register_page::ClassName::FORM) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) hx-post=(bitsync_routes::PostRegisterAction.to_string()) id=(PAGE_FORM_SWAP_ID) {
-                (optional_error_banner(&self.error_message))
+impl Renderable for RegisterForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form class=(crate::styles::register_page::ClassName::FORM) /*hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) hx-post=(bitsync_routes::PostRegisterAction.to_string())*/ id=(PAGE_FORM_SWAP_ID) {
+                OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "Username"
@@ -69,6 +71,7 @@ impl Render for RegisterForm {
                 }
             }
         }
+        .render_to(buffer);
     }
 }
 
@@ -79,10 +82,10 @@ pub struct TotpSetupForm {
     pub error_message: Option<String>,
 }
 
-impl Render for TotpSetupForm {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            form class=(crate::styles::register_page::ClassName::FORM) hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) {
+impl Renderable for TotpSetupForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form class=(crate::styles::register_page::ClassName::FORM) /*hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) TODO*/ {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Two-Factor Authentication Setup"}
                     p {"Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)"}
@@ -99,7 +102,7 @@ impl Render for TotpSetupForm {
 
                 hr;
 
-                (optional_error_banner(&self.error_message))
+                OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
@@ -109,7 +112,7 @@ impl Render for TotpSetupForm {
 
                         p id="totp-timer" class=(crate::styles::register_page::ClassName::TOTP_TIMER) {"30"}
 
-                        script {(maud::PreEscaped(r#"
+                        script {(Raw::dangerously_create(r#"
                             setInterval(() => {
                                 const totpTimer = document.querySelector('#totp-timer');
                                 const time = 30 - (Math.floor(Date.now() / 1000) % 30);
@@ -119,11 +122,12 @@ impl Render for TotpSetupForm {
                         "#))}
                     }
                 }
-                button hx-post type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                button /*hx-post*/ type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                     "send"
                 }
             }
         }
+        .render_to(buffer);
     }
 }
 
@@ -139,10 +143,10 @@ impl From<TotpSetupResult> for TotpRecoveryCodesPrompt {
     }
 }
 
-impl Render for TotpRecoveryCodesPrompt {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            div class=(crate::styles::register_page::ClassName::FORM) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) id=(PAGE_FORM_SWAP_ID) {
+impl Renderable for TotpRecoveryCodesPrompt {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            div class=(crate::styles::register_page::ClassName::FORM) /*hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) TODO*/ id=(PAGE_FORM_SWAP_ID) {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Save Your Recovery Codes"}
                     p {"Your two-factor authentication is now active."}
@@ -171,5 +175,6 @@ impl Render for TotpRecoveryCodesPrompt {
                 }
             }
         }
+        .render_to(buffer);
     }
 }

@@ -1,0 +1,3 @@
+[submodule "hyperstim"]
+	path = hyperstim
+	url = git@github.com:myFavShrimp/HyperStim.git

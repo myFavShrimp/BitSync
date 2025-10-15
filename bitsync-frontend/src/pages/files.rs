@@ -4,9 +4,12 @@ use bitsync_core::use_case::user_files::{
     upload_user_file::UserFileResult,
 };
 use bitsync_routes::TypedPath;
-use maud::Render;
+use hypertext::prelude::*;
 
-use crate::models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind};
+use crate::{
+    models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind},
+    pages::base::LoggedInDocument,
+};
 
 pub enum FilesHomePageElementId {
     FileUploadForm,
@@ -66,44 +69,46 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
     }
 }
 
-impl Render for FilesHomePage {
-    fn render(&self) -> maud::Markup {
-        super::base::LoggedInDocument(maud::html! {
-            style { (crate::styles::files_home_page::STYLE_SHEET) }
-            main {
-                @match &self.parent_directory_url {
-                    Some(link_data) => {
-                        a href=(link_data.parent_directory_url) {
-                            i."small" {
-                                "chevron_left"
+impl Renderable for FilesHomePage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            LoggedInDocument {
+                style { (crate::styles::files_home_page::STYLE_SHEET) }
+                main {
+                    @match &self.parent_directory_url {
+                        Some(link_data) => {
+                            a href=(link_data.parent_directory_url) {
+                                i."small" {
+                                    "chevron_left"
+                                }
+                                (link_data.current_directory_name)
                             }
-                            (link_data.current_directory_name)
+                        }
+                        None => {}
+                    }
+
+                    (FileUploadForm { file_upload_url: self.file_upload_url.clone() })
+
+                    button onclick=(format_args!("openPopoverById('{}')", &self.directory_creation_popover_id)) {
+                        "add directory"
+                    }
+                    dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(self.directory_creation_popover_id) {
+                        form /*hx-post=(self.directory_creation_url) hx-target="this" TODO */ {
+                            input type="text" name="directory_name";
+                            button {
+                                "Create"
+                            }
+                            button type="button" onclick="closeClosestPopover(this)" {
+                                "Cancel"
+                            }
                         }
                     }
-                    None => {}
-                }
-
-                (FileUploadForm { file_upload_url: self.file_upload_url.clone() })
-
-                button onclick=(format_args!("openPopoverById('{}')", &self.directory_creation_popover_id)) {
-                    "add directory"
-                }
-                dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(self.directory_creation_popover_id) {
-                    form hx-post=(self.directory_creation_url) hx-target="this" {
-                        input type="text" name="directory_name";
-                        button {
-                            "Create"
-                        }
-                        button type="button" onclick="closeClosestPopover(this)" {
-                            "Cancel"
-                        }
+                    div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) {
+                        ((FileStorageTable { dir_content: self.dir_content.clone() }))
                     }
-                }
-                div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) {
-                    ((FileStorageTable { dir_content: self.dir_content.clone() }))
                 }
             }
-        }).render()
+        }.render_to(buffer);
     }
 }
 
@@ -111,14 +116,14 @@ struct FileUploadForm {
     file_upload_url: String,
 }
 
-impl Render for FileUploadForm {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            form #(FilesHomePageElementId::FileUploadForm.to_str()) hx-post=(self.file_upload_url) enctype="multipart/form-data" {
+impl Renderable for FileUploadForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form #(FilesHomePageElementId::FileUploadForm.to_str()) /*hx-post=(self.file_upload_url) TODO */ enctype="multipart/form-data" {
                 input type="file" name="upload";
                 input type="submit" value="Upload";
             }
-        }
+        }.render_to(buffer);
     }
 }
 
@@ -126,9 +131,9 @@ struct FileStorageTable {
     dir_content: Vec<StorageItemPresentation>,
 }
 
-impl Render for FileStorageTable {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
+impl Renderable for FileStorageTable {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
             @if self.dir_content.is_empty() { } @else {
                 table {
                     thead {
@@ -145,7 +150,7 @@ impl Render for FileStorageTable {
                     }
                     tbody {
                         @for dir_item in &self.dir_content {
-                            tr hx-target="this" {
+                            tr /*hx-target="this" TODO*/ {
                                 td {
                                     i."" {
                                         (dir_item.kind.icon())
@@ -179,7 +184,7 @@ impl Render for FileStorageTable {
                                             "Move"
                                         }
                                         dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_move_popover_id) {
-                                            form hx-post=(dir_item.move_url) hx-target="this" {
+                                            form /*hx-post=(dir_item.move_url) hx-target="this" TODO*/ {
                                                 (dir_item.path)
                                                 input type="text" value=(dir_item.path) name="destination_path";
                                                 button {
@@ -193,7 +198,7 @@ impl Render for FileStorageTable {
                                         a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
                                             "Download"
                                         }
-                                        button hx-get=(dir_item.delete_url) onclick="closeClosestDialog(this)" {
+                                        button /*hx-get=(dir_item.delete_url) TODO*/ onclick="closeClosestDialog(this)" {
                                             "Delete"
                                         }
                                         button onclick="closeClosestPopover(this)" {
@@ -206,7 +211,7 @@ impl Render for FileStorageTable {
                     }
                 }
             }
-        }
+        }.render_to(buffer);
     }
 }
 
@@ -270,14 +275,14 @@ impl From<DirectoryCreationResult> for FilesHomePageChangeResult {
     }
 }
 
-impl Render for FilesHomePageChangeResult {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
+impl Renderable for FilesHomePageChangeResult {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
             template {
-                div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) hx-swap-oob=(format_args!("outerHTML:#{}", FilesHomePageElementId::FileStorageTableWrapper.to_str())) {
+                div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) /*hx-swap-oob=(format_args!("outerHTML:#{}", FilesHomePageElementId::FileStorageTableWrapper.to_str())) TODO */ {
                     ((FileStorageTable { dir_content: self.dir_content.clone() }))
                 }
             }
-        }
+        }.render_to(buffer);
     }
 }

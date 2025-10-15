@@ -1,21 +1,21 @@
 use std::sync::Arc;
 
 use axum::{
+    Extension, Router,
     extract::{Query, State},
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
-    Extension, Router,
 };
 use axum_extra::routing::RouterExt;
 use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_directory_contents;
 use bitsync_frontend::{
-    pages::{error::ErrorPage, files::FilesHomePage},
     Render,
+    pages::{error::ErrorPage, files::FilesHomePage},
 };
 
 use crate::{
-    auth::{require_login_and_totp_setup_middleware, AuthData},
     AppState,
+    auth::{AuthData, require_login_and_totp_setup_middleware},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -41,7 +41,7 @@ async fn files_home_page_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePage::from(result).render().into_string()),
-        Err(error) => Html(ErrorPage::from(error).render().into_string()),
+        Ok(result) => Html(FilesHomePage::from(result).render()),
+        Err(error) => Html(ErrorPage::from(error).render()),
     }
 }

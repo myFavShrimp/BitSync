@@ -1,24 +1,24 @@
 use std::sync::Arc;
 
 use axum::{
+    Extension, Router,
     extract::{FromRequest, Query, Request, State},
     middleware::from_fn_with_state,
     response::{Html, IntoResponse, Response},
-    Extension, Router,
 };
 use axum_extra::{
     body::AsyncReadBody,
-    extract::{multipart::Field, Form, Multipart},
+    extract::{Form, Multipart, multipart::Field},
     response::Attachment,
     routing::RouterExt,
 };
 use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
-use bitsync_frontend::{error_modal::ErrorModal, pages::files::FilesHomePageChangeResult, Render};
+use bitsync_frontend::{Render, error_modal::ErrorModal, pages::files::FilesHomePageChangeResult};
 use serde::Deserialize;
 
 use crate::{
-    auth::{require_login_and_totp_setup_middleware, AuthData},
     AppState,
+    auth::{AuthData, require_login_and_totp_setup_middleware},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -95,13 +95,8 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => Html(
-            FilesHomePageChangeResult::from(result)
-                .render()
-                .into_string(),
-        )
-        .into_response(),
-        Err(error) => Html(ErrorModal::from(error).render().into_string()).into_response(),
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
     }
 }
 
@@ -127,7 +122,7 @@ async fn user_file_download_handler(
 
             (axum_extra::TypedHeader(content_type), attachment).into_response()
         }
-        Err(error) => Html(ErrorModal::from(error).render().into_string()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
     }
 }
 
@@ -144,13 +139,8 @@ async fn user_file_delete_handler(
     )
     .await
     {
-        Ok(result) => Html(
-            FilesHomePageChangeResult::from(result)
-                .render()
-                .into_string(),
-        )
-        .into_response(),
-        Err(error) => Html(ErrorModal::from(error).render().into_string()).into_response(),
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
     }
 }
 
@@ -174,13 +164,8 @@ async fn user_file_move_handler(
     )
     .await
     {
-        Ok(result) => Html(
-            FilesHomePageChangeResult::from(result)
-                .render()
-                .into_string(),
-        )
-        .into_response(),
-        Err(error) => Html(ErrorModal::from(error).render().into_string()).into_response(),
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
     }
 }
 
@@ -204,12 +189,7 @@ async fn user_file_directory_creation_handler(
     )
     .await
     {
-        Ok(result) => Html(
-            FilesHomePageChangeResult::from(result)
-                .render()
-                .into_string(),
-        )
-        .into_response(),
-        Err(error) => Html(ErrorModal::from(error).render().into_string()).into_response(),
+        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
+        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
     }
 }

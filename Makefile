@@ -28,6 +28,10 @@ static-assets: fetch-static-assets font-css
 fetch-static-assets:
 	nu ./scripts/make_fetch_static_assets.nu --all
 
+bundle-hyperstim:
+	cd hyperstim && deno task bundle
+	cp hyperstim/dist/hyperstim.min.js static/external/hyperstim.js
+
 font-css:
 	nu ./scripts/make_font_css.nu
 

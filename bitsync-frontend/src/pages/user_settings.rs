@@ -1,6 +1,8 @@
 use bitsync_database::entity::User;
 
-use maud::Render;
+use hypertext::prelude::*;
+
+use crate::pages::base::LoggedInDocument;
 
 pub struct UserSettingsPage {
     pub user: User,
@@ -12,29 +14,31 @@ impl From<User> for UserSettingsPage {
     }
 }
 
-impl Render for UserSettingsPage {
-    fn render(&self) -> maud::Markup {
-        super::base::LoggedInDocument(maud::html! {
-            style {
-                (crate::styles::files_home_page::STYLE_SHEET)
-            }
-            main {
-                h1 {
-                    "Account"
+impl Renderable for UserSettingsPage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            LoggedInDocument {
+                style {
+                    (crate::styles::files_home_page::STYLE_SHEET)
                 }
-                (ChangePasswordForm)
+                main {
+                    h1 {
+                        "Account"
+                    }
+                    ChangePasswordForm;
+                }
             }
-        })
-        .render()
+        }
+        .render_to(buffer);
     }
 }
 
 struct ChangePasswordForm;
 
-impl Render for ChangePasswordForm {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
-            form hx-post=(bitsync_routes::PostUserSettingsChangePassword.to_string()) hx-target="this" {
+impl Renderable for ChangePasswordForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form /*hx-post=(bitsync_routes::PostUserSettingsChangePassword.to_string()) hx-target="this"*/ {
                 label {
                     "current password"
                     input type="password" name="current_password";
@@ -55,5 +59,6 @@ impl Render for ChangePasswordForm {
                 }
             }
         }
+        .render_to(buffer);
     }
 }

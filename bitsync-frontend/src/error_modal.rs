@@ -1,4 +1,4 @@
-use maud::Render;
+use hypertext::prelude::*;
 
 pub struct ErrorModal {
     message: String,
@@ -28,11 +28,11 @@ where
     }
 }
 
-impl Render for ErrorModal {
-    fn render(&self) -> maud::Markup {
-        maud::html! {
+impl Renderable for ErrorModal {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
             template {
-                div hx-swap-oob="beforeend:body" {
+                div /*hx-swap-oob="beforeend:body"*/ {
                     dialog class=(crate::styles::error_modal::ClassName::MODAL) {
                         h1 { (self.message) }
 
@@ -48,5 +48,6 @@ impl Render for ErrorModal {
                 }
             }
         }
+        .render_to(buffer);
     }
 }

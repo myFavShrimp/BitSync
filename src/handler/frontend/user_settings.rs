@@ -1,20 +1,20 @@
 use std::sync::Arc;
 
 use axum::{
+    Extension, Router,
     extract::State,
     http::StatusCode,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
-    Extension, Router,
 };
 use axum_extra::{extract::Form, routing::RouterExt};
 use bitsync_core::use_case::user_settings::update_user_password::update_user_password;
-use bitsync_frontend::{pages::user_settings::UserSettingsPage, Render};
+use bitsync_frontend::{Render, pages::user_settings::UserSettingsPage};
 use serde::Deserialize;
 
 use crate::{
-    auth::{require_login_and_totp_setup_middleware, AuthData},
     AppState,
+    auth::{AuthData, require_login_and_totp_setup_middleware},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -32,11 +32,7 @@ async fn user_settings_page_handler(
     _: bitsync_routes::GetUserSettingsPage,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    Html(
-        UserSettingsPage::from(auth_data.user)
-            .render()
-            .into_string(),
-    )
+    Html(UserSettingsPage::from(auth_data.user).render())
 }
 
 #[derive(Deserialize)]
