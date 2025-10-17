@@ -31,20 +31,18 @@ where
 impl Renderable for ErrorModal {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            template {
-                div /*hx-swap-oob="beforeend:body"*/ {
-                    dialog class=(crate::styles::error_modal::ClassName::MODAL) {
-                        h1 { (self.message) }
+            div {
+                dialog class=(crate::styles::error_modal::ClassName::MODAL) {
+                    h1 { (self.message) }
 
-                        @match &self.trace {
-                            Some(trace) => {
-                                pre { (trace) }
-                            }
-                            None => {}
+                    @match &self.trace {
+                        Some(trace) => {
+                            pre { (trace) }
                         }
-
-                        button onclick="closeClosestDialogModal(this)" { ("close") }
+                        None => {}
                     }
+
+                    button onclick="closeClosestDialogModal(this)" { ("close") }
                 }
             }
         }

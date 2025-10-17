@@ -1,6 +1,6 @@
 use hypertext::{Raw, prelude::*};
 
-use crate::{error_banner::OptionalErrorBanner, pages::base::GuestDocument};
+use crate::{Component, error_banner::OptionalErrorBanner, pages::base::GuestDocument};
 
 pub enum LoginPage {
     Login(LoginForm),
@@ -40,10 +40,22 @@ pub struct LoginForm {
     pub error_message: Option<String>,
 }
 
+impl Component for LoginForm {
+    fn id(&self) -> String {
+        "login-form".to_owned()
+    }
+}
+
 impl Renderable for LoginForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            form class=(crate::styles::login_page::ClassName::FORM) /*hx-post=(bitsync_routes::PostLoginAction.to_string()) hx-target="this" TODO */ {
+            form
+                id=(self.id())
+                class=(crate::styles::login_page::ClassName::FORM)
+                data-hijack
+                action=(bitsync_routes::PostLoginAction.to_string())
+                method="POST"
+            {
                 OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
@@ -83,10 +95,21 @@ pub struct TotpForm {
     pub error_message: Option<String>,
 }
 
+impl Component for TotpForm {
+    fn id(&self) -> String {
+        "login-totp-form".to_owned()
+    }
+}
+
 impl Renderable for TotpForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            form class=(crate::styles::login_page::ClassName::FORM) /*hx-post=(bitsync_routes::PostLoginTotpAuthAction.to_string()) hx-target="this" TODO*/ {
+            form
+                class=(crate::styles::login_page::ClassName::FORM)
+                data-hijack
+                action=(bitsync_routes::PostLoginTotpAuthAction.to_string())
+                method="POST"
+            {
                 OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {

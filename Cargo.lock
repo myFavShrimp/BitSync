@@ -295,6 +295,7 @@ dependencies = [
  "bitsync-core",
  "bitsync-database",
  "bitsync-frontend",
+ "bitsync-hyperstim",
  "bitsync-routes",
  "bitsync-storage",
  "bytes",
@@ -367,6 +368,14 @@ dependencies = [
  "serde_json",
  "size",
  "turf 0.10.1",
+]
+
+[[package]]
+name = "bitsync-hyperstim"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 pub mod error_banner;
 pub mod error_modal;
-pub mod icons;
+// pub mod icons;
 pub mod models;
 pub mod pages;
 pub mod styles;
@@ -15,6 +15,14 @@ pub trait Render: hypertext::Renderable {
 }
 
 impl<T> Render for T where T: Renderable {}
+
+pub trait Component: Render {
+    fn id(&self) -> String;
+
+    fn id_target(&self) -> String {
+        format!("#{}", self.id())
+    }
+}
 
 fn format_file_size(bytes: u64) -> String {
     size::Size::from_bytes(bytes)

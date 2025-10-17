@@ -1,7 +1,9 @@
 use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
 use hypertext::{Raw, prelude::*};
 
-use crate::{error_banner::OptionalErrorBanner, pages::base::GuestDocument, totp::totp_qr_src};
+use crate::{
+    Component, error_banner::OptionalErrorBanner, pages::base::GuestDocument, totp::totp_qr_src,
+};
 
 pub enum RegisterPage {
     UserRegistration(RegisterForm),
@@ -41,12 +43,22 @@ pub struct RegisterForm {
     pub error_message: Option<String>,
 }
 
-static PAGE_FORM_SWAP_ID: &str = "register-page-form";
+impl Component for RegisterForm {
+    fn id(&self) -> String {
+        "register-form".to_owned()
+    }
+}
 
 impl Renderable for RegisterForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            form class=(crate::styles::register_page::ClassName::FORM) /*hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) hx-post=(bitsync_routes::PostRegisterAction.to_string())*/ id=(PAGE_FORM_SWAP_ID) {
+            form
+                id=(self.id())
+                class=(crate::styles::register_page::ClassName::FORM)
+                data-hijack
+                action=(bitsync_routes::PostRegisterAction.to_string())
+                method="POST"
+            {
                 OptionalErrorBanner message=(self.error_message.clone());
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
@@ -75,6 +87,8 @@ impl Renderable for RegisterForm {
     }
 }
 
+static REGISTER_TOTP_FORM_ID: &str = "register-totp-form";
+
 #[derive(Default)]
 pub struct TotpSetupForm {
     pub totp_secret_image_base64_img_src: String,
@@ -82,10 +96,22 @@ pub struct TotpSetupForm {
     pub error_message: Option<String>,
 }
 
+impl Component for TotpSetupForm {
+    fn id(&self) -> String {
+        REGISTER_TOTP_FORM_ID.to_owned()
+    }
+}
+
 impl Renderable for TotpSetupForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            form class=(crate::styles::register_page::ClassName::FORM) /*hx-post=(bitsync_routes::PostRegisterTotpSetupAction.to_string()) hx-target="this" id=(PAGE_FORM_SWAP_ID) hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) TODO*/ {
+            form
+                id=(self.id())
+                class=(crate::styles::register_page::ClassName::FORM)
+                data-hijack
+                action=(bitsync_routes::PostRegisterTotpSetupAction.to_string())
+                method="POST"
+            {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Two-Factor Authentication Setup"}
                     p {"Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)"}
@@ -122,7 +148,7 @@ impl Renderable for TotpSetupForm {
                         "#))}
                     }
                 }
-                button /*hx-post*/ type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                     "send"
                 }
             }
@@ -143,10 +169,19 @@ impl From<TotpSetupResult> for TotpRecoveryCodesPrompt {
     }
 }
 
+impl Component for TotpRecoveryCodesPrompt {
+    fn id(&self) -> String {
+        REGISTER_TOTP_FORM_ID.to_owned()
+    }
+}
+
 impl Renderable for TotpRecoveryCodesPrompt {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            div class=(crate::styles::register_page::ClassName::FORM) /*hx-swap-oob=(format!("outerHTML:#{PAGE_FORM_SWAP_ID}")) TODO*/ id=(PAGE_FORM_SWAP_ID) {
+            div
+                id=(self.id())
+                class=(crate::styles::register_page::ClassName::FORM)
+            {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Save Your Recovery Codes"}
                     p {"Your two-factor authentication is now active."}

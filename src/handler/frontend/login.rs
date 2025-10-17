@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{
-    Extension, Router,
+    Extension, Json, Router,
     extract::State,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
@@ -10,15 +10,15 @@ use axum_extra::{
     extract::{CookieJar, Form},
     routing::RouterExt,
 };
-use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::{
     login::{LoginError, perform_login},
     verify_totp::verify_totp,
 };
 use bitsync_frontend::{
-    Render,
+    Component, Render,
     pages::login::{LoginForm, LoginPage, TotpForm},
 };
+use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
 
 use crate::{
@@ -26,7 +26,7 @@ use crate::{
         AuthData, jwt_cookie, require_basic_login_and_totp_setup_middleware,
         require_logout_middleware,
     },
-    handler::redirect_response,
+    handler::hyperstim_redirect_response,
 };
 
 use crate::AppState;
@@ -64,7 +64,6 @@ struct LoginActionFormData {
 async fn login_action_handler(
     _: bitsync_routes::PostLoginAction,
     State(state): State<Arc<AppState>>,
-    HxRequest(is_hx_request): HxRequest,
     cookie_jar: CookieJar,
     Form(login_data): Form<LoginActionFormData>,
 ) -> impl IntoResponse {
@@ -85,19 +84,24 @@ async fn login_action_handler(
                 false => bitsync_routes::GetRegisterTotpSetupPage.to_string(),
             };
 
-            (cookie_jar, redirect_response(is_hx_request, &redirect_url)).into_response()
+            (cookie_jar, hyperstim_redirect_response(&redirect_url)).into_response()
         }
         Err(error) => match error {
             LoginError::DatabaseQuery(..)
             | LoginError::DatabaseConnectionAcquisition(..)
-            | LoginError::Jwt(..) => Html(
-                LoginForm {
+            | LoginError::Jwt(..) => {
+                let login_form = LoginForm {
                     username: Some(login_data.username),
                     error_message: Some(String::from(UNEXPECTED_ERROR_MESSAGE)),
-                }
-                .render(),
-            )
-            .into_response(),
+                };
+
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: login_form.render(),
+                    patch_target: login_form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                })
+                .into_response()
+            }
             LoginError::PasswordHashVerification(password_hash_verification_error) => todo!(),
         },
     }
@@ -123,7 +127,6 @@ async fn login_totp_auth_submit_handler(
     _: bitsync_routes::PostLoginTotpAuthAction,
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    HxRequest(is_hx_request): HxRequest,
     cookie_jar: CookieJar,
     Form(totp_setup_data): Form<TotpAuthFormData>,
 ) -> impl IntoResponse {
@@ -140,7 +143,7 @@ async fn login_totp_auth_submit_handler(
 
             (
                 cookie_jar,
-                redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string()),
+                hyperstim_redirect_response(&bitsync_routes::GetFilesHomePage.to_string()),
             )
                 .into_response()
         }

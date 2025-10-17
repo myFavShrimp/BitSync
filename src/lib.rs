@@ -1,6 +1,6 @@
-use std::sync::{atomic::AtomicU64, Arc};
+use std::sync::{Arc, atomic::AtomicU64};
 
-use axum::{routing::IntoMakeService, Router};
+use axum::{Router, routing::IntoMakeService};
 use bitsync_core::config::Config;
 use bitsync_database::database::{ConnectAndMigrateError, Database};
 use tower_http::cors::CorsLayer;

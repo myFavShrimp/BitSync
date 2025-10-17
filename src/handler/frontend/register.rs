@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{
-    Extension, Router,
+    Extension, Json, Router,
     extract::State,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
@@ -10,23 +10,23 @@ use axum_extra::{
     extract::{CookieJar, Form},
     routing::RouterExt,
 };
-use axum_htmx::HxRequest;
 use bitsync_core::use_case::auth::{
     registration::{RegistrationError, perform_registration},
     retrieve_totp_setup_data::{RetrieveTotpSetupDataError, retrieve_totp_setup_data},
     setup_totp::{TotpSetupError, setup_totp},
 };
 use bitsync_frontend::{
-    Render,
+    Component, Render,
     pages::register::{RegisterForm, RegisterPage, TotpRecoveryCodesPrompt, TotpSetupForm},
 };
+use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
 
 use crate::{
     auth::{
         AuthData, jwt_cookie, require_login_and_no_totp_setup_middleware, require_logout_middleware,
     },
-    handler::redirect_response,
+    handler::hyperstim_redirect_response,
 };
 
 use crate::AppState;
@@ -63,7 +63,6 @@ struct RegisterActionFormData {
 
 async fn register_action_handler(
     _: bitsync_routes::PostRegisterAction,
-    HxRequest(is_hx_request): HxRequest,
     State(state): State<Arc<AppState>>,
     cookie_jar: CookieJar,
     Form(registration_data): Form<RegisterActionFormData>,
@@ -83,15 +82,12 @@ async fn register_action_handler(
 
             (
                 cookie_jar,
-                redirect_response(
-                    is_hx_request,
-                    &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
-                ),
+                hyperstim_redirect_response(&bitsync_routes::GetRegisterTotpSetupPage.to_string()),
             )
                 .into_response()
         }
-        Err(error) => Html(
-            RegisterForm {
+        Err(error) => {
+            let register_form = RegisterForm {
                 username: Some(registration_data.username),
                 error_message: Some(match error {
                     RegistrationError::EnsureUserStorageExists(..)
@@ -106,17 +102,21 @@ async fn register_action_handler(
                         String::from("The username is already taken.")
                     }
                 }),
-            }
-            .render(),
-        )
-        .into_response(),
+            };
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: register_form.render(),
+                patch_target: register_form.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
+            .into_response()
+        }
     }
 }
 
 async fn register_totp_setup_page_handler(
     _: bitsync_routes::GetRegisterTotpSetupPage,
     Extension(auth_data): Extension<AuthData>,
-    HxRequest(is_hx_request): HxRequest,
 ) -> impl IntoResponse {
     match retrieve_totp_setup_data(&auth_data.user).await {
         Ok(totp_setup_data) => Html(
@@ -137,8 +137,7 @@ async fn register_totp_setup_page_handler(
                     // TODO: display load errors at the top?
                     error_message: Some(match error {
                         RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => {
-                            return redirect_response(
-                                is_hx_request,
+                            return hyperstim_redirect_response(
                                 &bitsync_routes::GetFilesHomePage.to_string(),
                             );
                         }
@@ -164,7 +163,6 @@ async fn register_totp_setup_submit_handler(
     _: bitsync_routes::PostRegisterTotpSetupAction,
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
-    HxRequest(is_hx_request): HxRequest,
     cookie_jar: CookieJar,
     Form(totp_setup_data): Form<TotpSetupFormData>,
 ) -> impl IntoResponse {
@@ -180,15 +178,20 @@ async fn register_totp_setup_submit_handler(
         Ok(result) => {
             let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
 
-            (
-                cookie_jar,
-                Html(TotpRecoveryCodesPrompt::from(result).render()),
-            )
+            (cookie_jar, {
+                let totp_prompt = TotpRecoveryCodesPrompt::from(result);
+
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: totp_prompt.render(),
+                    patch_target: totp_prompt.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                })
+            })
                 .into_response()
         }
         Err(error) => match error {
             TotpSetupError::TotpAlreadySetUp(..) => {
-                redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string())
+                hyperstim_redirect_response(&bitsync_routes::GetFilesHomePage.to_string())
             }
             TotpSetupError::TotpCreation(..)
             | TotpSetupError::SystemTime(..)
@@ -208,36 +211,43 @@ async fn register_totp_setup_submit_handler(
             .into_response(),
             TotpSetupError::TotpInvalid(..) => {
                 match retrieve_totp_setup_data(&auth_data.user).await {
-                    Ok(totp_setup_data) => Html(
-                        TotpSetupForm {
+                    Ok(totp_setup_data) => {
+                        let totp_form = TotpSetupForm {
                             totp_secret_image_base64_img_src: totp_setup_data.secret_base64_qr_code,
                             totp_secret: totp_setup_data.secret_base32,
                             error_message: Some(String::from("The entered totp code is invalid.")),
-                        }
-                        .render(),
-                    )
-                    .into_response(),
+                        };
+
+                        Json(HyperStimCommand::HsPatchHtml {
+                            html: totp_form.render(),
+                            patch_target: totp_form.id_target(),
+                            patch_mode: HyperStimPatchMode::Outer,
+                        })
+                        .into_response()
+                    }
                     Err(error) => {
-                        Html(
-                            RegisterPage::TotpSetup(TotpSetupForm {
-                                // TODO: make optional
-                                totp_secret_image_base64_img_src: String::new(),
-                                totp_secret: String::new(),
-                                error_message: Some(match error {
-                                    RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => {
-                                        return redirect_response(
-                                            is_hx_request,
-                                            &bitsync_routes::GetFilesHomePage.to_string(),
-                                        );
-                                    }
-                                    RetrieveTotpSetupDataError::TotpCreation(..)
-                                    | RetrieveTotpSetupDataError::TotpSecretBase64QrCode(..) => {
-                                        String::from(UNEXPECTED_ERROR_MESSAGE)
-                                    }
-                                }),
-                            })
-                            .render(),
-                        )
+                        let totp_form = TotpSetupForm {
+                            // TODO: make optional
+                            totp_secret_image_base64_img_src: String::new(),
+                            totp_secret: String::new(),
+                            error_message: Some(match error {
+                                RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => {
+                                    return hyperstim_redirect_response(
+                                        &bitsync_routes::GetFilesHomePage.to_string(),
+                                    );
+                                }
+                                RetrieveTotpSetupDataError::TotpCreation(..)
+                                | RetrieveTotpSetupDataError::TotpSecretBase64QrCode(..) => {
+                                    String::from(UNEXPECTED_ERROR_MESSAGE)
+                                }
+                            }),
+                        };
+
+                        Json(HyperStimCommand::HsPatchHtml {
+                            html: totp_form.render(),
+                            patch_target: totp_form.id_target(),
+                            patch_mode: HyperStimPatchMode::Outer,
+                        })
                         .into_response()
                     }
                 }

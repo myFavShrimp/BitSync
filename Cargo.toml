@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "bitsync-core", "bitsync-database", "bitsync-frontend", "bitsync-routes", "bitsync-storage",
+    "bitsync-core", "bitsync-database", "bitsync-frontend", "bitsync-hyperstim", "bitsync-routes", "bitsync-storage",
 ]
 
 [workspace.dependencies]
@@ -9,6 +9,7 @@ axum-extra = "0.10.1"
 bitsync-core.path = "bitsync-core"
 bitsync-database.path = "bitsync-database"
 bitsync-frontend.path = "bitsync-frontend"
+bitsync-hyperstim.path = "bitsync-hyperstim"
 bitsync-routes.path = "bitsync-routes"
 bitsync-storage.path = "bitsync-storage"
 bytes = "1.6.0"
@@ -36,6 +37,7 @@ axum-htmx = "0.7.0"
 bitsync-core.workspace = true
 bitsync-database.workspace = true
 bitsync-frontend.workspace = true
+bitsync-hyperstim.workspace = true
 bitsync-routes.workspace = true
 bitsync-storage.workspace = true
 bytes.workspace = true

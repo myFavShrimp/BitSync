@@ -93,7 +93,11 @@ impl Renderable for FilesHomePage {
                         "add directory"
                     }
                     dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(self.directory_creation_popover_id) {
-                        form /*hx-post=(self.directory_creation_url) hx-target="this" TODO */ {
+                        form
+                            data-hijack
+                            action=(self.directory_creation_url)
+                            method="POST"
+                        {
                             input type="text" name="directory_name";
                             button {
                                 "Create"
@@ -119,11 +123,18 @@ struct FileUploadForm {
 impl Renderable for FileUploadForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            form #(FilesHomePageElementId::FileUploadForm.to_str()) /*hx-post=(self.file_upload_url) TODO */ enctype="multipart/form-data" {
+            form
+                #(FilesHomePageElementId::FileUploadForm.to_str())
+                data-hijack
+                action=(self.file_upload_url)
+                method="POST"
+                enctype="multipart/form-data"
+            {
                 input type="file" name="upload";
                 input type="submit" value="Upload";
             }
-        }.render_to(buffer);
+        }
+        .render_to(buffer);
     }
 }
 
@@ -183,8 +194,17 @@ impl Renderable for FileStorageTable {
                                         button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
                                             "Move"
                                         }
-                                        dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_move_popover_id) {
-                                            form /*hx-post=(dir_item.move_url) hx-target="this" TODO*/ {
+
+                                        dialog
+                                            class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER)
+                                            popover
+                                            id=(dir_item.actions_move_popover_id)
+                                        {
+                                            form
+                                                data-hijack
+                                                action=(dir_item.move_url)
+                                                method="POST"
+                                            {
                                                 (dir_item.path)
                                                 input type="text" value=(dir_item.path) name="destination_path";
                                                 button {
@@ -198,7 +218,10 @@ impl Renderable for FileStorageTable {
                                         a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
                                             "Download"
                                         }
-                                        button /*hx-get=(dir_item.delete_url) TODO*/ onclick="closeClosestDialog(this)" {
+                                        button
+                                            data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
+                                            data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
+                                        {
                                             "Delete"
                                         }
                                         button onclick="closeClosestPopover(this)" {
@@ -279,10 +302,11 @@ impl Renderable for FilesHomePageChangeResult {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             template {
-                div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) /*hx-swap-oob=(format_args!("outerHTML:#{}", FilesHomePageElementId::FileStorageTableWrapper.to_str())) TODO */ {
+                div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) {
                     ((FileStorageTable { dir_content: self.dir_content.clone() }))
                 }
             }
-        }.render_to(buffer);
+        }
+        .render_to(buffer);
     }
 }
