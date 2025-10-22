@@ -1,16 +1,20 @@
-use std::sync::{atomic::Ordering, Arc};
+use std::sync::{Arc, atomic::Ordering};
 
 use axum::{
+    Json,
     body::Body,
     extract::{Request, State},
-    http::{header, StatusCode},
+    http::{StatusCode, header},
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use bitsync_frontend::{BODY_SELECTOR_TARGET, Render, error_modal::ErrorModal};
+use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use http_body_util::Limited;
 
 use crate::AppState;
 
+#[tracing::instrument(skip(state, request, next))]
 pub async fn dynamic_body_size_limit(
     State(state): State<Arc<AppState>>,
     request: Request,
@@ -32,7 +36,24 @@ pub async fn dynamic_body_size_limit(
         };
 
         if content_length > current_limit {
-            return StatusCode::PAYLOAD_TOO_LARGE.into_response();
+            // TODO: this is broken. Firefox produces an NS_ERROR_NET_RESET error
+            // because the connection is closed too early.
+            // See: - https://github.com/tokio-rs/axum/discussions/2445
+            //      - https://github.com/tokio-rs/axum/issues/2850
+            // Possible fix?: https://github.com/hyperium/http-body/blob/master/http-body-util/src/limited.rs#L32
+            return (
+                StatusCode::PAYLOAD_TOO_LARGE,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: ErrorModal::with_message(format!(
+                        "The upload is too large. The maximum allowed size is {} bytes.",
+                        current_limit
+                    ))
+                    .render(),
+                    patch_target: BODY_SELECTOR_TARGET.to_owned(),
+                    patch_mode: HyperStimPatchMode::Append,
+                }),
+            )
+                .into_response();
         }
     }
 

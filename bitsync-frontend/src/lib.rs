@@ -8,6 +8,8 @@ mod totp;
 
 use hypertext::Renderable;
 
+pub static BODY_SELECTOR_TARGET: &str = "body";
+
 pub trait Render: hypertext::Renderable {
     fn render(&self) -> String {
         Renderable::render(&self).into_inner()

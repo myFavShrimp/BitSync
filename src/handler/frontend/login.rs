@@ -26,7 +26,7 @@ use crate::{
         AuthData, jwt_cookie, require_basic_login_and_totp_setup_middleware,
         require_logout_middleware,
     },
-    handler::hyperstim_redirect_response,
+    handler::{RedirectHttp, RedirectHyperStim, hyperstim_redirect_response},
 };
 
 use crate::AppState;
@@ -34,21 +34,41 @@ use crate::AppState;
 use super::UNEXPECTED_ERROR_MESSAGE;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
-    let totp_auth_router = Router::new()
-        .typed_get(login_totp_auth_page_handler)
-        .typed_post(login_totp_auth_submit_handler)
-        .route_layer(from_fn_with_state(
-            state.clone(),
-            require_basic_login_and_totp_setup_middleware,
-        ))
-        .with_state(state.clone());
-
     Router::new()
-        .typed_get(login_page_handler)
-        .typed_post(login_action_handler)
-        .route_layer(from_fn_with_state(state.clone(), require_logout_middleware))
-        .merge(totp_auth_router)
-        .with_state(state)
+        .merge(
+            Router::new()
+                .typed_get(login_totp_auth_page_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_basic_login_and_totp_setup_middleware::<RedirectHttp>,
+                )),
+        )
+        .merge(
+            Router::new()
+                .typed_post(login_totp_auth_submit_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_basic_login_and_totp_setup_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
+        .merge(
+            Router::new()
+                .typed_get(login_page_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_logout_middleware::<RedirectHttp>,
+                )),
+        )
+        .merge(
+            Router::new()
+                .typed_post(login_action_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_logout_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
 }
 
 async fn login_page_handler(_: bitsync_routes::GetLoginPage) -> impl IntoResponse {

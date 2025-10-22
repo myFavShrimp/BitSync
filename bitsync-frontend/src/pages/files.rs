@@ -7,6 +7,7 @@ use bitsync_routes::TypedPath;
 use hypertext::prelude::*;
 
 use crate::{
+    Component,
     models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind},
     pages::base::LoggedInDocument,
 };
@@ -14,14 +15,12 @@ use crate::{
 pub enum FilesHomePageElementId {
     FileUploadForm,
     DirectoryCreationDialog,
-    FileStorageTableWrapper,
 }
 
 impl FilesHomePageElementId {
     pub fn to_str(&self) -> &'static str {
         match self {
             FilesHomePageElementId::FileUploadForm => "file_upload_form",
-            FilesHomePageElementId::FileStorageTableWrapper => "file_storage_table_wrapper",
             FilesHomePageElementId::DirectoryCreationDialog => "directory_creation_dialog",
         }
     }
@@ -87,7 +86,7 @@ impl Renderable for FilesHomePage {
                         None => {}
                     }
 
-                    (FileUploadForm { file_upload_url: self.file_upload_url.clone() })
+                    FileUploadForm file_upload_url=(self.file_upload_url.clone());
 
                     button onclick=(format_args!("openPopoverById('{}')", &self.directory_creation_popover_id)) {
                         "add directory"
@@ -107,9 +106,8 @@ impl Renderable for FilesHomePage {
                             }
                         }
                     }
-                    div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) {
-                        ((FileStorageTable { dir_content: self.dir_content.clone() }))
-                    }
+
+                    ((FileStorageTable { dir_content: self.dir_content.clone() }))
                 }
             }
         }.render_to(buffer);
@@ -120,11 +118,17 @@ struct FileUploadForm {
     file_upload_url: String,
 }
 
+impl Component for FileUploadForm {
+    fn id(&self) -> String {
+        FilesHomePageElementId::FileUploadForm.to_str().to_string()
+    }
+}
+
 impl Renderable for FileUploadForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             form
-                #(FilesHomePageElementId::FileUploadForm.to_str())
+                id=(self.id())
                 data-hijack
                 action=(self.file_upload_url)
                 method="POST"
@@ -138,94 +142,104 @@ impl Renderable for FileUploadForm {
     }
 }
 
+static FILE_STORAGE_TABLE_ID: &str = "file-storage-table";
+
 struct FileStorageTable {
     dir_content: Vec<StorageItemPresentation>,
+}
+
+impl Component for FileStorageTable {
+    fn id(&self) -> String {
+        FILE_STORAGE_TABLE_ID.to_owned()
+    }
 }
 
 impl Renderable for FileStorageTable {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            @if self.dir_content.is_empty() { } @else {
-                table {
-                    thead {
-                        tr {
-                            th."" {}
-                            th {
-                                "Name"
-                            }
-                            th."" {
-                                "Size"
-                            }
-                            th."" {}
-                        }
-                    }
-                    tbody {
-                        @for dir_item in &self.dir_content {
-                            tr /*hx-target="this" TODO*/ {
-                                td {
-                                    i."" {
-                                        (dir_item.kind.icon())
-                                    }
+            div id=(self.id()) {
+                @if self.dir_content.is_empty() { } @else {
+                    table {
+                        thead {
+                            tr {
+                                th."" {}
+                                th {
+                                    "Name"
                                 }
-                                td {
-                                    @match &dir_item.kind {
-                                        StorageItemPresentationKind::Directory { url } => {
-                                            a href=(url) {
+                                th."" {
+                                    "Size"
+                                }
+                                th."" {}
+                            }
+                        }
+                        tbody {
+                            @for dir_item in &self.dir_content {
+                                tr /*hx-target="this" TODO*/ {
+                                    td {
+                                        i."" {
+                                            (dir_item.kind.icon())
+                                        }
+                                    }
+                                    td {
+                                        @match &dir_item.kind {
+                                            StorageItemPresentationKind::Directory { url } => {
+                                                a href=(url) {
+                                                    (dir_item.name)
+                                                }
+                                            }
+                                            StorageItemPresentationKind::File => {
                                                 (dir_item.name)
                                             }
                                         }
-                                        StorageItemPresentationKind::File => {
-                                            (dir_item.name)
-                                        }
                                     }
-                                }
-                                td class=(crate::styles::files_home_page::ClassName::FILE_SIZE_COLUMN) {
-                                    (dir_item.size)
-                                }
-                                td {
-                                    button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_popover_id)) {
-                                        "..."
+                                    td class=(crate::styles::files_home_page::ClassName::FILE_SIZE_COLUMN) {
+                                        (dir_item.size)
                                     }
-                                    dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_popover_id) {
-                                        h1 {
-                                            (dir_item.name)
+                                    td {
+                                        button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_popover_id)) {
+                                            "..."
                                         }
-                                        hr;
-                                        button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
-                                            "Move"
-                                        }
+                                        dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_popover_id) {
+                                            h1 {
+                                                (dir_item.name)
+                                            }
+                                            hr;
+                                            button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
+                                                "Move"
+                                            }
 
-                                        dialog
-                                            class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER)
-                                            popover
-                                            id=(dir_item.actions_move_popover_id)
-                                        {
-                                            form
-                                                data-hijack
-                                                action=(dir_item.move_url)
-                                                method="POST"
+                                            dialog
+                                                class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER)
+                                                popover
+                                                id=(dir_item.actions_move_popover_id)
                                             {
-                                                (dir_item.path)
-                                                input type="text" value=(dir_item.path) name="destination_path";
-                                                button {
-                                                    "Move"
-                                                }
-                                                button type="button" onclick="closeClosestPopover(this)" {
-                                                    "Cancel"
+                                                form
+                                                    data-hijack
+                                                    action=(dir_item.move_url)
+                                                    method="POST"
+                                                {
+                                                    (dir_item.path)
+                                                    input type="text" value=(dir_item.path) name="destination_path";
+                                                    button {
+                                                        "Move"
+                                                    }
+                                                    button type="button" onclick="closeClosestPopover(this)" {
+                                                        "Cancel"
+                                                    }
                                                 }
                                             }
-                                        }
-                                        a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
-                                            "Download"
-                                        }
-                                        button
-                                            data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
-                                            data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
-                                        {
-                                            "Delete"
-                                        }
-                                        button onclick="closeClosestPopover(this)" {
-                                            "close"
+                                            a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
+                                                "Download"
+                                            }
+                                            button
+                                                data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
+                                                data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
+                                            {
+                                                "Delete"
+                                            }
+                                            button onclick="closeClosestPopover(this)" {
+                                                "close"
+                                            }
                                         }
                                     }
                                 }
@@ -240,6 +254,12 @@ impl Renderable for FileStorageTable {
 
 pub struct FilesHomePageChangeResult {
     dir_content: Vec<StorageItemPresentation>,
+}
+
+impl Component for FilesHomePageChangeResult {
+    fn id(&self) -> String {
+        FILE_STORAGE_TABLE_ID.to_owned()
+    }
 }
 
 impl From<UserFileResult> for FilesHomePageChangeResult {
@@ -301,11 +321,7 @@ impl From<DirectoryCreationResult> for FilesHomePageChangeResult {
 impl Renderable for FilesHomePageChangeResult {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            template {
-                div #(FilesHomePageElementId::FileStorageTableWrapper.to_str()) {
-                    ((FileStorageTable { dir_content: self.dir_content.clone() }))
-                }
-            }
+            ((FileStorageTable { dir_content: self.dir_content.clone() }))
         }
         .render_to(buffer);
     }

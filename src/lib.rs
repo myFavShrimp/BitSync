@@ -25,7 +25,7 @@ impl AppState {
         let state = Self {
             database: Database::connect_and_migrate(&config.database_url).await?,
             config,
-            current_file_upload_limit: AtomicU64::new(0),
+            current_file_upload_limit: AtomicU64::new(10_240_000),
         };
 
         Ok(state)

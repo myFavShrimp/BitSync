@@ -1,6 +1,9 @@
 use std::{convert::Infallible, sync::Arc};
 
-use crate::{handler::redirect_response, AppState};
+use crate::{
+    AppState,
+    handler::{Redirection, redirect_response},
+};
 use axum::{
     extract::{FromRef, FromRequestParts, Request},
     http::request::Parts,
@@ -8,10 +11,9 @@ use axum::{
     response::Response,
 };
 use axum_extra::extract::{
-    cookie::{Cookie, SameSite},
     CookieJar,
+    cookie::{Cookie, SameSite},
 };
-use axum_htmx::HxRequest;
 use bitsync_core::jwt::{JwtClaims, LoginState};
 use bitsync_database::{database::ConnectionAcquisitionError, entity::User, repository};
 
@@ -77,40 +79,36 @@ where
     }
 }
 
-pub async fn require_logout_middleware(
+pub async fn require_logout_middleware<KIND: Redirection>(
     auth_status: AuthStatus,
-    HxRequest(is_hx_request): HxRequest,
     request: Request,
     next: Next,
 ) -> Response {
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
         AuthStatus::User(..) => {
-            redirect_response(is_hx_request, &bitsync_routes::GetFilesHomePage.to_string())
+            redirect_response::<KIND>(&bitsync_routes::GetFilesHomePage.to_string())
         }
     }
 }
 
-pub async fn require_login_and_totp_setup_middleware(
+pub async fn require_login_and_totp_setup_middleware<KIND: Redirection>(
     auth_status: AuthStatus,
-    HxRequest(is_hx_request): HxRequest,
     mut request: Request,
     next: Next,
 ) -> Response {
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => {
-            redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
+            redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
         }
         AuthStatus::User(auth_data) => {
             if !auth_data.user.is_totp_set_up {
-                return redirect_response(
-                    is_hx_request,
+                return redirect_response::<KIND>(
                     &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
                 );
             }
             if auth_data.claims.login_state == LoginState::Basic {
-                return redirect_response(
-                    is_hx_request,
+                return redirect_response::<KIND>(
                     &bitsync_routes::GetLoginTotpAuthPage.to_string(),
                 );
             }
@@ -123,28 +121,23 @@ pub async fn require_login_and_totp_setup_middleware(
     }
 }
 
-pub async fn require_basic_login_and_totp_setup_middleware(
+pub async fn require_basic_login_and_totp_setup_middleware<KIND: Redirection>(
     auth_status: AuthStatus,
-    HxRequest(is_hx_request): HxRequest,
     mut request: Request,
     next: Next,
 ) -> Response {
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => {
-            redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
+            redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
         }
         AuthStatus::User(auth_data) => {
             if !auth_data.user.is_totp_set_up {
-                return redirect_response(
-                    is_hx_request,
+                return redirect_response::<KIND>(
                     &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
                 );
             }
             if auth_data.claims.login_state == LoginState::Full {
-                return redirect_response(
-                    is_hx_request,
-                    &bitsync_routes::GetFilesHomePage.to_string(),
-                );
+                return redirect_response::<KIND>(&bitsync_routes::GetFilesHomePage.to_string());
             }
 
             let extensions = request.extensions_mut();
@@ -155,20 +148,18 @@ pub async fn require_basic_login_and_totp_setup_middleware(
     }
 }
 
-pub async fn require_login_and_no_totp_setup_middleware(
+pub async fn require_login_and_no_totp_setup_middleware<KIND: Redirection>(
     auth_status: AuthStatus,
-    HxRequest(is_hx_request): HxRequest,
     mut request: Request,
     next: Next,
 ) -> Response {
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => {
-            redirect_response(is_hx_request, &bitsync_routes::GetLoginPage.to_string())
+            redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
         }
         AuthStatus::User(auth_data) => {
             if auth_data.user.is_totp_set_up && auth_data.claims.login_state == LoginState::Basic {
-                return redirect_response(
-                    is_hx_request,
+                return redirect_response::<KIND>(
                     &bitsync_routes::GetLoginTotpAuthPage.to_string(),
                 );
             }

@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use axum::{
-    Extension, Router,
+    Extension, Json, Router,
     extract::{FromRequest, Query, Request, State},
     middleware::from_fn_with_state,
-    response::{Html, IntoResponse, Response},
+    response::{IntoResponse, Response},
 };
 use axum_extra::{
     body::AsyncReadBody,
@@ -13,35 +13,54 @@ use axum_extra::{
     routing::RouterExt,
 };
 use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
-use bitsync_frontend::{Render, error_modal::ErrorModal, pages::files::FilesHomePageChangeResult};
+use bitsync_frontend::{
+    BODY_SELECTOR_TARGET, Component, Render, error_modal::ErrorModal,
+    pages::files::FilesHomePageChangeResult,
+};
+use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
 
 use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
+    handler::{RedirectHttp, RedirectHyperStim},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
-    let auth_middleware =
-        from_fn_with_state(state.clone(), require_login_and_totp_setup_middleware);
-
-    let upload_router = Router::new()
-        .typed_post(user_file_upload_handler)
-        .route_layer(axum::middleware::from_fn_with_state(
-            state.clone(),
-            crate::body_limit::dynamic_body_size_limit,
-        ))
-        .route_layer(auth_middleware.clone())
-        .with_state(state.clone());
-
     Router::new()
-        .merge(upload_router)
-        .typed_get(user_file_download_handler)
-        .typed_get(user_file_delete_handler)
-        .typed_post(user_file_move_handler)
-        .typed_post(user_file_directory_creation_handler)
-        .route_layer(auth_middleware)
-        .with_state(state)
+        .merge(
+            Router::new()
+                .typed_post(user_file_upload_handler)
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    crate::body_limit::dynamic_body_size_limit,
+                ))
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_login_and_totp_setup_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
+        .merge(
+            Router::new()
+                .typed_get(user_file_download_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_login_and_totp_setup_middleware::<RedirectHttp>,
+                ))
+                .with_state(state.clone()),
+        )
+        .merge(
+            Router::new()
+                .typed_get(user_file_delete_handler)
+                .typed_post(user_file_move_handler)
+                .typed_post(user_file_directory_creation_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_login_and_totp_setup_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state),
+        )
 }
 
 struct UserFileMultipartField {
@@ -95,8 +114,22 @@ async fn user_file_upload_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
-        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
+        Ok(result) => {
+            let files_component = FilesHomePageChangeResult::from(result);
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: files_component.render(),
+                patch_target: files_component.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
+            .into_response()
+        }
+        Err(error) => Json(HyperStimCommand::HsPatchHtml {
+            html: ErrorModal::from(error).render(),
+            patch_target: BODY_SELECTOR_TARGET.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        })
+        .into_response(),
     }
 }
 
@@ -115,14 +148,17 @@ async fn user_file_download_handler(
     {
         Ok(result) => {
             let content_type = headers::ContentType::from(result.mime);
-
             let stream_body = AsyncReadBody::new(result.file);
-
             let attachment = Attachment::new(stream_body).filename(result.path.file_name());
 
             (axum_extra::TypedHeader(content_type), attachment).into_response()
         }
-        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
+        Err(error) => Json(HyperStimCommand::HsPatchHtml {
+            html: ErrorModal::from(error).render(),
+            patch_target: BODY_SELECTOR_TARGET.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        })
+        .into_response(),
     }
 }
 
@@ -139,8 +175,22 @@ async fn user_file_delete_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
-        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
+        Ok(result) => {
+            let files_component = FilesHomePageChangeResult::from(result);
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: files_component.render(),
+                patch_target: files_component.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
+            .into_response()
+        }
+        Err(error) => Json(HyperStimCommand::HsPatchHtml {
+            html: ErrorModal::from(error).render(),
+            patch_target: BODY_SELECTOR_TARGET.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        })
+        .into_response(),
     }
 }
 
@@ -164,8 +214,22 @@ async fn user_file_move_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
-        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
+        Ok(result) => {
+            let files_component = FilesHomePageChangeResult::from(result);
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: files_component.render(),
+                patch_target: files_component.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
+            .into_response()
+        }
+        Err(error) => Json(HyperStimCommand::HsPatchHtml {
+            html: ErrorModal::from(error).render(),
+            patch_target: BODY_SELECTOR_TARGET.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        })
+        .into_response(),
     }
 }
 
@@ -189,7 +253,21 @@ async fn user_file_directory_creation_handler(
     )
     .await
     {
-        Ok(result) => Html(FilesHomePageChangeResult::from(result).render()).into_response(),
-        Err(error) => Html(ErrorModal::from(error).render()).into_response(),
+        Ok(result) => {
+            let files_component = FilesHomePageChangeResult::from(result);
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: files_component.render(),
+                patch_target: files_component.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
+            .into_response()
+        }
+        Err(error) => Json(HyperStimCommand::HsPatchHtml {
+            html: ErrorModal::from(error).render(),
+            patch_target: BODY_SELECTOR_TARGET.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        })
+        .into_response(),
     }
 }

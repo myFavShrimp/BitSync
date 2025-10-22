@@ -5,6 +5,15 @@ pub struct ErrorModal {
     trace: Option<String>,
 }
 
+impl ErrorModal {
+    pub fn with_message(message: String) -> Self {
+        Self {
+            message,
+            trace: None,
+        }
+    }
+}
+
 impl<E> From<E> for ErrorModal
 where
     E: std::error::Error,
@@ -32,7 +41,10 @@ impl Renderable for ErrorModal {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             div {
-                dialog class=(crate::styles::error_modal::ClassName::MODAL) {
+                dialog
+                    class=(crate::styles::error_modal::ClassName::MODAL)
+                    data-init="this.showModal()"
+                {
                     h1 { (self.message) }
 
                     @match &self.trace {

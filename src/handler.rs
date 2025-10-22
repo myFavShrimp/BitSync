@@ -19,8 +19,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(static_assets::create_routes().await)
         .merge(frontend::create_routes(state.clone()).await)
         .fallback(handler_404)
-        .layer(DefaultBodyLimit::max(10240000))
-        .layer(RequestBodyLimitLayer::new(10240000))
+        .layer(DefaultBodyLimit::disable())
+        .layer(DefaultBodyLimit::max(10_240_000))
+        .layer(RequestBodyLimitLayer::new(10_240_000))
         .layer(TraceLayer::new_for_http())
 }
 
@@ -46,10 +47,34 @@ pub fn hyperstim_redirect_response(redirect_route: &str) -> Response {
         .into_response()
 }
 
-#[deprecated]
-pub fn redirect_response(is_hx_request: bool, redirect_route: &str) -> Response {
-    match is_hx_request {
-        true => hyperstim_redirect_response(redirect_route),
-        false => http_redirect_response(redirect_route),
+pub enum RedirectionKind {
+    Http,
+    HyperStim,
+}
+
+pub trait Redirection {
+    fn redirection_kind() -> RedirectionKind;
+}
+
+struct RedirectHttp;
+
+impl Redirection for RedirectHttp {
+    fn redirection_kind() -> RedirectionKind {
+        RedirectionKind::Http
+    }
+}
+
+struct RedirectHyperStim;
+
+impl Redirection for RedirectHyperStim {
+    fn redirection_kind() -> RedirectionKind {
+        RedirectionKind::HyperStim
+    }
+}
+
+pub fn redirect_response<KIND: Redirection>(redirect_route: &str) -> Response {
+    match KIND::redirection_kind() {
+        RedirectionKind::HyperStim => hyperstim_redirect_response(redirect_route),
+        RedirectionKind::Http => http_redirect_response(redirect_route),
     }
 }

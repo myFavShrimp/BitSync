@@ -16,6 +16,7 @@ use bitsync_frontend::{
 use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
+    handler::RedirectHttp,
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -23,7 +24,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_get(files_home_page_handler)
         .route_layer(from_fn_with_state(
             state.clone(),
-            require_login_and_totp_setup_middleware,
+            require_login_and_totp_setup_middleware::<RedirectHttp>,
         ))
         .with_state(state)
 }

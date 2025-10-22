@@ -15,17 +15,28 @@ use serde::Deserialize;
 use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
+    handler::{RedirectHttp, RedirectHyperStim},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
-        .typed_get(user_settings_page_handler)
-        .typed_post(user_settings_password_change_handler)
-        .route_layer(from_fn_with_state(
-            state.clone(),
-            require_login_and_totp_setup_middleware,
-        ))
-        .with_state(state.clone())
+        .merge(
+            Router::new()
+                .typed_get(user_settings_page_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_login_and_totp_setup_middleware::<RedirectHttp>,
+                )),
+        )
+        .merge(
+            Router::new()
+                .typed_get(user_settings_password_change_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_login_and_totp_setup_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
 }
 
 async fn user_settings_page_handler(
