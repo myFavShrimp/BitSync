@@ -3,16 +3,16 @@ use std::path::PathBuf;
 use bitsync_database::entity::User;
 use bitsync_storage::{
     operation::{
-        read::{read_dir_contents, ReadDirContentsError, ReadStorageItemError},
+        read::{ReadDirContentsError, ReadStorageItemError, read_dir_contents},
         write::{
-            create_directory, ensure_user_storage_exists, CreateDirectoryError,
-            EnsureUserStorageExistsError,
+            CreateDirectoryError, EnsureUserStorageExistsError, create_directory,
+            ensure_user_storage_exists,
         },
     },
     storage_item::StorageItem,
     storage_path::{StoragePath, StoragePathError},
     user_storage::UserStorage,
-    validation::{validate_path_is_just_file_name, PathIsJustFileNameValidationError},
+    validation::{PathIsJustFileNameValidationError, validate_path_is_just_file_name},
 };
 
 pub struct DirectoryCreationResult {

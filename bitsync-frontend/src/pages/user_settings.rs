@@ -1,29 +1,17 @@
-use bitsync_database::entity::User;
-
 use hypertext::prelude::*;
 
-use crate::pages::base::LoggedInDocument;
+use crate::{Component, pages::base::LoggedInDocument};
 
-pub struct UserSettingsPage {
-    pub user: User,
-}
-
-impl From<User> for UserSettingsPage {
-    fn from(value: User) -> Self {
-        Self { user: value }
-    }
-}
+pub struct UserSettingsPage;
 
 impl Renderable for UserSettingsPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             LoggedInDocument {
-                style {
-                    (crate::styles::files_home_page::STYLE_SHEET)
-                }
+                style { (crate::styles::user_settings_page::STYLE_SHEET) }
                 main {
                     h1 {
-                        "Account"
+                        "Account Settings"
                     }
                     ChangePasswordForm;
                 }
@@ -35,23 +23,34 @@ impl Renderable for UserSettingsPage {
 
 struct ChangePasswordForm;
 
+impl Component for ChangePasswordForm {
+    fn id(&self) -> String {
+        "change-password-form".to_owned()
+    }
+}
+
 impl Renderable for ChangePasswordForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            form /*hx-post=(bitsync_routes::PostUserSettingsChangePassword.to_string()) hx-target="this"*/ {
+            form
+                id=(self.id())
+                data-hijack
+                action=(bitsync_routes::PostUserSettingsChangePassword.to_string())
+                method="POST"
+            {
                 label {
-                    "current password"
+                    "Current Password"
                     input type="password" name="current_password";
                 }
                 label {
-                    "new password"
+                    "New Password"
                     input type="password" name="new_password";
                 }
                 label {
-                    "repeat new password"
+                    "Repeat New Password"
                     input type="password" name="new_password_repeated";
                 }
-                button {
+                button type="submit" {
                     "Save"
                 }
                 button type="reset" {

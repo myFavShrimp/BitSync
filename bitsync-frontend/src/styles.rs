@@ -21,3 +21,7 @@ pub mod register_page {
 pub mod files_home_page {
     turf::style_sheet!("../scss/files_home_page.scss");
 }
+
+pub mod user_settings_page {
+    turf::style_sheet!("../scss/user_settings_page.scss");
+}

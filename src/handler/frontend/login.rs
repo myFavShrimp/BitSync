@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::{
     Extension, Json, Router,
     extract::State,
+    http::StatusCode,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
 };
@@ -12,11 +13,13 @@ use axum_extra::{
 };
 use bitsync_core::use_case::auth::{
     login::{LoginError, perform_login},
-    verify_totp::verify_totp,
+    verify_totp::{VerifyTotpError, verify_totp},
 };
 use bitsync_frontend::{
     Component, Render,
-    pages::login::{LoginForm, LoginPage, TotpForm},
+    pages::login::{
+        LoginDisplayError, LoginForm, LoginPage, TotpForm, TotpVerificationDisplayError,
+    },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
@@ -26,12 +29,11 @@ use crate::{
         AuthData, jwt_cookie, require_basic_login_and_totp_setup_middleware,
         require_logout_middleware,
     },
+    error_report::emit_error,
     handler::{RedirectHttp, RedirectHyperStim, hyperstim_redirect_response},
 };
 
 use crate::AppState;
-
-use super::UNEXPECTED_ERROR_MESSAGE;
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
@@ -100,42 +102,45 @@ async fn login_action_handler(
             let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
 
             let redirect_url = match result.user.is_totp_set_up {
-                true => bitsync_routes::GetFilesHomePage.to_string(),
+                true => bitsync_routes::GetLoginTotpAuthPage.to_string(),
                 false => bitsync_routes::GetRegisterTotpSetupPage.to_string(),
             };
 
             (cookie_jar, hyperstim_redirect_response(&redirect_url)).into_response()
         }
-        Err(error) => match error {
-            LoginError::DatabaseQuery(..)
-            | LoginError::DatabaseConnectionAcquisition(..)
-            | LoginError::Jwt(..) => {
-                let login_form = LoginForm {
-                    username: Some(login_data.username),
-                    error_message: Some(String::from(UNEXPECTED_ERROR_MESSAGE)),
-                };
+        Err(error) => {
+            let display_error = match error {
+                LoginError::PasswordHashVerification(..) | LoginError::DatabaseQuery(..) => {
+                    LoginDisplayError::InvalidCredentials
+                }
+                error => {
+                    emit_error(error);
+                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                }
+            };
 
+            let login_form = LoginForm {
+                username: Some(login_data.username),
+                error: Some(display_error),
+            };
+
+            (
+                StatusCode::UNAUTHORIZED,
                 Json(HyperStimCommand::HsPatchHtml {
                     html: login_form.render(),
                     patch_target: login_form.id_target(),
                     patch_mode: HyperStimPatchMode::Outer,
-                })
+                }),
+            )
                 .into_response()
-            }
-            LoginError::PasswordHashVerification(password_hash_verification_error) => todo!(),
-        },
+        }
     }
 }
 
 async fn login_totp_auth_page_handler(
     _: bitsync_routes::GetLoginTotpAuthPage,
 ) -> impl IntoResponse {
-    Html(
-        LoginPage::Totp(TotpForm {
-            error_message: None,
-        })
-        .render(),
-    )
+    Html(LoginPage::Totp(TotpForm { error: None }).render())
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -167,6 +172,29 @@ async fn login_totp_auth_submit_handler(
             )
                 .into_response()
         }
-        Err(..) => todo!(),
+        Err(error) => {
+            let display_error = match error {
+                VerifyTotpError::TotpInvalid(..) => TotpVerificationDisplayError::InvalidCode,
+                VerifyTotpError::TotpNotSetUp(..) => TotpVerificationDisplayError::NotSetUp,
+                error => {
+                    emit_error(error);
+                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                }
+            };
+
+            let totp_form = TotpForm {
+                error: Some(display_error),
+            };
+
+            (
+                StatusCode::UNAUTHORIZED,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: totp_form.render(),
+                    patch_target: totp_form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response()
+        }
     }
 }

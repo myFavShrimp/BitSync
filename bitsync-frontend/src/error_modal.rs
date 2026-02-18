@@ -54,7 +54,7 @@ impl Renderable for ErrorModal {
                         None => {}
                     }
 
-                    button onclick="closeClosestDialogModal(this)" { ("close") }
+                    button onclick="closeClosestDialog(this)" { ("close") }
                 }
             }
         }

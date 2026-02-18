@@ -1,4 +1,4 @@
-use axum::{response::IntoResponse, Router};
+use axum::{Router, response::IntoResponse};
 use axum_extra::routing::RouterExt;
 
 use crate::handler::handler_404;

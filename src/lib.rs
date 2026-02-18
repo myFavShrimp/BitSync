@@ -8,6 +8,7 @@ use tower_http::cors::CorsLayer;
 mod auth;
 mod body_limit;
 pub mod config;
+mod error_report;
 mod handler;
 
 pub struct AppState {

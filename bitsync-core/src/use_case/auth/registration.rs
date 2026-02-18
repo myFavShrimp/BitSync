@@ -1,17 +1,17 @@
 use std::path::PathBuf;
 
 use bitsync_database::{
-    database::{transaction::TransactionCommitError, Database, TransactionBeginError},
+    database::{Database, TransactionBeginError, transaction::TransactionCommitError},
     entity::User,
     repository,
 };
 use bitsync_storage::{
-    operation::write::{ensure_user_storage_exists, EnsureUserStorageExistsError},
+    operation::write::{EnsureUserStorageExistsError, ensure_user_storage_exists},
     user_storage::UserStorage,
 };
 
 use crate::{
-    hash::{hash_password, PasswordHashCreationError},
+    hash::{PasswordHashCreationError, hash_password},
     jwt::{JwtClaims, LoginState},
 };
 

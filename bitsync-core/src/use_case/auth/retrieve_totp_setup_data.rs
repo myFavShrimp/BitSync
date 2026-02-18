@@ -1,6 +1,6 @@
 use bitsync_database::entity::User;
 
-use crate::totp::{build_totp_for_user, TotpCreationError};
+use crate::totp::{TotpCreationError, build_totp_for_user};
 
 #[derive(thiserror::Error, Debug)]
 #[error("Failed to create totp setup data")]

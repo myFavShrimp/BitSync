@@ -1,4 +1,4 @@
-use sqlx::{migrate::MigrateDatabase, pool::PoolConnection, PgPool, Postgres};
+use sqlx::{PgPool, Postgres, migrate::MigrateDatabase, pool::PoolConnection};
 use transaction::Transaction;
 
 pub mod transaction;

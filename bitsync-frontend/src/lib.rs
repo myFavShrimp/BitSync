@@ -1,6 +1,6 @@
 pub mod error_banner;
 pub mod error_modal;
-// pub mod icons;
+pub mod icons;
 pub mod models;
 pub mod pages;
 pub mod styles;

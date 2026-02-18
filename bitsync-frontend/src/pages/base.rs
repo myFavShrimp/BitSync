@@ -27,7 +27,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                 body {
                     nav {
                         a class=(crate::styles::files_home_page::ClassName::LOGO) href=(bitsync_routes::GetFilesHomePage.to_string()) {
-                            // (crate::icons::logo::Logo::default()) TODO
+                            (crate::icons::logo::Logo::default())
                         }
                         a href=(bitsync_routes::GetUserSettingsPage.to_string()) {
                             "User Settings"

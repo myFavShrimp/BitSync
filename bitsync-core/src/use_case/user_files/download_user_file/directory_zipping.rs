@@ -1,6 +1,6 @@
 use bitsync_storage::{
     operation::read::{
-        read_dir_contents, read_file_stream, ReadDirContentsError, ReadFileStreamError,
+        ReadDirContentsError, ReadFileStreamError, read_dir_contents, read_file_stream,
     },
     storage_item::{StorageItem, StorageItemKind},
 };

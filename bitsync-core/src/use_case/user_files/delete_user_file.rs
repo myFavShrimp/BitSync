@@ -3,10 +3,10 @@ use std::path::PathBuf;
 use bitsync_database::entity::User;
 use bitsync_storage::{
     operation::{
-        read::{read_dir_contents, read_storage_item, ReadDirContentsError, ReadStorageItemError},
+        read::{ReadDirContentsError, ReadStorageItemError, read_dir_contents, read_storage_item},
         write::{
-            delete_directory, delete_file, ensure_user_storage_exists, DeleteDirectoryError,
-            DeleteFileError, EnsureUserStorageExistsError,
+            DeleteDirectoryError, DeleteFileError, EnsureUserStorageExistsError, delete_directory,
+            delete_file, ensure_user_storage_exists,
         },
     },
     storage_item::{StorageItem, StorageItemKind},

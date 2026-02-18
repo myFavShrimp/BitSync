@@ -20,5 +20,3 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(logout::create_routes(state.clone()).await)
         .merge(user_file::create_routes(state).await)
 }
-
-static UNEXPECTED_ERROR_MESSAGE: &str = "An unexpected error occurred.";

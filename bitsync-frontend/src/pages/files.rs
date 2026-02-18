@@ -136,6 +136,14 @@ impl Renderable for FileUploadForm {
             {
                 input type="file" name="upload";
                 input type="submit" value="Upload";
+                div data-effect=(format!(
+                    "this.textContent = document.querySelector('{}').hsFetch.state()",
+                    self.id_target(),
+                )) {}
+                div data-effect=(format!(
+                    "this.textContent = document.querySelector('{}').hsFetch.error()",
+                    self.id_target(),
+                )) {}
             }
         }
         .render_to(buffer);
@@ -174,7 +182,7 @@ impl Renderable for FileStorageTable {
                         }
                         tbody {
                             @for dir_item in &self.dir_content {
-                                tr /*hx-target="this" TODO*/ {
+                                tr {
                                     td {
                                         i."" {
                                             (dir_item.kind.icon())

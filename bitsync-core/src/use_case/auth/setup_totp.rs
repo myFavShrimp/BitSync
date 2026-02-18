@@ -1,13 +1,13 @@
 use bitsync_database::{
-    database::{transaction::TransactionCommitError, Database, TransactionBeginError},
+    database::{Database, TransactionBeginError, transaction::TransactionCommitError},
     entity::User,
     repository::{self, QueryError},
 };
 
 use crate::{
-    hash::{hash_password, PasswordHashCreationError},
+    hash::{PasswordHashCreationError, hash_password},
     jwt::{JwtClaims, LoginState},
-    totp::{build_totp_for_user, TotpCreationError},
+    totp::{TotpCreationError, build_totp_for_user},
 };
 
 #[derive(thiserror::Error, Debug)]

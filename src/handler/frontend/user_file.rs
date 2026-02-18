@@ -31,10 +31,10 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_post(user_file_upload_handler)
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    crate::body_limit::dynamic_body_size_limit,
-                ))
+                // .route_layer(axum::middleware::from_fn_with_state(
+                //     state.clone(),
+                //     crate::body_limit::dynamic_body_size_limit,
+                // ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -82,13 +82,27 @@ where
 
         let multipart_field = match multipart_data.next_field().await {
             Ok(Some(multipart_field)) => multipart_field,
-            Ok(None) => todo!("error - no file"),
+            Ok(None) => {
+                return Err(Json(HyperStimCommand::HsPatchHtml {
+                    html: ErrorModal::with_message("No file was provided".to_owned()).render(),
+                    patch_target: BODY_SELECTOR_TARGET.to_owned(),
+                    patch_mode: HyperStimPatchMode::Append,
+                })
+                .into_response());
+            }
             Err(error) => return Err(error.body_text().into_response()),
         };
 
         let file_name = match multipart_field.file_name() {
             Some(file_name) => file_name.to_owned(),
-            None => todo!("error - no file"),
+            None => {
+                return Err(Json(HyperStimCommand::HsPatchHtml {
+                    html: ErrorModal::with_message("No file name was provided".to_owned()).render(),
+                    patch_target: BODY_SELECTOR_TARGET.to_owned(),
+                    patch_mode: HyperStimPatchMode::Append,
+                })
+                .into_response());
+            }
         };
 
         Ok(Self {

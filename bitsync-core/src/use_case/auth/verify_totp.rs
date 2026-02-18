@@ -2,7 +2,7 @@ use bitsync_database::entity::User;
 
 use crate::{
     jwt::{JwtClaims, LoginState},
-    totp::{build_totp_for_user, TotpCreationError},
+    totp::{TotpCreationError, build_totp_for_user},
 };
 
 #[derive(thiserror::Error, Debug)]

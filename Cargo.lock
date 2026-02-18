@@ -216,16 +216,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-htmx"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d16a4be621f96b959fc829e4cbf02fd79ffb8427525002af31a9e2979599fbb7"
-dependencies = [
- "axum-core",
- "http",
-]
-
-[[package]]
 name = "axum-macros"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -291,7 +281,6 @@ dependencies = [
  "async-trait",
  "axum",
  "axum-extra",
- "axum-htmx",
  "bitsync-core",
  "bitsync-database",
  "bitsync-frontend",

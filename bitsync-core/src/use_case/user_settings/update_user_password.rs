@@ -1,11 +1,11 @@
 use bitsync_database::{
-    database::{transaction::TransactionCommitError, Database, TransactionBeginError},
+    database::{Database, TransactionBeginError, transaction::TransactionCommitError},
     entity::User,
     repository,
 };
 
 use crate::hash::{
-    hash_password, verify_password_hash, PasswordHashCreationError, PasswordHashVerificationError,
+    PasswordHashCreationError, PasswordHashVerificationError, hash_password, verify_password_hash,
 };
 
 #[derive(thiserror::Error, Debug)]

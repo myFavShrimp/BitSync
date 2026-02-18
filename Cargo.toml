@@ -33,7 +33,6 @@ license = "MPL-2.0"
 async-trait = "0.1.74"
 axum = { workspace = true, features = ["http2"] }
 axum-extra = { workspace = true, features = ["typed-header", "form", "cookie", "typed-routing", "async-read-body", "attachment", "multipart"] }
-axum-htmx = "0.7.0"
 bitsync-core.workspace = true
 bitsync-database.workspace = true
 bitsync-frontend.workspace = true

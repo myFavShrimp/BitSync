@@ -1,6 +1,32 @@
-use hypertext::{Raw, prelude::*};
+use hypertext::prelude::*;
 
 use crate::{Component, error_banner::OptionalErrorBanner, pages::base::GuestDocument};
+
+pub enum LoginDisplayError {
+    InvalidCredentials,
+}
+
+impl LoginDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::InvalidCredentials => "Invalid username or password",
+        }
+    }
+}
+
+pub enum TotpVerificationDisplayError {
+    InvalidCode,
+    NotSetUp,
+}
+
+impl TotpVerificationDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::InvalidCode => "Invalid verification code",
+            Self::NotSetUp => "TOTP is not set up",
+        }
+    }
+}
 
 pub enum LoginPage {
     Login(LoginForm),
@@ -17,9 +43,9 @@ impl Renderable for LoginPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             GuestDocument {
-                style { (Raw::dangerously_create(crate::styles::login_page::STYLE_SHEET)) }
+                style { (crate::styles::login_page::STYLE_SHEET) }
 
-                // (crate::icons::logo::Logo::with_class(crate::styles::login_page::ClassName::LOGO)) TODO
+                (crate::icons::logo::Logo::with_class(crate::styles::login_page::ClassName::LOGO))
                 p class=(crate::styles::login_page::ClassName::PAGE_HINT) {("Sign in to access your secure storage")}
 
                 main {
@@ -37,7 +63,7 @@ impl Renderable for LoginPage {
 #[derive(Default)]
 pub struct LoginForm {
     pub username: Option<String>,
-    pub error_message: Option<String>,
+    pub error: Option<LoginDisplayError>,
 }
 
 impl Component for LoginForm {
@@ -56,8 +82,6 @@ impl Renderable for LoginForm {
                 action=(bitsync_routes::PostLoginAction.to_string())
                 method="POST"
             {
-                OptionalErrorBanner message=(self.error_message.clone());
-
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "Username"
                     div class=(crate::styles::login_page::ClassName::INPUT) {
@@ -70,14 +94,9 @@ impl Renderable for LoginForm {
                         input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" placeholder="Enter your password" required name="password";
                     }
                 }
-                @match &self.error_message {
-                    Some(message) => {
-                        div {
-                            (message)
-                        }
-                    }
-                    None => {}
-                }
+
+                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+
                 div class=(crate::styles::login_page::ClassName::ACTIONS) {
                     button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                         "Sign in"
@@ -92,7 +111,7 @@ impl Renderable for LoginForm {
 }
 
 pub struct TotpForm {
-    pub error_message: Option<String>,
+    pub error: Option<TotpVerificationDisplayError>,
 }
 
 impl Component for TotpForm {
@@ -105,13 +124,12 @@ impl Renderable for TotpForm {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             form
+                id=(self.id())
                 class=(crate::styles::login_page::ClassName::FORM)
                 data-hijack
                 action=(bitsync_routes::PostLoginTotpAuthAction.to_string())
                 method="POST"
             {
-                OptionalErrorBanner message=(self.error_message.clone());
-
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
 
@@ -120,7 +138,7 @@ impl Renderable for TotpForm {
 
                         p id="totp-timer" class=(crate::styles::login_page::ClassName::TOTP_TIMER) {"30"}
 
-                        script {(Raw::dangerously_create(r#"
+                        script {(hypertext::Raw::dangerously_create(r#"
                             setInterval(() => {
                                 const totpTimer = document.querySelector('#totp-timer');
                                 const time = 30 - (Math.floor(Date.now() / 1000) % 30);
@@ -130,14 +148,9 @@ impl Renderable for TotpForm {
                         "#))}
                     }
                 }
-                @match &self.error_message {
-                    Some(message) => {
-                        div {
-                            (message)
-                        }
-                    }
-                    None => {}
-                }
+
+                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+
                 button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                     "Login"
                 }

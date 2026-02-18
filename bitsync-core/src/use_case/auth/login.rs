@@ -4,7 +4,7 @@ use bitsync_database::repository;
 
 use crate::jwt::{JwtClaims, LoginState};
 
-use crate::hash::{verify_password_hash, PasswordHashVerificationError};
+use crate::hash::{PasswordHashVerificationError, verify_password_hash};
 
 #[derive(thiserror::Error, Debug)]
 #[error("Username or password wrong")]

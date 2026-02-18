@@ -8,13 +8,16 @@ use axum::{
     response::{Html, IntoResponse},
 };
 use axum_extra::{extract::Form, routing::RouterExt};
-use bitsync_core::use_case::user_settings::update_user_password::update_user_password;
+use bitsync_core::use_case::user_settings::update_user_password::{
+    UpdateUserPasswordError, update_user_password,
+};
 use bitsync_frontend::{Render, pages::user_settings::UserSettingsPage};
 use serde::Deserialize;
 
 use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
+    error_report::emit_error,
     handler::{RedirectHttp, RedirectHyperStim},
 };
 
@@ -30,7 +33,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         )
         .merge(
             Router::new()
-                .typed_get(user_settings_password_change_handler)
+                .typed_post(user_settings_password_change_handler)
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -41,9 +44,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
 
 async fn user_settings_page_handler(
     _: bitsync_routes::GetUserSettingsPage,
-    Extension(auth_data): Extension<AuthData>,
+    Extension(_auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    Html(UserSettingsPage::from(auth_data.user).render())
+    Html(UserSettingsPage.render())
 }
 
 #[derive(Deserialize)]
@@ -68,7 +71,16 @@ async fn user_settings_password_change_handler(
     )
     .await
     {
-        Ok(_) => StatusCode::OK.into_response(),
-        Err(e) => todo!("{:#?}", e),
+        Ok(()) => StatusCode::OK.into_response(),
+        Err(UpdateUserPasswordError::PasswordHashVerification(..)) => {
+            StatusCode::BAD_REQUEST.into_response()
+        }
+        Err(UpdateUserPasswordError::PasswordsMismatch(..)) => {
+            StatusCode::BAD_REQUEST.into_response()
+        }
+        Err(error) => {
+            emit_error(error);
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        }
     }
 }

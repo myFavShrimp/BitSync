@@ -1,9 +1,33 @@
 use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
-use hypertext::{Raw, prelude::*};
+use hypertext::prelude::*;
 
 use crate::{
     Component, error_banner::OptionalErrorBanner, pages::base::GuestDocument, totp::totp_qr_src,
 };
+
+pub enum RegistrationDisplayError {
+    UsernameTaken,
+}
+
+impl RegistrationDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::UsernameTaken => "The username is already taken",
+        }
+    }
+}
+
+pub enum TotpSetupDisplayError {
+    InvalidCode,
+}
+
+impl TotpSetupDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::InvalidCode => "The entered TOTP code is invalid",
+        }
+    }
+}
 
 pub enum RegisterPage {
     UserRegistration(RegisterForm),
@@ -20,9 +44,9 @@ impl Renderable for RegisterPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             GuestDocument {
-                style { (Raw::dangerously_create(crate::styles::register_page::STYLE_SHEET)) }
+                style { (crate::styles::register_page::STYLE_SHEET) }
 
-                // (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO)) TODO
+                (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
                 p class=(crate::styles::register_page::ClassName::PAGE_HINT) {("Create an account to get started")}
 
                 main {
@@ -40,7 +64,7 @@ impl Renderable for RegisterPage {
 #[derive(Default)]
 pub struct RegisterForm {
     pub username: Option<String>,
-    pub error_message: Option<String>,
+    pub error: Option<RegistrationDisplayError>,
 }
 
 impl Component for RegisterForm {
@@ -59,8 +83,6 @@ impl Renderable for RegisterForm {
                 action=(bitsync_routes::PostRegisterAction.to_string())
                 method="POST"
             {
-                OptionalErrorBanner message=(self.error_message.clone());
-
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "Username"
                     div class=(crate::styles::register_page::ClassName::INPUT) {
@@ -73,6 +95,9 @@ impl Renderable for RegisterForm {
                         input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" placeholder="Enter your password" required name="password";
                     }
                 }
+
+                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+
                 div class=(crate::styles::register_page::ClassName::ACTIONS) {
                     button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                         "Register"
@@ -93,7 +118,7 @@ static REGISTER_TOTP_FORM_ID: &str = "register-totp-form";
 pub struct TotpSetupForm {
     pub totp_secret_image_base64_img_src: String,
     pub totp_secret: String,
-    pub error_message: Option<String>,
+    pub error: Option<TotpSetupDisplayError>,
 }
 
 impl Component for TotpSetupForm {
@@ -128,7 +153,7 @@ impl Renderable for TotpSetupForm {
 
                 hr;
 
-                OptionalErrorBanner message=(self.error_message.clone());
+                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
@@ -138,7 +163,7 @@ impl Renderable for TotpSetupForm {
 
                         p id="totp-timer" class=(crate::styles::register_page::ClassName::TOTP_TIMER) {"30"}
 
-                        script {(Raw::dangerously_create(r#"
+                        script {(hypertext::Raw::dangerously_create(r#"
                             setInterval(() => {
                                 const totpTimer = document.querySelector('#totp-timer');
                                 const time = 30 - (Math.floor(Date.now() / 1000) % 30);

@@ -1,6 +1,6 @@
 use bitsync_database::entity::User;
 use totp_rs::{
-    qrcodegen_image::image::EncodableLayout, Rfc6238 as RfcTotp, Rfc6238Error, TotpUrlError, TOTP,
+    Rfc6238 as RfcTotp, Rfc6238Error, TOTP, TotpUrlError, qrcodegen_image::image::EncodableLayout,
 };
 
 static TOTP_LENGTH: usize = 6;

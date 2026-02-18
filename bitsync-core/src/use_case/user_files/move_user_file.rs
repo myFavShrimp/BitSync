@@ -3,9 +3,9 @@ use std::path::PathBuf;
 use bitsync_database::entity::User;
 use bitsync_storage::{
     operation::{
-        read::{read_dir_contents, ReadDirContentsError, ReadStorageItemError},
+        read::{ReadDirContentsError, ReadStorageItemError, read_dir_contents},
         write::{
-            ensure_user_storage_exists, rename_item, EnsureUserStorageExistsError, RenameItemError,
+            EnsureUserStorageExistsError, RenameItemError, ensure_user_storage_exists, rename_item,
         },
     },
     storage_item::StorageItem,
