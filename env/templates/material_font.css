@@ -1,0 +1,5 @@
+@font-face {
+  font-family: '{{ name }}';
+  font-style: normal;
+  src: url({{ location }}) format('woff');
+}

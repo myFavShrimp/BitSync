@@ -21,18 +21,21 @@ fmt:
 install-tools:
 	cargo install --locked sqlx-cli
 	cargo install --locked cargo-watch
-	cargo install --locked nu
+	cargo install --locked arc-automation
 
-static-assets: fetch-static-assets font-css
+static-assets:
+	arc run -s local -t static_assets
 
 fetch-static-assets:
-	nu ./scripts/make_fetch_static_assets.nu --all
-
-bundle-hyperstim:
-	cd hyperstim && deno task bundle
-	cp hyperstim/dist/hyperstim.min.js static/external/hyperstim.js
+	arc run -s local -t fetch_static_assets
 
 font-css:
-	nu ./scripts/make_font_css.nu
+	arc run -s local -t generate_font_css
+
+start-postgres:
+	arc run -s local -t start_postgres
+
+fetch-hyperstim:
+	arc run -s local -t fetch_hyperstim
 
 ws: watch-server
