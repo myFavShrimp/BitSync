@@ -18,6 +18,7 @@ impl Renderable for Logo {
         } else {
             LOGO_SVG.replacen("<svg", &format!(r#"<svg class="{}""#, self.0), 1)
         };
+
         hypertext::Raw::dangerously_create(svg).render_to(buffer);
     }
 }

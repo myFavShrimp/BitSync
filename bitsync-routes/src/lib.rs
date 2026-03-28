@@ -12,6 +12,10 @@ pub struct GetStaticFile {
     pub file_path: String,
 }
 
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/favicon.ico")]
+pub struct GetFavicon;
+
 // auth
 
 #[derive(TypedPath, Deserialize)]
