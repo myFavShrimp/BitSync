@@ -12,7 +12,6 @@ pub struct StorageItemPresentation {
     pub path: String,
     pub kind: StorageItemPresentationKind,
     pub actions_popover_id: String,
-    pub actions_move_popover_id: String,
     pub download_url: String,
     pub move_url: String,
     pub delete_url: String,
@@ -66,8 +65,6 @@ impl From<StorageItem> for StorageItemPresentation {
             .to_string();
 
         let actions_popover_id = format!("{}-{ACTIONS_POPOVER_ID_PART}", value.path.file_name());
-        let actions_move_popover_id =
-            format!("{}-{ACTIONS_POPOVER_ID_PART}-move", value.path.file_name());
 
         Self {
             size: format_file_size(value.size),
@@ -75,7 +72,6 @@ impl From<StorageItem> for StorageItemPresentation {
             path,
             kind: StorageItemPresentationKind::from(value),
             actions_popover_id,
-            actions_move_popover_id,
             download_url,
             move_url,
             delete_url,

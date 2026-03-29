@@ -230,12 +230,19 @@ async fn user_file_move_handler(
     {
         Ok(result) => {
             let files_component = FilesHomePageChangeResult::from(result);
+            let dialog_id =
+                bitsync_frontend::pages::files::FilesHomePageElementId::FileMoveDialog.to_str();
 
-            Json(HyperStimCommand::HsPatchHtml {
-                html: files_component.render(),
-                patch_target: files_component.id_target(),
-                patch_mode: HyperStimPatchMode::Outer,
-            })
+            Json(vec![
+                HyperStimCommand::HsPatchHtml {
+                    html: files_component.render(),
+                    patch_target: files_component.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                },
+                HyperStimCommand::HsExecute {
+                    code: format!("document.getElementById('{dialog_id}').close()"),
+                },
+            ])
             .into_response()
         }
         Err(error) => Json(HyperStimCommand::HsPatchHtml {

@@ -15,6 +15,7 @@ use crate::{
 pub enum FilesHomePageElementId {
     FileUploadForm,
     DirectoryCreationDialog,
+    FileMoveDialog,
 }
 
 impl FilesHomePageElementId {
@@ -22,6 +23,7 @@ impl FilesHomePageElementId {
         match self {
             FilesHomePageElementId::FileUploadForm => "file-upload-form",
             FilesHomePageElementId::DirectoryCreationDialog => "directory-creation-dialog",
+            FilesHomePageElementId::FileMoveDialog => "file-move-dialog",
         }
     }
 }
@@ -31,7 +33,8 @@ pub struct FilesHomePage {
     parent_directory_url: Option<ParentDirectoryLink>,
     file_upload_url: String,
     directory_creation_url: String,
-    directory_creation_popover_id: String,
+    directory_creation_dialog_id: String,
+    file_move_dialog_id: String,
 }
 
 impl From<UserDirectoryContentsResult> for FilesHomePage {
@@ -61,9 +64,10 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
             parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
             file_upload_url,
             directory_creation_url,
-            directory_creation_popover_id: FilesHomePageElementId::DirectoryCreationDialog
+            directory_creation_dialog_id: FilesHomePageElementId::DirectoryCreationDialog
                 .to_str()
                 .to_owned(),
+            file_move_dialog_id: FilesHomePageElementId::FileMoveDialog.to_str().to_owned(),
         }
     }
 }
@@ -87,7 +91,7 @@ impl Renderable for FilesHomePage {
                     div class=(crate::styles::files_home_page::ClassName::ACTIONS) {
                         button
                             class=(crate::styles::files_home_page::ClassName::ACTION_BUTTON)
-                            onclick=(format_args!("openDialogModalById('{}')", &self.directory_creation_popover_id))
+                            onclick=(format_args!("openDialogModalById('{}')", &self.directory_creation_dialog_id))
                         {
                             (crate::icons::folder_plus::FolderPlus)
                             span { "New Folder" }
@@ -98,12 +102,12 @@ impl Renderable for FilesHomePage {
 
                     dialog
                         class=(crate::styles::modal::ClassName::MODAL)
-                        id=(self.directory_creation_popover_id)
+                        id=(self.directory_creation_dialog_id)
                         onclick="if (event.target === this) this.close()"
                     {
                         div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
                             h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Create New Folder" }
-                            button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "\u{00d7}" }
+                            button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "×" }
                         }
                         form
                             data-hijack
@@ -117,6 +121,30 @@ impl Renderable for FilesHomePage {
                             div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
                                 button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
                                 button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Create" }
+                            }
+                        }
+                    }
+
+                    dialog
+                        class=(crate::styles::modal::ClassName::MODAL)
+                        id=(self.file_move_dialog_id)
+                        onclick="if (event.target === this) this.close()"
+                    {
+                        div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
+                            h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Move Item" }
+                            button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "×" }
+                        }
+                        form
+                            data-hijack
+                            method="POST"
+                        {
+                            div class=(crate::styles::modal::ClassName::MODAL_BODY) {
+                                label class=(crate::styles::modal::ClassName::FORM_LABEL) { "Destination Path" }
+                                input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="destination_path" placeholder="Enter destination path";
+                            }
+                            div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
+                                button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
+                                button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Move" }
                             }
                         }
                     }
@@ -226,25 +254,16 @@ impl Renderable for FileStorageTable {
                                         (crate::icons::ellipsis_vertical::EllipsisVertical)
                                     }
                                     dialog class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::files_home_page::ClassName::FILE_CONTEXT_MENU)) popover id=(dir_item.actions_popover_id) {
-                                        button class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
-                                            span { "Move" }
-                                        }
-                                        dialog
-                                            class=(crate::styles::files_home_page::ClassName::MOVE_POPOVER)
-                                            popover
-                                            id=(dir_item.actions_move_popover_id)
+                                        button
+                                            class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                            onclick=(format_args!(
+                                                "closeClosestPopover(this); openMoveModal('{}', '{}', '{}')",
+                                                FilesHomePageElementId::FileMoveDialog.to_str(),
+                                                dir_item.move_url,
+                                                dir_item.path,
+                                            ))
                                         {
-                                            form
-                                                data-hijack
-                                                action=(dir_item.move_url)
-                                                method="POST"
-                                            {
-                                                input type="text" value=(dir_item.path) name="destination_path" placeholder="Destination path";
-                                                div class=(crate::styles::files_home_page::ClassName::POPOVER_ACTIONS) {
-                                                    button { "Move" }
-                                                    button type="button" onclick="closeClosestPopover(this)" { "Cancel" }
-                                                }
-                                            }
+                                            span { "Move" }
                                         }
                                         a class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
                                             span { "Download" }

@@ -29,6 +29,18 @@ function closeClosestDialogAndRemoveElement(element) {
     )
 }
 
+function openMoveModal(dialogId, action, path) {
+    const dialog = document.getElementById(dialogId)
+
+    if (dialog == null || dialog.nodeName != 'DIALOG') return
+
+    const form = dialog.querySelector('form')
+    form.hsFetch.resource(action)
+    form.querySelector('input[name="destination_path"]').value = path
+
+    dialog.showModal()
+}
+
 // popover
 
 function openPopoverById(id) {
