@@ -17,7 +17,6 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
 
                     link href="/static/external/css/reset.css" rel="stylesheet" type="text/css";
                     link href="/static/external/css/Noto Sans.css" rel="stylesheet" type="text/css";
-
                     script src="/static/js/dialog-helper.js" defer {}
 
                     style { (crate::styles::base::STYLE_SHEET) }
@@ -25,15 +24,29 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     style { (crate::styles::error_banner::STYLE_SHEET) }
                 }
                 body {
-                    nav {
-                        a class=(crate::styles::files_home_page::ClassName::LOGO) href=(bitsync_routes::GetFilesHomePage.to_string()) {
+                    header {
+                        a class=(crate::styles::base::ClassName::HEADER_LOGO) href=(bitsync_routes::GetFilesHomePage.to_string()) {
                             (crate::icons::logo::Logo::default())
                         }
-                        a href=(bitsync_routes::GetUserSettingsPage.to_string()) {
-                            "User Settings"
-                        }
-                        a href=(bitsync_routes::GetLogoutAction.to_string()) {
-                            "Log out"
+                        nav {
+                            div class=(crate::styles::base::ClassName::SEARCH_CONTAINER) {
+                                (crate::icons::search::Search)
+                                input type="text" placeholder="Search files and folders...";
+                            }
+                            button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="navMenu" title="Menu" {
+                                (crate::icons::menu::Menu)
+                            }
+                            div class=(crate::styles::base::ClassName::NAV_DROPDOWN_MENU) id="navMenu" popover {
+                                a class=(crate::styles::base::ClassName::NAV_DROPDOWN_ITEM) href=(bitsync_routes::GetUserSettingsPage.to_string()) {
+                                    (crate::icons::bolt::Bolt)
+                                    span { "Settings" }
+                                }
+                                div class=(crate::styles::base::ClassName::NAV_DROPDOWN_DIVIDER) {}
+                                a class=(format!("{} {}", crate::styles::base::ClassName::NAV_DROPDOWN_ITEM, crate::styles::base::ClassName::NAV_DROPDOWN_ITEM_DANGER)) href=(bitsync_routes::GetLogoutAction.to_string()) {
+                                    (crate::icons::log_out::LogOut)
+                                    span { "Sign Out" }
+                                }
+                            }
                         }
                     }
 

@@ -6,12 +6,159 @@
 
 body {
     font-family: Noto Sans;
+    background: linear-gradient(135deg, #111111 0%, #1c1c1c 100%);
+    color: $text-color;
+    min-height: 100vh;
 
-    .top-bar-logo {
-        width: 130px;
-        height: 40px;
-        margin-left: 4px;
-        fill: white;
+    header {
+        backdrop-filter: blur(12px);
+        background: rgba(20, 20, 20, 0.8);
+        border-bottom: 1px solid $border-color;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+    }
+
+    .HeaderLogo {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+
+        svg {
+            width: 120px;
+            fill: $primary-light;
+            margin-bottom: -10%;
+        }
+    }
+
+    .SearchContainer {
+        position: relative;
+        width: 300px;
+
+        svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: $text-secondary;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            color: $text-color;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+
+            &:focus {
+                outline: none;
+                border-color: $primary-light;
+                box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+            }
+        }
+    }
+
+    .NavMenuButton {
+        anchor-name: --nav-menu;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        color: $text-color;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 2.5rem;
+        height: 2.5rem;
+
+        svg {
+            width: 1.125rem;
+            height: 1.125rem;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+    }
+
+    .NavDropdownMenu {
+        position: fixed;
+        position-anchor: --nav-menu;
+        inset: unset;
+        top: anchor(bottom);
+        right: anchor(right);
+        margin-top: 0.5rem;
+        width: 200px;
+        background: rgba(20, 20, 20, 0.97);
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4);
+        padding: 0.5rem;
+
+        &:popover-open {
+            display: flex;
+            flex-direction: column;
+            animation: navFadeIn 0.15s ease;
+        }
+    }
+
+    .NavDropdownItem {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        color: $text-secondary;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-decoration: none;
+
+        svg {
+            width: 1.125rem;
+            height: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: $text-color;
+        }
+    }
+
+    .NavDropdownDivider {
+        height: 1px;
+        background: $border-color;
+        margin: 0.375rem 0;
+    }
+
+    .NavDropdownItemDanger {
+        color: $danger-color;
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: $danger-color;
+        }
     }
 
     .Button {
@@ -65,5 +212,16 @@ body {
         outline: none;
         border-color: $primary-light;
         box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+    }
+}
+
+@keyframes navFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
