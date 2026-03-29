@@ -5,7 +5,7 @@ body {
     display: flex;
     align-items: center;
     flex-direction: column;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #111111 0%, #1c1c1c 100%);
     color: $text-secondary;
 
     .Logo {
@@ -54,10 +54,10 @@ body {
                 pointer-events: none;
             }
 
-            &:hover:before {
-                left: 150%;
+            /*&:hover:before {
+                left: -70%;
                 transition: 0.7s ease-in-out;
-            }
+            }*/
 
             .InputWrapper {
                 display: flex;

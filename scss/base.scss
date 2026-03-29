@@ -53,7 +53,7 @@ body {
     .FormControl {
         width: 100%;
         padding: 0.875rem 1rem;
-        background: $item-background-color;
+        background: $input-background-color;
         border: 1px solid $border-color;
         border-radius: $border-radius;
         color: $text-color;
@@ -64,6 +64,6 @@ body {
     .FormControl:focus {
         outline: none;
         border-color: $primary-light;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
     }
 }
