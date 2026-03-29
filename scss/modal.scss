@@ -1,0 +1,99 @@
+@import "vars";
+
+body {
+    .Modal {
+        &::backdrop {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        background: rgba(30, 30, 30, 0.98);
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        width: 100%;
+        max-width: 540px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        padding: 0;
+        color: $text-color;
+    }
+
+    .ModalHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid $border-color;
+    }
+
+    .ModalTitle {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .ModalClose {
+        background: none;
+        border: none;
+        color: $text-secondary;
+        cursor: pointer;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        font-size: 1.25rem;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: $text-color;
+        }
+    }
+
+    .ModalBody {
+        padding: 2rem;
+    }
+
+    .ModalActions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid $border-color;
+    }
+
+    .ModalButton {
+        padding: 0.75rem 1.25rem;
+        border-radius: $border-radius;
+        font-size: 0.875rem;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid $border-color;
+        background: rgba(255, 255, 255, 0.05);
+        color: $text-color;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    .ModalButtonPrimary {
+        background: linear-gradient(135deg, $primary-color, $primary-dark);
+        border: 1px solid $primary-dark;
+
+        &:hover {
+            background: linear-gradient(135deg, $primary-light, $primary-color);
+            box-shadow: 0 4px 12px rgba(113, 113, 122, 0.3);
+        }
+    }
+
+    .FormLabel {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+}

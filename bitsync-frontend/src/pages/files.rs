@@ -20,8 +20,8 @@ pub enum FilesHomePageElementId {
 impl FilesHomePageElementId {
     pub fn to_str(&self) -> &'static str {
         match self {
-            FilesHomePageElementId::FileUploadForm => "file_upload_form",
-            FilesHomePageElementId::DirectoryCreationDialog => "directory_creation_dialog",
+            FilesHomePageElementId::FileUploadForm => "file-upload-form",
+            FilesHomePageElementId::DirectoryCreationDialog => "directory-creation-dialog",
         }
     }
 }
@@ -87,7 +87,7 @@ impl Renderable for FilesHomePage {
                     div class=(crate::styles::files_home_page::ClassName::ACTIONS) {
                         button
                             class=(crate::styles::files_home_page::ClassName::ACTION_BUTTON)
-                            onclick=(format_args!("openPopoverById('{}')", &self.directory_creation_popover_id))
+                            onclick=(format_args!("openDialogModalById('{}')", &self.directory_creation_popover_id))
                         {
                             (crate::icons::folder_plus::FolderPlus)
                             span { "New Folder" }
@@ -96,16 +96,27 @@ impl Renderable for FilesHomePage {
                         FileUploadForm file_upload_url=(self.file_upload_url.clone());
                     }
 
-                    dialog class=(crate::styles::files_home_page::ClassName::DIR_CREATE_POPOVER) popover id=(self.directory_creation_popover_id) {
+                    dialog
+                        class=(crate::styles::modal::ClassName::MODAL)
+                        id=(self.directory_creation_popover_id)
+                        onclick="if (event.target === this) this.close()"
+                    {
+                        div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
+                            h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Create New Folder" }
+                            button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "\u{00d7}" }
+                        }
                         form
                             data-hijack
                             action=(self.directory_creation_url)
                             method="POST"
                         {
-                            input type="text" name="directory_name" placeholder="Folder name";
-                            div class=(crate::styles::files_home_page::ClassName::POPOVER_ACTIONS) {
-                                button { "Create" }
-                                button type="button" onclick="closeClosestPopover(this)" { "Cancel" }
+                            div class=(crate::styles::modal::ClassName::MODAL_BODY) {
+                                label class=(crate::styles::modal::ClassName::FORM_LABEL) { "Folder Name" }
+                                input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="directory_name" placeholder="Enter folder name";
+                            }
+                            div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
+                                button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
+                                button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Create" }
                             }
                         }
                     }

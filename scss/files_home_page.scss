@@ -17,6 +17,7 @@ body {
             color: $text-secondary;
             font-size: 0.875rem;
             text-decoration: none;
+            width: max-content;
 
             svg {
                 width: 1rem;
@@ -218,7 +219,7 @@ body {
             }
         }
 
-        .MovePopover, .DirCreatePopover {
+        .MovePopover {
             background: rgba(30, 30, 30, 0.98);
             border: 1px solid $border-color;
             border-radius: $border-radius;

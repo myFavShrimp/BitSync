@@ -20,6 +20,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     script src="/static/js/dialog-helper.js" defer {}
 
                     style { (crate::styles::base::STYLE_SHEET) }
+                    style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
                 }

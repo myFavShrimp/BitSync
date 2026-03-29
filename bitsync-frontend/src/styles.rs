@@ -10,6 +10,10 @@ pub mod error_modal {
     turf::style_sheet!("../scss/error_modal.scss");
 }
 
+pub mod modal {
+    turf::style_sheet!("../scss/modal.scss");
+}
+
 pub mod login_page {
     turf::style_sheet!("../scss/login_page.scss");
 }
