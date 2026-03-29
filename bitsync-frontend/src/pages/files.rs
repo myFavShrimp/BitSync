@@ -138,22 +138,20 @@ impl Renderable for FileUploadForm {
                 enctype="multipart/form-data"
             {
                 input type="file" name="upload" hidden onchange="this.form.requestSubmit()";
-                button type="button" class=(format!("{} {}", crate::styles::files_home_page::ClassName::ACTION_BUTTON, crate::styles::files_home_page::ClassName::ACTION_BUTTON_PRIMARY)) onclick="this.previousElementSibling.click()" {
+                button
+                    type="button"
+                    class=(format!(
+                        "{} {}",
+                        crate::styles::files_home_page::ClassName::ACTION_BUTTON,
+                        crate::styles::files_home_page::ClassName::ACTION_BUTTON_PRIMARY,
+                    ))
+                    onclick="this.previousElementSibling.click()"
+                    data-effect=("this.disabled = this.form.hsFetch.state() === 'pending'")
+                {
+                    div class=(crate::styles::files_home_page::ClassName::SPINNER) {}
                     (crate::icons::upload::Upload)
                     span { "Upload Files" }
                 }
-                span class=(crate::styles::files_home_page::ClassName::UPLOAD_STATUS)
-                    data-effect=(format!(
-                        "this.textContent = document.querySelector('{}').hsFetch.state()",
-                        self.id_target(),
-                    ))
-                {}
-                span class=(crate::styles::files_home_page::ClassName::UPLOAD_STATUS)
-                    data-effect=(format!(
-                        "this.textContent = document.querySelector('{}').hsFetch.error()",
-                        self.id_target(),
-                    ))
-                {}
             }
         }
         .render_to(buffer);
