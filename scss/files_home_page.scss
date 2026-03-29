@@ -162,6 +162,13 @@ body {
             display: flex;
             gap: 0.5rem;
             justify-content: flex-end;
+
+            .FileContextMenu {
+                inset: unset;
+                margin-right: 0.25rem;
+                right: anchor(left);
+                align-self: anchor-center;
+            }
         }
 
         .FileActionButton {
@@ -185,67 +192,6 @@ body {
             &:hover {
                 background: rgba(255, 255, 255, 0.08);
                 color: $text-color;
-            }
-        }
-
-        .ActionsPopover {
-            background: rgba(30, 30, 30, 0.98);
-            border: 1px solid $border-color;
-            border-radius: $border-radius;
-            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4);
-            padding: 0.5rem;
-            min-width: 180px;
-
-            &:popover-open {
-                display: flex;
-                flex-direction: column;
-            }
-
-            h1 {
-                font-size: 0.875rem;
-                font-weight: 600;
-                padding: 0.75rem 1rem 0.5rem;
-                color: $text-color;
-            }
-
-            hr {
-                border: none;
-                height: 1px;
-                background: $border-color;
-                margin: 0.25rem 0;
-            }
-
-            a, button {
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                padding: 0.75rem 1rem;
-                border-radius: 0.5rem;
-                color: $text-secondary;
-                font-size: 0.875rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.15s ease;
-                text-decoration: none;
-                background: none;
-                border: none;
-                font-family: inherit;
-                width: 100%;
-                text-align: left;
-
-                &:hover {
-                    background: rgba(255, 255, 255, 0.05);
-                    color: $text-color;
-                }
-            }
-
-            .DangerAction {
-                color: $danger-color;
-
-                &:hover {
-                    background: rgba(239, 68, 68, 0.08);
-                    color: $danger-color;
-                }
             }
         }
 

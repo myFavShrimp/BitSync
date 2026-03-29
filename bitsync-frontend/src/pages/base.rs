@@ -32,19 +32,19 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             @if cfg!(debug_assertions) {
                                 div class=(crate::styles::base::ClassName::SEARCH_CONTAINER) {
                                     (crate::icons::search::Search)
-                                    input type="text" placeholder="Search files and folders...";
+                                    input type="text" placeholder=("Search files and folders...");
                                 }
                             }
-                            button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="navMenu" title="Menu" {
+                            button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="nav-menu" title="Menu" {
                                 (crate::icons::menu::Menu)
                             }
-                            div class=(crate::styles::base::ClassName::NAV_DROPDOWN_MENU) id="navMenu" popover {
-                                a class=(crate::styles::base::ClassName::NAV_DROPDOWN_ITEM) href=(bitsync_routes::GetUserSettingsPage.to_string()) {
+                            div class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::base::ClassName::NAV_CONTEXT_MENU)) id="nav-menu" popover {
+                                a class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) href=(bitsync_routes::GetUserSettingsPage.to_string()) {
                                     (crate::icons::bolt::Bolt)
                                     span { "Settings" }
                                 }
-                                div class=(crate::styles::base::ClassName::NAV_DROPDOWN_DIVIDER) {}
-                                a class=(format!("{} {}", crate::styles::base::ClassName::NAV_DROPDOWN_ITEM, crate::styles::base::ClassName::NAV_DROPDOWN_ITEM_DANGER)) href=(bitsync_routes::GetLogoutAction.to_string()) {
+                                div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                                a class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU_ITEM, crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER)) href=(bitsync_routes::GetLogoutAction.to_string()) {
                                     (crate::icons::log_out::LogOut)
                                     span { "Sign Out" }
                                 }

@@ -26,6 +26,15 @@ body {
             display: flex;
             gap: 1rem;
             align-items: center;
+
+            .NavContextMenu {
+                position: fixed;
+                position-anchor: --nav-menu-button;
+                inset: unset;
+                top: anchor(bottom);
+                right: anchor(right);
+                margin-top: 0.5rem;
+            }
         }
     }
 
@@ -75,7 +84,7 @@ body {
     }
 
     .NavMenuButton {
-        anchor-name: --nav-menu;
+        anchor-name: --nav-menu-button;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -100,13 +109,7 @@ body {
         }
     }
 
-    .NavDropdownMenu {
-        position: fixed;
-        position-anchor: --nav-menu;
-        inset: unset;
-        top: anchor(bottom);
-        right: anchor(right);
-        margin-top: 0.5rem;
+    .ContextMenu {
         width: 200px;
         background: rgba(20, 20, 20, 0.97);
         border: 1px solid $border-color;
@@ -117,11 +120,10 @@ body {
         &:popover-open {
             display: flex;
             flex-direction: column;
-            animation: navFadeIn 0.15s ease;
         }
     }
 
-    .NavDropdownItem {
+    .ContextMenuItem {
         display: flex;
         align-items: center;
         gap: 0.75rem;
@@ -133,6 +135,11 @@ body {
         cursor: pointer;
         transition: all 0.15s ease;
         text-decoration: none;
+        background: none;
+        border: none;
+        font-family: inherit;
+        width: 100%;
+        text-align: left;
 
         svg {
             width: 1.125rem;
@@ -146,13 +153,13 @@ body {
         }
     }
 
-    .NavDropdownDivider {
+    .ContextMenuDivider {
         height: 1px;
         background: $border-color;
         margin: 0.375rem 0;
     }
 
-    .NavDropdownItemDanger {
+    .ContextMenuItemDanger {
         color: $danger-color;
 
         &:hover {

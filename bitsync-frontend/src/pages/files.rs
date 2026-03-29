@@ -212,15 +212,13 @@ impl Renderable for FileStorageTable {
                                 div class=(crate::styles::files_home_page::ClassName::FILE_ACTIONS) {
                                     button
                                         class=(crate::styles::files_home_page::ClassName::FILE_ACTION_BUTTON)
-                                        onclick=(format_args!("openPopoverById('{}')", dir_item.actions_popover_id))
+                                        popovertarget=(dir_item.actions_popover_id)
                                     {
                                         (crate::icons::ellipsis_vertical::EllipsisVertical)
                                     }
-                                    dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_popover_id) {
-                                        h1 { (dir_item.name) }
-                                        hr;
-                                        button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
-                                            "Move"
+                                    dialog class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::files_home_page::ClassName::FILE_CONTEXT_MENU)) popover id=(dir_item.actions_popover_id) {
+                                        button class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
+                                            span { "Move" }
                                         }
                                         dialog
                                             class=(crate::styles::files_home_page::ClassName::MOVE_POPOVER)
@@ -239,18 +237,16 @@ impl Renderable for FileStorageTable {
                                                 }
                                             }
                                         }
-                                        a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
-                                            "Download"
+                                        a class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
+                                            span { "Download" }
                                         }
+                                        div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
                                         button
-                                            class=(crate::styles::files_home_page::ClassName::DANGER_ACTION)
+                                            class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU_ITEM, crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER))
                                             data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
                                             data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
                                         {
-                                            "Delete"
-                                        }
-                                        button onclick="closeClosestPopover(this)" {
-                                            "Close"
+                                            span { "Delete" }
                                         }
                                     }
                                 }
