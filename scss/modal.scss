@@ -7,6 +7,10 @@ body {
             backdrop-filter: blur(5px);
         }
 
+        &[open] {
+            animation: navFadeIn 0.25s ease;
+        }
+
         background: rgba(30, 30, 30, 0.98);
         border: 1px solid $border-color;
         border-radius: $border-radius;

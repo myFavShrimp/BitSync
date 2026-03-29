@@ -120,6 +120,7 @@ body {
         &:popover-open {
             display: flex;
             flex-direction: column;
+            animation: navFadeIn 0.15s ease;
         }
     }
 
