@@ -1,15 +1,328 @@
-.FileSizeColumn {
-    white-space: nowrap;
-}
+@import "vars";
 
-.ForceMenuIconDefaultColor {
-    color: var(--on-surface) !important;
-}
+body {
+    main {
+        flex: 1;
+        min-width: 0;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        width: 100%;
 
-.actions-popover {
-    flex-direction: column;
+        .Breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: $text-secondary;
+            font-size: 0.875rem;
+            text-decoration: none;
 
-    &:popover-open {
-        display: flex
+            svg {
+                width: 1rem;
+                height: 1rem;
+            }
+
+            &:hover {
+                color: $text-color;
+            }
+        }
+
+        .Actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .ActionButton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            color: $text-color;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+
+            svg {
+                width: 1rem;
+                height: 1rem;
+            }
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .ActionButtonPrimary {
+            background: linear-gradient(135deg, $primary-color, $primary-dark);
+            border: 1px solid $primary-dark;
+
+            &:hover {
+                background: linear-gradient(135deg, $primary-light, $primary-color);
+                box-shadow: 0 4px 12px rgba(113, 113, 122, 0.3);
+            }
+        }
+
+        .FileBrowser {
+            background: rgba(20, 20, 20, 0.5);
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            overflow: hidden;
+        }
+
+        .FileHeader {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 80px);
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid $border-color;
+
+            span {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: $text-secondary;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+        }
+
+        .FileItem {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 80px);
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid $border-color;
+            transition: all 0.2s ease;
+            align-items: center;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        .FileName {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            overflow: hidden;
+
+            svg {
+                width: 1.25rem;
+                height: 1.25rem;
+                flex-shrink: 0;
+                color: $primary-light;
+            }
+
+            span {
+                font-size: 0.875rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            a {
+                color: $text-color;
+                text-decoration: none;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+                &:hover {
+                    color: $primary-light;
+                }
+            }
+        }
+
+        .FileNameIcon {
+            color: $text-secondary;
+        }
+
+        .FileSize {
+            font-size: 0.875rem;
+            color: $text-secondary;
+            white-space: nowrap;
+        }
+
+        .FileActions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .FileActionButton {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: $text-secondary;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            svg {
+                width: 1rem;
+                height: 1rem;
+            }
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.08);
+                color: $text-color;
+            }
+        }
+
+        .ActionsPopover {
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4);
+            padding: 0.5rem;
+            min-width: 180px;
+
+            &:popover-open {
+                display: flex;
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 0.875rem;
+                font-weight: 600;
+                padding: 0.75rem 1rem 0.5rem;
+                color: $text-color;
+            }
+
+            hr {
+                border: none;
+                height: 1px;
+                background: $border-color;
+                margin: 0.25rem 0;
+            }
+
+            a, button {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                color: $text-secondary;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                text-decoration: none;
+                background: none;
+                border: none;
+                font-family: inherit;
+                width: 100%;
+                text-align: left;
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.05);
+                    color: $text-color;
+                }
+            }
+
+            .DangerAction {
+                color: $danger-color;
+
+                &:hover {
+                    background: rgba(239, 68, 68, 0.08);
+                    color: $danger-color;
+                }
+            }
+        }
+
+        .MovePopover, .DirCreatePopover {
+            background: rgba(30, 30, 30, 0.98);
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 1.5rem;
+            min-width: 320px;
+
+            &:popover-open {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            input {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                background: $input-background-color;
+                border: 1px solid $border-color;
+                border-radius: $border-radius;
+                color: $text-color;
+                font-size: 0.875rem;
+                font-family: inherit;
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-light;
+                    box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+                }
+            }
+
+            .PopoverActions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.75rem;
+
+                button {
+                    padding: 0.625rem 1.25rem;
+                    border-radius: $border-radius;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    font-family: inherit;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    border: 1px solid $border-color;
+                    background: rgba(255, 255, 255, 0.05);
+                    color: $text-color;
+
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.1);
+                    }
+
+                    &:first-child {
+                        background: linear-gradient(135deg, $primary-color, $primary-dark);
+                        border: none;
+
+                        &:hover {
+                            background: linear-gradient(135deg, $primary-light, $primary-color);
+                        }
+                    }
+                }
+            }
+        }
+
+        .UploadStatus {
+            font-size: 0.75rem;
+            color: $text-secondary;
+        }
+
+        .EmptyState {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: $text-secondary;
+            font-size: 0.875rem;
+        }
     }
 }

@@ -24,15 +24,6 @@ pub enum StorageItemPresentationKind {
     Directory { url: String },
 }
 
-impl StorageItemPresentationKind {
-    pub fn icon(&self) -> &'static str {
-        match self {
-            StorageItemPresentationKind::Directory { .. } => "folder",
-            StorageItemPresentationKind::File { .. } => "description",
-        }
-    }
-}
-
 impl From<StorageItem> for StorageItemPresentationKind {
     fn from(value: StorageItem) -> Self {
         match value.kind {

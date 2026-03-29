@@ -76,33 +76,36 @@ impl Renderable for FilesHomePage {
                 main {
                     @match &self.parent_directory_url {
                         Some(link_data) => {
-                            a href=(link_data.parent_directory_url) {
-                                i."small" {
-                                    "chevron_left"
-                                }
+                            a class=(crate::styles::files_home_page::ClassName::BREADCRUMB) href=(link_data.parent_directory_url) {
+                                (crate::icons::chevron_left::ChevronLeft)
                                 (link_data.current_directory_name)
                             }
                         }
                         None => {}
                     }
 
-                    FileUploadForm file_upload_url=(self.file_upload_url.clone());
+                    div class=(crate::styles::files_home_page::ClassName::ACTIONS) {
+                        button
+                            class=(crate::styles::files_home_page::ClassName::ACTION_BUTTON)
+                            onclick=(format_args!("openPopoverById('{}')", &self.directory_creation_popover_id))
+                        {
+                            (crate::icons::folder_plus::FolderPlus)
+                            span { "New Folder" }
+                        }
 
-                    button onclick=(format_args!("openPopoverById('{}')", &self.directory_creation_popover_id)) {
-                        "add directory"
+                        FileUploadForm file_upload_url=(self.file_upload_url.clone());
                     }
-                    dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(self.directory_creation_popover_id) {
+
+                    dialog class=(crate::styles::files_home_page::ClassName::DIR_CREATE_POPOVER) popover id=(self.directory_creation_popover_id) {
                         form
                             data-hijack
                             action=(self.directory_creation_url)
                             method="POST"
                         {
-                            input type="text" name="directory_name";
-                            button {
-                                "Create"
-                            }
-                            button type="button" onclick="closeClosestPopover(this)" {
-                                "Cancel"
+                            input type="text" name="directory_name" placeholder="Folder name";
+                            div class=(crate::styles::files_home_page::ClassName::POPOVER_ACTIONS) {
+                                button { "Create" }
+                                button type="button" onclick="closeClosestPopover(this)" { "Cancel" }
                             }
                         }
                     }
@@ -134,16 +137,23 @@ impl Renderable for FileUploadForm {
                 method="POST"
                 enctype="multipart/form-data"
             {
-                input type="file" name="upload";
-                input type="submit" value="Upload";
-                div data-effect=(format!(
-                    "this.textContent = document.querySelector('{}').hsFetch.state()",
-                    self.id_target(),
-                )) {}
-                div data-effect=(format!(
-                    "this.textContent = document.querySelector('{}').hsFetch.error()",
-                    self.id_target(),
-                )) {}
+                input type="file" name="upload" hidden onchange="this.form.requestSubmit()";
+                button type="button" class=(format!("{} {}", crate::styles::files_home_page::ClassName::ACTION_BUTTON, crate::styles::files_home_page::ClassName::ACTION_BUTTON_PRIMARY)) onclick="this.previousElementSibling.click()" {
+                    (crate::icons::upload::Upload)
+                    span { "Upload Files" }
+                }
+                span class=(crate::styles::files_home_page::ClassName::UPLOAD_STATUS)
+                    data-effect=(format!(
+                        "this.textContent = document.querySelector('{}').hsFetch.state()",
+                        self.id_target(),
+                    ))
+                {}
+                span class=(crate::styles::files_home_page::ClassName::UPLOAD_STATUS)
+                    data-effect=(format!(
+                        "this.textContent = document.querySelector('{}').hsFetch.error()",
+                        self.id_target(),
+                    ))
+                {}
             }
         }
         .render_to(buffer);
@@ -165,89 +175,82 @@ impl Component for FileStorageTable {
 impl Renderable for FileStorageTable {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            div id=(self.id()) {
-                @if self.dir_content.is_empty() { } @else {
-                    table {
-                        thead {
-                            tr {
-                                th."" {}
-                                th {
-                                    "Name"
-                                }
-                                th."" {
-                                    "Size"
-                                }
-                                th."" {}
-                            }
-                        }
-                        tbody {
-                            @for dir_item in &self.dir_content {
-                                tr {
-                                    td {
-                                        i."" {
-                                            (dir_item.kind.icon())
+            div id=(self.id()) class=(crate::styles::files_home_page::ClassName::FILE_BROWSER) {
+                @if self.dir_content.is_empty() {
+                    div class=(crate::styles::files_home_page::ClassName::EMPTY_STATE) {
+                        "This folder is empty"
+                    }
+                } @else {
+                    div class=(crate::styles::files_home_page::ClassName::FILE_HEADER) {
+                        span { "Name" }
+                        span { "Size" }
+                        span { "Actions" }
+                    }
+                    div {
+                        @for dir_item in &self.dir_content {
+                            div class=(crate::styles::files_home_page::ClassName::FILE_ITEM) {
+                                div class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
+                                    @match &dir_item.kind {
+                                        StorageItemPresentationKind::Directory { url } => {
+                                            (crate::icons::folder::Folder)
+                                            a href=(url) { (dir_item.name) }
+                                        }
+                                        StorageItemPresentationKind::File => {
+                                            span class=(crate::styles::files_home_page::ClassName::FILE_NAME_ICON) {
+                                                (crate::icons::file_text::FileText)
+                                            }
+                                            span { (dir_item.name) }
                                         }
                                     }
-                                    td {
-                                        @match &dir_item.kind {
-                                            StorageItemPresentationKind::Directory { url } => {
-                                                a href=(url) {
-                                                    (dir_item.name)
+                                }
+                                div class=(crate::styles::files_home_page::ClassName::FILE_SIZE) {
+                                    @match &dir_item.kind {
+                                        StorageItemPresentationKind::Directory { .. } => { "\u{2014}" }
+                                        StorageItemPresentationKind::File => { (dir_item.size) }
+                                    }
+                                }
+                                div class=(crate::styles::files_home_page::ClassName::FILE_ACTIONS) {
+                                    button
+                                        class=(crate::styles::files_home_page::ClassName::FILE_ACTION_BUTTON)
+                                        onclick=(format_args!("openPopoverById('{}')", dir_item.actions_popover_id))
+                                    {
+                                        (crate::icons::ellipsis_vertical::EllipsisVertical)
+                                    }
+                                    dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_popover_id) {
+                                        h1 { (dir_item.name) }
+                                        hr;
+                                        button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
+                                            "Move"
+                                        }
+                                        dialog
+                                            class=(crate::styles::files_home_page::ClassName::MOVE_POPOVER)
+                                            popover
+                                            id=(dir_item.actions_move_popover_id)
+                                        {
+                                            form
+                                                data-hijack
+                                                action=(dir_item.move_url)
+                                                method="POST"
+                                            {
+                                                input type="text" value=(dir_item.path) name="destination_path" placeholder="Destination path";
+                                                div class=(crate::styles::files_home_page::ClassName::POPOVER_ACTIONS) {
+                                                    button { "Move" }
+                                                    button type="button" onclick="closeClosestPopover(this)" { "Cancel" }
                                                 }
                                             }
-                                            StorageItemPresentationKind::File => {
-                                                (dir_item.name)
-                                            }
                                         }
-                                    }
-                                    td class=(crate::styles::files_home_page::ClassName::FILE_SIZE_COLUMN) {
-                                        (dir_item.size)
-                                    }
-                                    td {
-                                        button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_popover_id)) {
-                                            "..."
+                                        a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
+                                            "Download"
                                         }
-                                        dialog class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER) popover id=(dir_item.actions_popover_id) {
-                                            h1 {
-                                                (dir_item.name)
-                                            }
-                                            hr;
-                                            button onclick=(format_args!("openPopoverById('{}')", dir_item.actions_move_popover_id)) {
-                                                "Move"
-                                            }
-
-                                            dialog
-                                                class=(crate::styles::files_home_page::ClassName::ACTIONS_POPOVER)
-                                                popover
-                                                id=(dir_item.actions_move_popover_id)
-                                            {
-                                                form
-                                                    data-hijack
-                                                    action=(dir_item.move_url)
-                                                    method="POST"
-                                                {
-                                                    (dir_item.path)
-                                                    input type="text" value=(dir_item.path) name="destination_path";
-                                                    button {
-                                                        "Move"
-                                                    }
-                                                    button type="button" onclick="closeClosestPopover(this)" {
-                                                        "Cancel"
-                                                    }
-                                                }
-                                            }
-                                            a href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
-                                                "Download"
-                                            }
-                                            button
-                                                data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
-                                                data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
-                                            {
-                                                "Delete"
-                                            }
-                                            button onclick="closeClosestPopover(this)" {
-                                                "close"
-                                            }
+                                        button
+                                            class=(crate::styles::files_home_page::ClassName::DANGER_ACTION)
+                                            data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
+                                            data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
+                                        {
+                                            "Delete"
+                                        }
+                                        button onclick="closeClosestPopover(this)" {
+                                            "Close"
                                         }
                                     }
                                 }
