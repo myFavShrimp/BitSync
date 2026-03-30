@@ -16,3 +16,4 @@ turf = "0.10.0"
 [package.metadata.turf]
 load_paths = ["scss-vars"]
 browser_targets = ["defaults"]
+class_names.template = "<original_name>-<id>"
