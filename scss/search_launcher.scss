@@ -1,0 +1,60 @@
+@import "vars";
+@import "dialog";
+
+body {
+    .SearchLauncher {
+        @include dialog-backdrop($bg: rgba(0, 0, 0, 0.5), $blur: 8px);
+        @include dialog-open-close($translate-from: translateY(-10px) scale(0.98), $extra-transform: scale(1));
+
+        background: transparent;
+        border: none;
+        padding: 0;
+        width: calc(100% - 2rem);
+        max-width: 480px;
+        margin-top: 20vh;
+        color: $text-color;
+    }
+
+    .SearchLauncherInput {
+        width: 100%;
+        padding: 1rem 1.25rem 1rem 3rem;
+        background: rgba(25, 25, 25, 0.95);
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        color: $text-color;
+        font-size: 1rem;
+        font-family: inherit;
+        box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+
+        &:focus {
+            outline: none;
+            border-color: $primary-light;
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(113, 113, 122, 0.2);
+        }
+    }
+
+    .SearchLauncherInputWrapper {
+        position: relative;
+
+        svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: $text-secondary;
+        }
+    }
+
+    .SearchLauncherResults {
+        margin-top: 0.5rem;
+        background: rgba(25, 25, 25, 0.95);
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+        max-height: 400px;
+        overflow-y: auto;
+        display: none;
+    }
+}

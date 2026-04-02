@@ -1,44 +1,20 @@
 @import "vars";
+@import "dialog";
 
 body {
     .Modal {
-        &::backdrop {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            opacity: 0;
-            transition: opacity 0.25s ease, display 0.25s allow-discrete, overlay 0.25s allow-discrete;
-        }
-
-        &[open]::backdrop {
-            opacity: 1;
-
-            @starting-style {
-                opacity: 0;
-            }
-        }
+        @include dialog-backdrop;
+        @include dialog-open-close;
 
         background: rgba(30, 30, 30, 0.98);
         border: 1px solid $border-color;
         border-radius: $border-radius;
-        width: 100%;
+        width: calc(100% - 2rem);
         max-width: 540px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         overflow: hidden;
         padding: 0;
         color: $text-color;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.25s ease, transform 0.25s ease, display 0.25s allow-discrete, overlay 0.25s allow-discrete;
-
-        &[open] {
-            opacity: 1;
-            transform: translateY(0);
-
-            @starting-style {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-        }
     }
 
     .ModalHeader {

@@ -1,0 +1,32 @@
+@mixin dialog-backdrop($bg: rgba(0, 0, 0, 0.6), $blur: 5px) {
+    &::backdrop {
+        background: $bg;
+        backdrop-filter: blur($blur);
+        opacity: 0;
+        transition: opacity 0.25s ease, display 0.25s allow-discrete, overlay 0.25s allow-discrete;
+    }
+
+    &[open]::backdrop {
+        opacity: 1;
+
+        @starting-style {
+            opacity: 0;
+        }
+    }
+}
+
+@mixin dialog-open-close($translate-from: translateY(10px), $extra-transform: none) {
+    opacity: 0;
+    transform: $translate-from;
+    transition: opacity 0.25s ease, transform 0.25s ease, display 0.25s allow-discrete, overlay 0.25s allow-discrete;
+
+    &[open] {
+        opacity: 1;
+        transform: if($extra-transform == none, translateY(0), translateY(0) $extra-transform);
+
+        @starting-style {
+            opacity: 0;
+            transform: $translate-from;
+        }
+    }
+}

@@ -26,6 +26,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
+                    style { (crate::styles::search_launcher::STYLE_SHEET) }
                     style { (crate::styles::toast::STYLE_SHEET) }
                 }
                 body {
@@ -35,7 +36,11 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                         }
                         nav {
                             @if cfg!(debug_assertions) {
-                                button class=(crate::styles::base::ClassName::SEARCH_BUTTON) title="Search" {
+                                button
+                                    class=(crate::styles::base::ClassName::SEARCH_BUTTON)
+                                    title="Search"
+                                    onclick="document.getElementById('search-launcher').showModal()"
+                                {
                                     (crate::icons::search::Search)
                                     span { "Search files and folders..." }
                                 }
@@ -62,6 +67,24 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     }
 
                     (self.children)
+
+                    @if cfg!(debug_assertions) {
+                        dialog
+                            class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER)
+                            id="search-launcher"
+                            onclick="if (event.target === this) this.close()"
+                        {
+                            div class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER_INPUT_WRAPPER) {
+                                (crate::icons::search::Search)
+                                input
+                                    class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER_INPUT)
+                                    type="text"
+                                    placeholder="Search files and folders..."
+                                    autofocus;
+                            }
+                            div class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER_RESULTS) {}
+                        }
+                    }
 
                     div id=(DIALOG_WRAPPER_ID) {}
 
