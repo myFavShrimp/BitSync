@@ -75,6 +75,9 @@ body {
     }
 
     .ModalBody {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
         padding: 2rem;
     }
 
@@ -113,10 +116,18 @@ body {
         }
     }
 
+    .ModalSectionTitle {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-color;
+        margin-bottom: 0.25rem;
+    }
+
     .FormLabel {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
         font-size: 0.875rem;
         font-weight: 500;
-        margin-bottom: 0.5rem;
     }
 }

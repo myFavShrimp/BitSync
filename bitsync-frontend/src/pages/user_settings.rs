@@ -1,60 +1,46 @@
 use hypertext::prelude::*;
 
-use crate::{Component, pages::base::LoggedInDocument};
+pub static SETTINGS_DIALOG_ID: &str = "settings-dialog";
 
-pub struct UserSettingsPage;
+pub struct SettingsDialog;
 
-impl Renderable for UserSettingsPage {
+impl Renderable for SettingsDialog {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            LoggedInDocument {
-                style { (crate::styles::user_settings_page::STYLE_SHEET) }
-                main {
-                    h1 {
-                        "Account Settings"
-                    }
-                    ChangePasswordForm;
-                }
-            }
-        }
-        .render_to(buffer);
-    }
-}
-
-struct ChangePasswordForm;
-
-impl Component for ChangePasswordForm {
-    fn id(&self) -> String {
-        "change-password-form".to_owned()
-    }
-}
-
-impl Renderable for ChangePasswordForm {
-    fn render_to(&self, buffer: &mut hypertext::Buffer) {
-        maud! {
-            form
-                id=(self.id())
-                data-hijack
-                action=(bitsync_routes::PostUserSettingsChangePassword.to_string())
-                method="POST"
+            dialog
+                class=(crate::styles::modal::ClassName::MODAL)
+                id=(SETTINGS_DIALOG_ID)
+                data-init="this.showModal()"
+                onclick="if (event.target === this) closeClosestDialogAndRemoveElement(this)"
             {
-                label {
-                    "Current Password"
-                    input type="password" name="current_password";
+                div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
+                    h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Settings" }
+                    button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialogAndRemoveElement(this)" { "×" }
                 }
-                label {
-                    "New Password"
-                    input type="password" name="new_password";
-                }
-                label {
-                    "Repeat New Password"
-                    input type="password" name="new_password_repeated";
-                }
-                button type="submit" {
-                    "Save"
-                }
-                button type="reset" {
-                    "Cancel"
+                form
+                    data-hijack
+                    action=(bitsync_routes::PostUserSettingsChangePassword.to_string())
+                    method="POST"
+                {
+                    div class=(crate::styles::modal::ClassName::MODAL_BODY) {
+                        h3 class=(crate::styles::modal::ClassName::MODAL_SECTION_TITLE) { "Change Password" }
+                        label class=(crate::styles::modal::ClassName::FORM_LABEL) {
+                            "Current Password"
+                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="current_password";
+                        }
+                        label class=(crate::styles::modal::ClassName::FORM_LABEL) {
+                            "New Password"
+                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password";
+                        }
+                        label class=(crate::styles::modal::ClassName::FORM_LABEL) {
+                            "Repeat New Password"
+                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password_repeated";
+                        }
+                    }
+                    div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
+                        button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialogAndRemoveElement(this)" { "Cancel" }
+                        button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Save" }
+                    }
                 }
             }
         }

@@ -1,4 +1,4 @@
-mod base;
+pub(crate) mod base;
 pub mod error;
 pub mod files;
 pub mod login;

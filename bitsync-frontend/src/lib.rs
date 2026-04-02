@@ -9,6 +9,8 @@ mod totp;
 
 use hypertext::Renderable;
 
+pub use pages::base::DIALOG_WRAPPER_SELECTOR;
+
 pub static BODY_SELECTOR_TARGET: &str = "body";
 
 pub trait Render: hypertext::Renderable {

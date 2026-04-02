@@ -1,5 +1,8 @@
 use hypertext::prelude::*;
 
+pub static DIALOG_WRAPPER_ID: &str = "dialog-wrapper";
+pub static DIALOG_WRAPPER_SELECTOR: &str = "#dialog-wrapper";
+
 pub struct LoggedInDocument<R: Renderable> {
     pub children: R,
 }
@@ -41,7 +44,11 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                 (crate::icons::menu::Menu)
                             }
                             div class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::base::ClassName::NAV_CONTEXT_MENU)) id="nav-menu" popover {
-                                a class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) href=(bitsync_routes::GetUserSettingsPage.to_string()) {
+                                button
+                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPage.to_string()))
+                                    data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                {
                                     (crate::icons::bolt::Bolt)
                                     span { "Settings" }
                                 }
@@ -55,6 +62,8 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     }
 
                     (self.children)
+
+                    div id=(DIALOG_WRAPPER_ID) {}
 
                     div
                         id=(crate::toast::TOAST_CONTAINER_ID)

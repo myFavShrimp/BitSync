@@ -1,24 +1,22 @@
 use std::sync::Arc;
 
 use axum::{
-    Extension, Router,
-    extract::State,
-    http::StatusCode,
-    middleware::from_fn_with_state,
-    response::{Html, IntoResponse},
+    Extension, Json, Router, extract::State, http::StatusCode, middleware::from_fn_with_state,
+    response::IntoResponse,
 };
 use axum_extra::{extract::Form, routing::RouterExt};
 use bitsync_core::use_case::user_settings::update_user_password::{
     UpdateUserPasswordError, update_user_password,
 };
-use bitsync_frontend::{Render, pages::user_settings::UserSettingsPage};
+use bitsync_frontend::{DIALOG_WRAPPER_SELECTOR, Render, pages::user_settings::SettingsDialog};
+use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
 
 use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
     error_report::emit_error,
-    handler::{RedirectHttp, RedirectHyperStim},
+    handler::RedirectHyperStim,
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -28,7 +26,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .typed_get(user_settings_page_handler)
                 .route_layer(from_fn_with_state(
                     state.clone(),
-                    require_login_and_totp_setup_middleware::<RedirectHttp>,
+                    require_login_and_totp_setup_middleware::<RedirectHyperStim>,
                 )),
         )
         .merge(
@@ -46,7 +44,11 @@ async fn user_settings_page_handler(
     _: bitsync_routes::GetUserSettingsPage,
     Extension(_auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    Html(UserSettingsPage.render())
+    Json(HyperStimCommand::HsPatchHtml {
+        html: SettingsDialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
 }
 
 #[derive(Deserialize)]

@@ -115,8 +115,10 @@ impl Renderable for FilesHomePage {
                             method="POST"
                         {
                             div class=(crate::styles::modal::ClassName::MODAL_BODY) {
-                                label class=(crate::styles::modal::ClassName::FORM_LABEL) { "Folder Name" }
-                                input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="directory_name" placeholder="Enter folder name";
+                                label class=(crate::styles::modal::ClassName::FORM_LABEL) {
+                                    "Folder Name"
+                                    input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="directory_name" placeholder="Enter folder name";
+                                }
                             }
                             div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
                                 button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
@@ -139,8 +141,10 @@ impl Renderable for FilesHomePage {
                             method="POST"
                         {
                             div class=(crate::styles::modal::ClassName::MODAL_BODY) {
-                                label class=(crate::styles::modal::ClassName::FORM_LABEL) { "Destination Path" }
-                                input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="destination_path" placeholder="Enter destination path";
+                                label class=(crate::styles::modal::ClassName::FORM_LABEL) {
+                                    "Destination Path"
+                                    input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="destination_path" placeholder="Enter destination path";
+                                }
                             }
                             div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
                                 button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
