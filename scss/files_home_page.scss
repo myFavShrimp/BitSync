@@ -9,6 +9,10 @@ body {
         padding: 2rem;
         width: 100%;
 
+        @media (max-width: 600px) {
+            padding: 1rem;
+        }
+
         .Breadcrumb {
             display: flex;
             align-items: center;
@@ -99,65 +103,77 @@ body {
         }
 
         .FileBrowser {
+            width: 100%;
             background: rgba(20, 20, 20, 0.5);
             border: 1px solid $border-color;
             border-radius: $border-radius;
             overflow: hidden;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .FileHeader {
-            display: grid;
-            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 80px);
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid $border-color;
-
-            span {
+            th {
+                padding: 1rem 1.5rem;
                 font-size: 0.75rem;
                 font-weight: 600;
                 color: $text-secondary;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
+                text-align: left;
+                border-bottom: 1px solid $border-color;
+                white-space: nowrap;
+
+                &:first-child {
+                    padding-right: 0;
+                }
+
+                &:nth-child(2) {
+                    padding-left: 0.75rem;
+                    width: 100%;
+                }
             }
         }
 
         .FileItem {
-            display: grid;
-            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 80px);
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid $border-color;
             transition: all 0.2s ease;
-            align-items: center;
 
-            &:last-child {
-                border-bottom: none;
+            &:not(:last-child) td {
+                border-bottom: 1px solid $border-color;
             }
 
             &:hover {
                 background: rgba(255, 255, 255, 0.05);
             }
+
+            td {
+                padding: 1rem 1.5rem;
+                vertical-align: middle;
+            }
         }
 
-        .FileName {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            overflow: hidden;
+        td.FileIcon {
+            padding-right: 0;
 
             svg {
                 width: 1.25rem;
                 height: 1.25rem;
-                flex-shrink: 0;
+                display: block;
                 color: $primary-light;
             }
 
-            span {
-                font-size: 0.875rem;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+            &.FileIconSecondary svg {
+                color: $text-secondary;
             }
+        }
+
+        td.FileName {
+            padding-left: 0.75rem;
+            max-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.875rem;
 
             a {
                 color: $text-color;
@@ -172,17 +188,14 @@ body {
             }
         }
 
-        .FileNameIcon {
-            color: $text-secondary;
-        }
-
         .FileSize {
             font-size: 0.875rem;
             color: $text-secondary;
             white-space: nowrap;
         }
 
-        .FileActions {
+        td.FileActions {
+            padding-left: 0;
             display: flex;
             gap: 0.5rem;
             justify-content: flex-end;
@@ -220,10 +233,22 @@ body {
         }
 
         .EmptyState {
-            padding: 4rem 2rem;
+            padding: 5rem 2rem;
             text-align: center;
             color: $text-secondary;
-            font-size: 0.875rem;
+
+            svg {
+                width: 4rem;
+                height: 4rem;
+                color: $primary-dark;
+                margin-bottom: 1.25rem;
+            }
+
+            p {
+                font-size: 0.9375rem;
+                font-weight: 500;
+                color: $primary-light;
+            }
         }
     }
 }

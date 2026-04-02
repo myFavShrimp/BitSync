@@ -1,5 +1,6 @@
 pub mod bolt;
 pub mod chevron_left;
+pub mod cloudy;
 pub mod ellipsis_vertical;
 pub mod file_text;
 pub mod folder;

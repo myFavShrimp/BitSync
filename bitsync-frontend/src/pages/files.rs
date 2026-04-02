@@ -212,41 +212,53 @@ impl Component for FileStorageTable {
 impl Renderable for FileStorageTable {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            div id=(self.id()) class=(crate::styles::files_home_page::ClassName::FILE_BROWSER) {
+            table id=(self.id()) class=(crate::styles::files_home_page::ClassName::FILE_BROWSER) {
                 @if self.dir_content.is_empty() {
-                    div class=(crate::styles::files_home_page::ClassName::EMPTY_STATE) {
-                        "This folder is empty"
+                    tbody {
+                        tr {
+                            td class=(crate::styles::files_home_page::ClassName::EMPTY_STATE) colspan="4" {
+                                (crate::icons::cloudy::Cloudy)
+                                p { "This folder is empty" }
+                            }
+                        }
                     }
                 } @else {
-                    div class=(crate::styles::files_home_page::ClassName::FILE_HEADER) {
-                        span { "Name" }
-                        span { "Size" }
-                        span { "Actions" }
+                    thead {
+                        tr class=(crate::styles::files_home_page::ClassName::FILE_HEADER) {
+                            th {}
+                            th { "Name" }
+                            th { "Size" }
+                            th {}
+                        }
                     }
-                    div {
+                    tbody {
                         @for dir_item in &self.dir_content {
-                            div class=(crate::styles::files_home_page::ClassName::FILE_ITEM) {
-                                div class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
-                                    @match &dir_item.kind {
-                                        StorageItemPresentationKind::Directory { url } => {
+                            tr class=(crate::styles::files_home_page::ClassName::FILE_ITEM) {
+                                @match &dir_item.kind {
+                                    StorageItemPresentationKind::Directory { url } => {
+                                        td class=(crate::styles::files_home_page::ClassName::FILE_ICON) {
                                             (crate::icons::folder::Folder)
+                                        }
+                                        td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
                                             a href=(url) { (dir_item.name) }
                                         }
-                                        StorageItemPresentationKind::File => {
-                                            span class=(crate::styles::files_home_page::ClassName::FILE_NAME_ICON) {
-                                                (crate::icons::file_text::FileText)
-                                            }
-                                            span { (dir_item.name) }
+                                    }
+                                    StorageItemPresentationKind::File => {
+                                        td class=(format!("{} {}", crate::styles::files_home_page::ClassName::FILE_ICON, crate::styles::files_home_page::ClassName::FILE_ICON_SECONDARY)) {
+                                            (crate::icons::file_text::FileText)
+                                        }
+                                        td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
+                                            (dir_item.name)
                                         }
                                     }
                                 }
-                                div class=(crate::styles::files_home_page::ClassName::FILE_SIZE) {
+                                td class=(crate::styles::files_home_page::ClassName::FILE_SIZE) {
                                     @match &dir_item.kind {
                                         StorageItemPresentationKind::Directory { .. } => { "\u{2014}" }
                                         StorageItemPresentationKind::File => { (dir_item.size) }
                                     }
                                 }
-                                div class=(crate::styles::files_home_page::ClassName::FILE_ACTIONS) {
+                                td class=(crate::styles::files_home_page::ClassName::FILE_ACTIONS) {
                                     button
                                         class=(crate::styles::files_home_page::ClassName::FILE_ACTION_BUTTON)
                                         popovertarget=(dir_item.actions_popover_id)
