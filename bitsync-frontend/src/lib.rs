@@ -4,6 +4,7 @@ pub mod icons;
 pub mod models;
 pub mod pages;
 pub mod styles;
+pub mod toast;
 mod totp;
 
 use hypertext::Renderable;

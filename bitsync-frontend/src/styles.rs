@@ -29,3 +29,7 @@ pub mod files_home_page {
 pub mod user_settings_page {
     turf::style_sheet!("../scss/user_settings_page.scss");
 }
+
+pub mod toast {
+    turf::style_sheet!("../scss/toast.scss");
+}

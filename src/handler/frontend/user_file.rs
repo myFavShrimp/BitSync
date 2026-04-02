@@ -14,8 +14,10 @@ use axum_extra::{
 };
 use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
 use bitsync_frontend::{
-    BODY_SELECTOR_TARGET, Component, Render, error_modal::ErrorModal,
+    BODY_SELECTOR_TARGET, Component, Render,
+    error_modal::ErrorModal,
     pages::files::FilesHomePageChangeResult,
+    toast::{TOAST_CONTAINER_SELECTOR, Toast},
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
@@ -200,8 +202,8 @@ async fn user_file_delete_handler(
             .into_response()
         }
         Err(error) => Json(HyperStimCommand::HsPatchHtml {
-            html: ErrorModal::from(error).render(),
-            patch_target: BODY_SELECTOR_TARGET.to_owned(),
+            html: Toast::error(format!("{error}")).render(),
+            patch_target: TOAST_CONTAINER_SELECTOR.to_owned(),
             patch_mode: HyperStimPatchMode::Append,
         })
         .into_response(),

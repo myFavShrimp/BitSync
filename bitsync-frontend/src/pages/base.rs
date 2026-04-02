@@ -23,6 +23,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
+                    style { (crate::styles::toast::STYLE_SHEET) }
                 }
                 body {
                     header {
@@ -54,6 +55,13 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     }
 
                     (self.children)
+
+                    div
+                        id=(crate::toast::TOAST_CONTAINER_ID)
+                        class=(crate::styles::toast::ClassName::TOAST_CONTAINER)
+                        role="status"
+                        aria-live="polite"
+                    {}
                 }
             }
         }.render_to(buffer);
@@ -80,9 +88,17 @@ impl<R: Renderable> Renderable for GuestDocument<R> {
 
                     style { (crate::styles::base::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
+                    style { (crate::styles::toast::STYLE_SHEET) }
                 }
                 body {
                     (self.children)
+
+                    div
+                        id=(crate::toast::TOAST_CONTAINER_ID)
+                        class=(crate::styles::toast::ClassName::TOAST_CONTAINER)
+                        role="status"
+                        aria-live="polite"
+                    {}
                 }
             }
         }
