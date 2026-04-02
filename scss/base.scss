@@ -20,6 +20,7 @@ body {
         align-items: center;
         position: sticky;
         top: 0;
+        gap: 1.25rem;
 
         nav {
             display: flex;
@@ -49,35 +50,50 @@ body {
         }
     }
 
-    .SearchContainer {
-        position: relative;
+    .SearchButton {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
         width: 300px;
+        padding: 0.75rem 1rem;
+        background: rgba(20, 20, 20, 0.9);
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        color: $text-secondary;
+        font-size: 0.875rem;
+        font-family: inherit;
+        white-space: nowrap;
+        overflow: hidden;
+        cursor: text;
+        transition: all 0.3s ease;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
 
         svg {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
             width: 1rem;
             height: 1rem;
-            color: $text-secondary;
+            flex-shrink: 0;
         }
 
-        input {
-            width: 100%;
-            padding: 0.75rem 1rem 0.75rem 2.5rem;
-            background: rgba(20, 20, 20, 0.9);
-            border: 1px solid $border-color;
-            border-radius: $border-radius;
-            color: $text-color;
-            font-size: 0.875rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
+        &:hover {
+            outline: none;
+            border-color: $primary-light;
+            box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+        }
 
-            &:focus {
-                outline: none;
-                border-color: $primary-light;
-                box-shadow: 0 0 0 3px rgba(113, 113, 122, 0.2);
+        @media (max-width: 600px) {
+            position: static;
+            transform: none;
+            width: 2.8125rem;
+            height: 2.8125rem;
+            padding: 0.625rem;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+
+            span {
+                display: none;
             }
         }
     }

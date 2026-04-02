@@ -32,9 +32,9 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                         }
                         nav {
                             @if cfg!(debug_assertions) {
-                                div class=(crate::styles::base::ClassName::SEARCH_CONTAINER) {
+                                button class=(crate::styles::base::ClassName::SEARCH_BUTTON) title="Search" {
                                     (crate::icons::search::Search)
-                                    input type="text" placeholder=("Search files and folders...");
+                                    span { "Search files and folders..." }
                                 }
                             }
                             button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="nav-menu" title="Menu" {
