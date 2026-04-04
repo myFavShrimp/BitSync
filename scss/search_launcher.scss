@@ -14,6 +14,10 @@ body {
         max-height: 100%;
         color: $text-color;
 
+        @media (max-width: 600px) {
+            padding-top: 5rem;
+        }
+
         .CloseButton {
             position: absolute;
             top: 1.5rem;
@@ -33,7 +37,6 @@ body {
         }
 
         form, .Results {
-            width: calc(100% - 2rem);
             max-width: 480px;
             margin: 0 auto;
         }

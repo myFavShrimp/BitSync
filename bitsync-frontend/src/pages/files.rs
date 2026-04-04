@@ -91,15 +91,15 @@ impl Renderable for FilesHomePage {
                     }
 
                     div class=(crate::styles::files_home_page::ClassName::ACTIONS) {
+                        FileUploadForm file_upload_url=(self.file_upload_url.clone());
+
                         button
                             class=(crate::styles::files_home_page::ClassName::ACTION_BUTTON)
+                            title="New Folder"
                             onclick=(format_args!("openDialogModalById('{}')", &self.directory_creation_dialog_id))
                         {
                             (crate::icons::folder_plus::FolderPlus)
-                            span { "New Folder" }
                         }
-
-                        FileUploadForm file_upload_url=(self.file_upload_url.clone());
                     }
 
                     dialog
@@ -185,17 +185,16 @@ impl Renderable for FileUploadForm {
                 input type="file" name="upload" hidden onchange="this.form.requestSubmit()";
                 button
                     type="button"
-                    class=(format!(
-                        "{} {}",
-                        crate::styles::files_home_page::ClassName::ACTION_BUTTON,
+                    class=(
+                        crate::styles::files_home_page::ClassName::ACTION_BUTTON, " ",
                         crate::styles::files_home_page::ClassName::ACTION_BUTTON_PRIMARY,
-                    ))
+                    )
+                    title="Upload Files"
                     onclick="this.previousElementSibling.click()"
                     data-effect=("this.disabled = this.form.hsFetch.state() === 'pending'")
                 {
                     div class=(crate::styles::files_home_page::ClassName::SPINNER) {}
                     (crate::icons::upload::Upload)
-                    span { "Upload Files" }
                 }
             }
         }
@@ -266,6 +265,7 @@ impl Renderable for FileStorageTable {
                                 }
                                 td class=(crate::styles::files_home_page::ClassName::FILE_ACTIONS) {
                                     button
+                                        title="More"
                                         class=(crate::styles::files_home_page::ClassName::FILE_ACTION_BUTTON)
                                         popovertarget=(dir_item.actions_popover_id)
                                     {

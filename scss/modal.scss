@@ -21,32 +21,32 @@ body {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem 2rem;
+        padding: 1rem 1.5rem;
         border-bottom: 1px solid $border-color;
-    }
 
-    .ModalTitle {
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
+        .ModalTitle {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
 
-    .ModalClose {
-        background: none;
-        border: none;
-        color: $text-secondary;
-        cursor: pointer;
-        width: 2rem;
-        height: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: all 0.2s ease;
-        font-size: 1.25rem;
+        .ModalClose {
+            background: none;
+            border: none;
+            color: $text-secondary;
+            cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
 
-        &:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: $text-color;
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: $text-color;
+            }
         }
     }
 
@@ -54,41 +54,41 @@ body {
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        padding: 2rem;
+        padding: 1.5rem;
     }
 
     .ModalActions {
         display: flex;
         justify-content: flex-end;
         gap: 1rem;
-        padding: 1.5rem 2rem;
+        padding: 1rem 1.5rem;
         border-top: 1px solid $border-color;
-    }
 
-    .ModalButton {
-        padding: 0.75rem 1.25rem;
-        border-radius: $border-radius;
-        font-size: 0.875rem;
-        font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid $border-color;
-        background: rgba(255, 255, 255, 0.05);
-        color: $text-color;
+        .ModalButton {
+            padding: 0.75rem 1.25rem;
+            border-radius: $border-radius;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid $border-color;
+            background: rgba(255, 255, 255, 0.05);
+            color: $text-color;
 
-        &:hover {
-            background: rgba(255, 255, 255, 0.1);
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
         }
-    }
 
-    .ModalButtonPrimary {
-        background: linear-gradient(135deg, $primary-color, $primary-dark);
-        border: 1px solid $primary-dark;
+        .ModalButtonPrimary {
+            background: linear-gradient(135deg, $primary-color, $primary-dark);
+            border: 1px solid $primary-dark;
 
-        &:hover {
-            background: linear-gradient(135deg, $primary-light, $primary-color);
-            box-shadow: 0 4px 12px rgba(113, 113, 122, 0.3);
+            &:hover {
+                background: linear-gradient(135deg, $primary-light, $primary-color);
+                box-shadow: 0 4px 12px rgba(113, 113, 122, 0.3);
+            }
         }
     }
 
