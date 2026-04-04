@@ -50,6 +50,83 @@ body {
         }
     }
 
+    .TabBarWrapper {
+        position: relative;
+        border-bottom: 1px solid $border-color;
+
+        &::before, &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3.5rem;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        &::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(30, 30, 30, 0.98), transparent);
+        }
+
+        &::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(30, 30, 30, 0.98), transparent);
+        }
+
+        &.OverflowLeft::before {
+            opacity: 1;
+        }
+
+        &.OverflowRight::after {
+            opacity: 1;
+        }
+    }
+
+    .TabBar {
+        display: flex;
+        gap: 0.375rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0.625rem 1.5rem;
+
+        .Tab {
+            padding: 0.4rem 0.75rem;
+            background: none;
+            border: 1px solid transparent;
+            border-radius: $border-radius-sm;
+            color: $text-secondary;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.06);
+                color: $text-color;
+            }
+
+            &.Active {
+                background: rgba(255, 255, 255, 0.1);
+                color: $text-color;
+            }
+
+            &.Disabled {
+                color: rgba(255, 255, 255, 0.2);
+                cursor: not-allowed;
+
+                &:hover {
+                    background: none;
+                    color: rgba(255, 255, 255, 0.2);
+                }
+            }
+        }
+    }
+
     .ModalBody {
         display: flex;
         flex-direction: column;

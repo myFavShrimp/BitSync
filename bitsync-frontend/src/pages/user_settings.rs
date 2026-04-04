@@ -17,13 +17,34 @@ impl Renderable for SettingsDialog {
                     h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Settings" }
                     button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialogAndRemoveElement(this)" { "×" }
                 }
+                div class=(crate::styles::modal::ClassName::TAB_BAR_WRAPPER) {
+                    div
+                        class=(crate::styles::modal::ClassName::TAB_BAR)
+                        data-init=(format!(
+                            "this.updateOverflow = createHorizontalOverflowHandler(this, '{overflow_left}', '{overflow_right}'), this.updateOverflow()",
+                            overflow_left = crate::styles::modal::ClassName::OVERFLOW_LEFT,
+                            overflow_right = crate::styles::modal::ClassName::OVERFLOW_RIGHT,
+                        ))
+                        data-on-scroll="this.updateOverflow()"
+                    {
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::ACTIVE) { "Password" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "TOTP" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Sessions" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Shares" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "TOTP" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Sessions" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Shares" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "TOTP" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Sessions" }
+                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Shares" }
+                    }
+                }
                 form
                     data-hijack
                     action=(bitsync_routes::PostUserSettingsChangePassword.to_string())
                     method="POST"
                 {
                     div class=(crate::styles::modal::ClassName::MODAL_BODY) {
-                        h3 class=(crate::styles::modal::ClassName::MODAL_SECTION_TITLE) { "Change Password" }
                         label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                             "Current Password"
                             input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="current_password";
