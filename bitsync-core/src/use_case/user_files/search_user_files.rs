@@ -109,8 +109,7 @@ pub async fn search_user_files(
                 .path
                 .scoped_path
                 .parent()
-                .map(|parent_path| parent_path.to_string_lossy().to_string())
-                .filter(|path| !path.is_empty())
+                .map(|parent_path| format!("/{}", parent_path.to_string_lossy()))
                 .unwrap_or_else(|| "/".to_owned());
 
             Some(SearchResult {

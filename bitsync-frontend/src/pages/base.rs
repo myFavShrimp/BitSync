@@ -50,6 +50,13 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                 id="search-launcher"
                                 onclick="if (event.target === this) this.close()"
                             {
+                                button
+                                    class=(crate::styles::search_launcher::ClassName::CLOSE_BUTTON)
+                                    onclick="closeClosestDialog(this)"
+                                {
+                                    "×"
+                                }
+
                                 form
                                     data-hijack
                                     action=(bitsync_routes::GetSearch.to_string())

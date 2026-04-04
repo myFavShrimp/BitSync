@@ -1,14 +1,21 @@
 use axum::{Router, response::IntoResponse};
 use axum_extra::routing::RouterExt;
 
-use crate::handler::{handler_404, http_redirect_response};
+use crate::handler::handler_404;
 
 pub(crate) async fn create_routes() -> Router {
     Router::new().typed_get(serve).typed_get(favicon)
 }
 
-async fn favicon(_: bitsync_routes::GetFavicon) -> impl IntoResponse {
-    http_redirect_response("/static/favicon.ico")
+async fn favicon(route: bitsync_routes::GetFavicon) -> impl IntoResponse {
+    let mime = mime_guess::from_path(route.to_string()).first_or_octet_stream();
+    let content_type = headers::ContentType::from(mime);
+
+    (
+        axum_extra::TypedHeader(content_type),
+        base::FAVICON_ICO.contents_bytes,
+    )
+        .into_response()
 }
 
 #[iftree::include_file_tree(
