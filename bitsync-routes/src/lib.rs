@@ -107,6 +107,17 @@ pub struct PostUserFileDirectoryCreationQueryParameters {
     pub path: String,
 }
 
+// search
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/search")]
+pub struct GetSearch;
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GetSearchQueryParameters {
+    pub query: String,
+    pub path: Option<String>,
+}
+
 // account
 
 #[derive(TypedPath, Deserialize)]

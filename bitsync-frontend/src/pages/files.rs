@@ -29,6 +29,7 @@ impl FilesHomePageElementId {
 }
 
 pub struct FilesHomePage {
+    current_path: String,
     dir_content: Vec<StorageItemPresentation>,
     parent_directory_url: Option<ParentDirectoryLink>,
     file_upload_url: String,
@@ -60,6 +61,7 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
             .to_string();
 
         FilesHomePage {
+            current_path: value.path.path(),
             dir_content: displayable_dir_content,
             parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
             file_upload_url,
@@ -75,7 +77,7 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
 impl Renderable for FilesHomePage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            LoggedInDocument {
+            LoggedInDocument current_path=(Some(self.current_path.clone())) {
                 style { (crate::styles::files_home_page::STYLE_SHEET) }
                 main {
                     @match &self.parent_directory_url {

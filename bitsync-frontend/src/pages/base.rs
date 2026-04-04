@@ -4,6 +4,7 @@ pub static DIALOG_WRAPPER_ID: &str = "dialog-wrapper";
 pub static DIALOG_WRAPPER_SELECTOR: &str = "#dialog-wrapper";
 
 pub struct LoggedInDocument<R: Renderable> {
+    pub current_path: Option<String>,
     pub children: R,
 }
 
@@ -35,16 +36,50 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             (crate::icons::logo::Logo::default())
                         }
                         nav {
-                            @if cfg!(debug_assertions) {
-                                button
-                                    class=(crate::styles::base::ClassName::SEARCH_BUTTON)
-                                    title="Search"
-                                    onclick="document.getElementById('search-launcher').showModal()"
-                                {
-                                    (crate::icons::search::Search)
-                                    span { "Search files and folders..." }
-                                }
+                            button
+                                class=(crate::styles::base::ClassName::SEARCH_BUTTON)
+                                title="Search"
+                                onclick="openDialogModalById('search-launcher')"
+                            {
+                                (crate::icons::search::Search)
+                                span { "Search files and folders..." }
                             }
+
+                            dialog
+                                class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER)
+                                id="search-launcher"
+                                onclick="if (event.target === this) this.close()"
+                            {
+                                form
+                                    data-hijack
+                                    action=(bitsync_routes::GetSearch.to_string())
+                                    method="GET"
+                                {
+                                    div class=(crate::styles::search_launcher::ClassName::INPUT_WRAPPER) {
+                                        (crate::icons::search::Search)
+                                        @if let Some(path) = &self.current_path {
+                                            input
+                                                type="hidden"
+                                                name="path"
+                                                value=(path);
+                                        }
+                                        input
+                                            class=(crate::styles::search_launcher::ClassName::INPUT)
+                                            type="text"
+                                            name="query"
+                                            placeholder="Search files and folders..."
+                                            autocomplete="off"
+                                            autofocus
+                                            data-on-input__debounce.300ms="this.form.requestSubmit()";
+                                    }
+                                }
+                                div
+                                    class=(crate::styles::search_launcher::ClassName::RESULTS)
+                                    id="search-results"
+                                {}
+                            }
+
+
                             button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="nav-menu" title="Menu" {
                                 (crate::icons::menu::Menu)
                             }
@@ -67,24 +102,6 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     }
 
                     (self.children)
-
-                    @if cfg!(debug_assertions) {
-                        dialog
-                            class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER)
-                            id="search-launcher"
-                            onclick="if (event.target === this) this.close()"
-                        {
-                            div class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER_INPUT_WRAPPER) {
-                                (crate::icons::search::Search)
-                                input
-                                    class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER_INPUT)
-                                    type="text"
-                                    placeholder="Search files and folders..."
-                                    autofocus;
-                            }
-                            div class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER_RESULTS) {}
-                        }
-                    }
 
                     div id=(DIALOG_WRAPPER_ID) {}
 

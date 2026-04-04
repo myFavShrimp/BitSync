@@ -13,6 +13,7 @@ bytes.workspace = true
 futures.workspace = true
 jsonwebtoken = "9.2.0"
 mime_guess.workspace = true
+nucleo-matcher = "0.3.0"
 serde.workspace = true
 tokio.workspace = true
 thiserror.workspace = true

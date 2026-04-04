@@ -13,48 +13,134 @@ body {
         max-width: 480px;
         margin-top: 20vh;
         color: $text-color;
-    }
 
-    .SearchLauncherInput {
-        width: 100%;
-        padding: 1rem 1.25rem 1rem 3rem;
-        background: rgba(25, 25, 25, 0.95);
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        color: $text-color;
-        font-size: 1rem;
-        font-family: inherit;
-        box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+        .InputWrapper {
+            position: relative;
 
-        &:focus {
-            outline: none;
-            border-color: $primary-light;
-            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(113, 113, 122, 0.2);
+            svg {
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 1rem;
+                height: 1rem;
+                color: $text-secondary;
+            }
+
+            .Input {
+                width: 100%;
+                padding: 1rem 1.25rem 1rem 3rem;
+                background: rgba(25, 25, 25, 0.95);
+                border: 1px solid $border-color;
+                border-radius: $border-radius;
+                color: $text-color;
+                font-size: 1rem;
+                font-family: inherit;
+                box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-light;
+                    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(113, 113, 122, 0.2);
+                }
+            }
         }
-    }
 
-    .SearchLauncherInputWrapper {
-        position: relative;
+        .Results:not(:empty) {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
 
-        svg {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1rem;
-            height: 1rem;
-            color: $text-secondary;
+            .Empty {
+                background: rgba(25, 25, 25, 0.95);
+                border: 1px solid $border-color;
+                border-radius: $border-radius;
+                box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+                padding: 1.5rem;
+                text-align: center;
+                color: $text-secondary;
+                font-size: 0.875rem;
+            }
+
+            .Card {
+                background: rgba(25, 25, 25, 0.95);
+                border: 1px solid $border-color;
+                border-radius: $border-radius;
+                box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
+                padding: 0.25rem;
+
+                .SectionTitle {
+                    font-size: 0.6875rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    color: $text-secondary;
+                    padding: 0.5rem 0.75rem 0.25rem;
+                }
+
+                .ResultItem {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.625rem 0.75rem;
+                    border-radius: $border-radius-sm;
+                    color: $text-color;
+                    text-decoration: none;
+                    transition: background 0.15s ease;
+
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.06);
+                    }
+
+                    .ResultIcon {
+                        flex-shrink: 0;
+
+                        svg {
+                            width: 1.125rem;
+                            height: 1.125rem;
+                            color: $primary-light;
+                        }
+                    }
+
+                    .ResultIconSecondary {
+                        flex-shrink: 0;
+
+                        svg {
+                            width: 1.125rem;
+                            height: 1.125rem;
+                            color: $text-secondary;
+                        }
+                    }
+
+                    .ResultInfo {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.125rem;
+                        min-width: 0;
+
+                        .ResultName {
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                            line-height: 1.1rem;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+
+                        .ResultPath {
+                            font-size: 0.75rem;
+                            line-height: 0.9rem;
+                            color: $text-secondary;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+                    }
+                }
+            }
         }
-    }
-
-    .SearchLauncherResults {
-        margin-top: 0.5rem;
-        background: rgba(25, 25, 25, 0.95);
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
-        max-height: 400px;
-        overflow-y: auto;
-        display: none;
     }
 }

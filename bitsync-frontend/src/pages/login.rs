@@ -95,7 +95,7 @@ impl Renderable for LoginForm {
                     }
                 }
 
-                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+                OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                 div class=(crate::styles::login_page::ClassName::ACTIONS) {
                     button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
@@ -149,7 +149,7 @@ impl Renderable for TotpForm {
                     }
                 }
 
-                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+                OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                 button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
                     "Login"

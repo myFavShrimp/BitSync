@@ -96,7 +96,7 @@ impl Renderable for RegisterForm {
                     }
                 }
 
-                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+                OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                 div class=(crate::styles::register_page::ClassName::ACTIONS) {
                     button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
@@ -153,7 +153,7 @@ impl Renderable for TotpSetupForm {
 
                 hr;
 
-                OptionalErrorBanner message=(self.error.as_ref().map(|e| e.message().to_owned()));
+                OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"

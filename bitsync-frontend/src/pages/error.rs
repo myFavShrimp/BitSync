@@ -30,7 +30,7 @@ where
 impl Renderable for ErrorPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            LoggedInDocument {
+            LoggedInDocument current_path=(None::<String>) {
                 main {
                     h1 { "An unexpected error occurred" }
                     pre { (self.error_message) }
