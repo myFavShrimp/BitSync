@@ -79,7 +79,13 @@ impl Renderable for FilesHomePage {
         maud! {
             LoggedInDocument current_path=(Some(self.current_path.clone())) {
                 style { (crate::styles::files_home_page::STYLE_SHEET) }
-                main {
+                main
+                    data-init=(format!(
+                        "initDropUpload(this, document.getElementById('{form_id}'), '{active_class}')",
+                        form_id = FilesHomePageElementId::FileUploadForm.to_str(),
+                        active_class = crate::styles::files_home_page::ClassName::DROP_ZONE_ACTIVE,
+                    ))
+                {
                     @match &self.parent_directory_url {
                         Some(link_data) => {
                             a class=(crate::styles::files_home_page::ClassName::BREADCRUMB) href=(link_data.parent_directory_url) {

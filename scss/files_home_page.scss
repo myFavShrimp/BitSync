@@ -13,6 +13,23 @@ body {
             padding: 1rem;
         }
 
+        &.DropZoneActive::after {
+            content: "Drop files to upload";
+            position: fixed;
+            inset: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed $primary-light;
+            border-radius: $border-radius;
+            background: rgba(113, 113, 122, 0.08);
+            color: $primary-light;
+            font-size: 1.125rem;
+            font-weight: 500;
+            pointer-events: none;
+            backdrop-filter: blur(24px);
+        }
+
         .Breadcrumb {
             display: flex;
             align-items: center;
