@@ -45,22 +45,23 @@ impl Renderable for SettingsDialog {
                     method="POST"
                 {
                     div class=(crate::styles::modal::ClassName::MODAL_BODY) {
+                        p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
+                            "Update your password below. Changing your password will sign out all other active sessions."
+                        }
                         label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                             "Current Password"
-                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="current_password";
+                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="current_password" placeholder="Enter your current password";
                         }
+                        div class=(crate::styles::modal::ClassName::FORM_DIVIDER) {}
                         label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                             "New Password"
-                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password";
+                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password" placeholder="Enter a new password";
                         }
                         label class=(crate::styles::modal::ClassName::FORM_LABEL) {
-                            "Repeat New Password"
-                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password_repeated";
+                            "Confirm New Password"
+                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password_repeated" placeholder="Repeat your new password";
                         }
-                    }
-                    div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
-                        button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialogAndRemoveElement(this)" { "Cancel" }
-                        button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Save" }
+                        button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Change Password" }
                     }
                 }
             }
