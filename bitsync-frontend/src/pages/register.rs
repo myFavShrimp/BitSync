@@ -1,4 +1,5 @@
 use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
+use bitsync_routes::TypedPath;
 use hypertext::prelude::*;
 
 use crate::{
@@ -7,12 +8,14 @@ use crate::{
 
 pub enum RegistrationDisplayError {
     UsernameTaken,
+    InvalidInviteToken,
 }
 
 impl RegistrationDisplayError {
     pub fn message(&self) -> &'static str {
         match self {
             Self::UsernameTaken => "The username is already taken",
+            Self::InvalidInviteToken => "The invite token is invalid or has already been used",
         }
     }
 }
@@ -30,13 +33,14 @@ impl TotpSetupDisplayError {
 }
 
 pub enum RegisterPage {
+    InviteTokenInput(InviteTokenForm),
     UserRegistration(RegisterForm),
     TotpSetup(TotpSetupForm),
 }
 
 impl Default for RegisterPage {
     fn default() -> Self {
-        Self::UserRegistration(Default::default())
+        Self::InviteTokenInput(Default::default())
     }
 }
 
@@ -47,10 +51,16 @@ impl Renderable for RegisterPage {
                 style { (crate::styles::register_page::STYLE_SHEET) }
 
                 (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
-                p class=(crate::styles::register_page::ClassName::PAGE_HINT) {("Create an account to get started")}
+                p class=(crate::styles::register_page::ClassName::PAGE_HINT) {
+                    @match &self {
+                        Self::InviteTokenInput(..) => ("Enter your invite token to register"),
+                        Self::UserRegistration(..) | Self::TotpSetup(..) => ("Create an account to get started"),
+                    }
+                }
 
                 main {
                     @match &self {
+                        Self::InviteTokenInput(form) => (form),
                         Self::UserRegistration(register_form) => (register_form),
                         Self::TotpSetup(totp_setup_form) => (totp_setup_form),
                     }
@@ -62,7 +72,67 @@ impl Renderable for RegisterPage {
 }
 
 #[derive(Default)]
+pub struct InviteTokenForm {
+    pub error: Option<InviteTokenDisplayError>,
+}
+
+impl Component for InviteTokenForm {
+    fn id(&self) -> String {
+        "invite-token-form".to_owned()
+    }
+}
+
+pub enum InviteTokenDisplayError {
+    InvalidToken,
+}
+
+impl InviteTokenDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::InvalidToken => "The invite token is invalid or has already been used",
+        }
+    }
+}
+
+impl Renderable for InviteTokenForm {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            form
+                id=(self.id())
+                class=(crate::styles::register_page::ClassName::FORM)
+                data-hijack
+                action=(bitsync_routes::PostRedeemInviteToken.to_string())
+                method="POST"
+            {
+                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                    "Invite Token"
+                    div class=(crate::styles::register_page::ClassName::INPUT) {
+                        input
+                            class=(crate::styles::base::ClassName::FORM_CONTROL)
+                            name="token"
+                            placeholder="Enter your invite token"
+                            required;
+                    }
+                }
+
+                OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
+
+                div class=(crate::styles::register_page::ClassName::ACTIONS) {
+                    button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                        "Continue"
+                    }
+                    a href=(bitsync_routes::GetLoginPage.to_string()) class=(crate::styles::base::ClassName::TEXT_LINK) {
+                        "I already have an account"
+                    }
+                }
+            }
+        }
+        .render_to(buffer);
+    }
+}
+
 pub struct RegisterForm {
+    pub token: String,
     pub username: Option<String>,
     pub error: Option<RegistrationDisplayError>,
 }
@@ -80,7 +150,7 @@ impl Renderable for RegisterForm {
                 id=(self.id())
                 class=(crate::styles::register_page::ClassName::FORM)
                 data-hijack
-                action=(bitsync_routes::PostRegisterAction.to_string())
+                action=(bitsync_routes::PostRegisterAction.with_query_params(bitsync_routes::PostRegisterActionQueryParameters { token: self.token.clone() }).to_string())
                 method="POST"
             {
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {

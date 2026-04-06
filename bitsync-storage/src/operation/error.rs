@@ -1,7 +1,5 @@
 use std::{io::Error as IoError, path::PathBuf};
 
-// -----
-
 #[derive(thiserror::Error, Debug)]
 #[error("Failed to create directory")]
 pub struct DirectoryCreationError {

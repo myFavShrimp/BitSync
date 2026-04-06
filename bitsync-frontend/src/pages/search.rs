@@ -90,7 +90,7 @@ impl Renderable for SearchResults {
                         div class=(crate::styles::search_launcher::ClassName::SECTION_TITLE) {
                             "Current folder"
                         }
-                        ((SearchResultList { items: &self.current_dir_items }))
+                        (SearchResultList { items: &self.current_dir_items })
                     }
                 }
                 @if !self.global_items.is_empty() {
@@ -98,7 +98,7 @@ impl Renderable for SearchResults {
                         div class=(crate::styles::search_launcher::ClassName::SECTION_TITLE) {
                             "All files"
                         }
-                        ((SearchResultList { items: &self.global_items }))
+                        (SearchResultList { items: &self.global_items })
                     }
                 }
             }

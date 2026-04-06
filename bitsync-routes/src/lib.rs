@@ -41,10 +41,22 @@ pub struct GetLogoutAction;
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/register")]
 pub struct GetRegisterPage;
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GetRegisterPageQueryParameters {
+    pub token: Option<String>,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/register/redeem-token")]
+pub struct PostRedeemInviteToken;
 
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/register")]
 pub struct PostRegisterAction;
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PostRegisterActionQueryParameters {
+    pub token: String,
+}
 
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/register/totp-setup")]

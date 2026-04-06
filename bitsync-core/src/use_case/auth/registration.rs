@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use bitsync_database::{
     database::{Database, TransactionBeginError, transaction::TransactionCommitError},
@@ -9,10 +9,12 @@ use bitsync_storage::{
     operation::write::{EnsureUserStorageExistsError, ensure_user_storage_exists},
     user_storage::UserStorage,
 };
+use uuid::Uuid;
 
 use crate::{
     hash::{PasswordHashCreationError, hash_password},
     jwt::{JwtClaims, LoginState},
+    use_case::auth::InvalidInviteTokenError,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -23,6 +25,7 @@ pub enum RegistrationError {
     DatabaseTransaction(#[from] TransactionCommitError),
     TransactionBegin(#[from] TransactionBeginError),
     UserExists(#[from] UserExists),
+    InvalidInviteTokenError(#[from] InvalidInviteTokenError),
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     Jwt(#[from] crate::jwt::Error),
 }
@@ -38,30 +41,38 @@ pub struct RegistrationResult {
 
 pub async fn perform_registration(
     database: &Database,
-    storage_root_dir: &PathBuf,
+    storage_root_dir: &Path,
     username: &str,
     password: &str,
+    invite_token_id: &Uuid,
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<RegistrationResult, RegistrationError> {
     let mut transaction = database.begin_transaction().await?;
+
+    let invite_token =
+        repository::invite_token::find_by_id(&mut *transaction, invite_token_id).await?;
+    let invite_token = invite_token.ok_or(InvalidInviteTokenError)?;
 
     if let Ok(_user) = repository::user::find_by_username(&mut *transaction, username).await {
         Err(UserExists)?;
     }
 
     let hashed_password = hash_password(password)?;
-    let user = repository::user::create(
+    let user = repository::user::create_with_admin(
         &mut *transaction,
         username,
         &hashed_password,
         &uuid::Uuid::nil().into_bytes(),
+        invite_token.is_admin,
     )
     .await?;
 
+    repository::invite_token::delete_by_id(&mut *transaction, &invite_token.id).await?;
+
     let user_storage = UserStorage {
         user_id: user.id,
-        storage_root: storage_root_dir.clone(),
+        storage_root: storage_root_dir.to_path_buf(),
     };
 
     ensure_user_storage_exists(&user_storage).await?;

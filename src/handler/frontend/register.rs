@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     Extension, Json, Router,
-    extract::State,
+    extract::{Query, State},
     http::StatusCode,
     middleware::from_fn_with_state,
     response::{Html, IntoResponse},
@@ -12,6 +12,7 @@ use axum_extra::{
     routing::RouterExt,
 };
 use bitsync_core::use_case::auth::{
+    redeem_invite_token::{RedeemInviteTokenError, redeem_invite_token},
     registration::{RegistrationError, perform_registration},
     retrieve_totp_setup_data::{RetrieveTotpSetupDataError, retrieve_totp_setup_data},
     setup_totp::{TotpSetupError, setup_totp},
@@ -19,11 +20,12 @@ use bitsync_core::use_case::auth::{
 use bitsync_frontend::{
     Component, Render,
     pages::register::{
-        RegisterForm, RegisterPage, RegistrationDisplayError, TotpRecoveryCodesPrompt,
-        TotpSetupDisplayError, TotpSetupForm,
+        InviteTokenDisplayError, InviteTokenForm, RegisterForm, RegisterPage,
+        RegistrationDisplayError, TotpRecoveryCodesPrompt, TotpSetupDisplayError, TotpSetupForm,
     },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
+use bitsync_routes::TypedPath;
 use serde::Deserialize;
 
 use crate::{
@@ -65,6 +67,15 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         )
         .merge(
             Router::new()
+                .typed_post(redeem_invite_token_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_logout_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
+        .merge(
+            Router::new()
                 .typed_post(register_action_handler)
                 .route_layer(from_fn_with_state(
                     state.clone(),
@@ -74,8 +85,62 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         )
 }
 
-async fn register_page_handler(_: bitsync_routes::GetRegisterPage) -> impl IntoResponse {
-    Html(RegisterPage::default().render())
+async fn register_page_handler(
+    _: bitsync_routes::GetRegisterPage,
+    Query(query_parameters): Query<bitsync_routes::GetRegisterPageQueryParameters>,
+) -> impl IntoResponse {
+    match query_parameters.token {
+        Some(token) => Html(
+            RegisterPage::UserRegistration(RegisterForm {
+                token,
+                username: None,
+                error: None,
+            })
+            .render(),
+        ),
+        None => Html(RegisterPage::default().render()),
+    }
+}
+
+#[derive(Deserialize, Clone, Debug)]
+struct RedeemInviteTokenFormData {
+    token: String,
+}
+
+async fn redeem_invite_token_handler(
+    _: bitsync_routes::PostRedeemInviteToken,
+    State(state): State<Arc<AppState>>,
+    Form(form_data): Form<RedeemInviteTokenFormData>,
+) -> impl IntoResponse {
+    match redeem_invite_token(&state.database, &form_data.token).await {
+        Ok(()) => {
+            let redirect_url = bitsync_routes::GetRegisterPage
+                .with_query_params(bitsync_routes::GetRegisterPageQueryParameters {
+                    token: Some(form_data.token.clone()),
+                })
+                .to_string();
+            hyperstim_redirect_response(&redirect_url).into_response()
+        }
+        Err(RedeemInviteTokenError::InvalidInviteTokenError(..)) => {
+            let invite_token_form = InviteTokenForm {
+                error: Some(InviteTokenDisplayError::InvalidToken),
+            };
+
+            (
+                StatusCode::BAD_REQUEST,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: invite_token_form.render(),
+                    patch_target: invite_token_form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response()
+        }
+        Err(error) => {
+            emit_error(error);
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        }
+    }
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -87,14 +152,23 @@ struct RegisterActionFormData {
 async fn register_action_handler(
     _: bitsync_routes::PostRegisterAction,
     State(state): State<Arc<AppState>>,
+    Query(query_parameters): Query<bitsync_routes::PostRegisterActionQueryParameters>,
     cookie_jar: CookieJar,
     Form(registration_data): Form<RegisterActionFormData>,
 ) -> impl IntoResponse {
+    let token_uuid = match uuid::Uuid::parse_str(&query_parameters.token) {
+        Ok(uuid) => uuid,
+        Err(_) => {
+            return StatusCode::BAD_REQUEST.into_response();
+        }
+    };
+
     match perform_registration(
         &state.database,
         &state.config.fs_storage_root_dir,
         &registration_data.username,
         &registration_data.password,
+        &token_uuid,
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
@@ -112,6 +186,9 @@ async fn register_action_handler(
         Err(error) => {
             let display_error = match error {
                 RegistrationError::UserExists(..) => RegistrationDisplayError::UsernameTaken,
+                RegistrationError::InvalidInviteTokenError(..) => {
+                    RegistrationDisplayError::InvalidInviteToken
+                }
                 error => {
                     emit_error(error);
                     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
@@ -119,6 +196,7 @@ async fn register_action_handler(
             };
 
             let register_form = RegisterForm {
+                token: query_parameters.token,
                 username: Some(registration_data.username),
                 error: Some(display_error),
             };

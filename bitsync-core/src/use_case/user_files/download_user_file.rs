@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use bitsync_database::entity::User;
 use bitsync_storage::{
@@ -32,13 +32,13 @@ pub enum UserFileDownloadError {
 }
 
 pub async fn download_user_file(
-    storage_root_dir: &PathBuf,
+    storage_root_dir: &Path,
     path: &str,
     user: &User,
 ) -> Result<UserFileDownloadResult, UserFileDownloadError> {
     let user_storage = UserStorage {
         user_id: user.id,
-        storage_root: storage_root_dir.clone(),
+        storage_root: storage_root_dir.to_path_buf(),
     };
 
     ensure_user_storage_exists(&user_storage).await?;
@@ -81,7 +81,7 @@ pub async fn download_user_file(
             let mut dir_path = path.scoped_path.clone();
             dir_path.set_extension("zip");
 
-            let fake_zip_path = StoragePath::new(user_storage.clone(), PathBuf::from(dir_path))?;
+            let fake_zip_path = StoragePath::new(user_storage.clone(), dir_path)?;
 
             let mime = mime_guess::from_path(&fake_zip_path.scoped_path).first_or_octet_stream();
 

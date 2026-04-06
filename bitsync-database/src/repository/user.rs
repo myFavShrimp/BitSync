@@ -87,6 +87,39 @@ where
     .await?)
 }
 
+pub async fn create_with_admin<'e, E>(
+    connection: E,
+    username: &str,
+    password: &str,
+    totp_secret: &[u8],
+    is_admin: bool,
+) -> Result<User, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"INSERT INTO "user" (username, password, totp_secret, is_admin) VALUES ($1, $2, $3, $4) RETURNING *"#,
+        username,
+        password,
+        totp_secret,
+        is_admin,
+    )
+    .fetch_one(connection)
+    .await?)
+}
+
+pub async fn admin_exists<'e, E>(executor: E) -> Result<bool, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM "user" WHERE is_admin = true) as "exists!: bool""#,
+    )
+    .fetch_one(executor)
+    .await?)
+}
+
 pub async fn set_totp_setup_state<'e, E>(
     executor: E,
     user_id: &Uuid,

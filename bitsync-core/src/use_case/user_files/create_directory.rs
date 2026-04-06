@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use bitsync_database::entity::User;
 use bitsync_storage::{
@@ -31,7 +31,7 @@ pub enum UserFileDirecoryCreationError {
 }
 
 pub async fn create_direcory(
-    storage_root_dir: &PathBuf,
+    storage_root_dir: &Path,
     parent_directory: &str,
     direcory_name: &str,
     user: &User,
@@ -40,7 +40,7 @@ pub async fn create_direcory(
 
     let user_storage = UserStorage {
         user_id: user.id,
-        storage_root: storage_root_dir.clone(),
+        storage_root: storage_root_dir.to_path_buf(),
     };
 
     ensure_user_storage_exists(&user_storage).await?;

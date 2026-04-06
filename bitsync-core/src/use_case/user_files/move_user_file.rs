@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use bitsync_database::entity::User;
 use bitsync_storage::{
@@ -28,14 +28,14 @@ pub enum UserFileMoveError {
 }
 
 pub async fn move_user_file(
-    storage_root_dir: &PathBuf,
+    storage_root_dir: &Path,
     path_to_move: &str,
     move_destination_path: &str,
     user: &User,
 ) -> Result<UserFileMoveResult, UserFileMoveError> {
     let user_storage = UserStorage {
         user_id: user.id,
-        storage_root: storage_root_dir.clone(),
+        storage_root: storage_root_dir.to_path_buf(),
     };
 
     ensure_user_storage_exists(&user_storage).await?;

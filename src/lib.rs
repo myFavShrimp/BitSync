@@ -1,7 +1,12 @@
 use std::sync::{Arc, atomic::AtomicU64};
 
 use axum::{Router, routing::IntoMakeService};
-use bitsync_core::config::Config;
+use bitsync_core::{
+    config::Config,
+    use_case::auth::ensure_admin_bootstrap::{
+        AdminBootstrapStatus, EnsureAdminBootstrapError, ensure_admin_bootstrap,
+    },
+};
 use bitsync_database::database::{ConnectAndMigrateError, Database};
 use tower_http::cors::CorsLayer;
 
@@ -19,7 +24,10 @@ pub struct AppState {
 
 #[derive(thiserror::Error, Debug)]
 #[error("Failed to initialize application state")]
-pub struct ApplicationStateInitializationError(#[from] ConnectAndMigrateError);
+pub enum ApplicationStateInitializationError {
+    ConnectAndMigrate(#[from] ConnectAndMigrateError),
+    AdminBootstrap(#[from] EnsureAdminBootstrapError),
+}
 
 impl AppState {
     pub async fn from_config(config: Config) -> Result<Self, ApplicationStateInitializationError> {
@@ -37,6 +45,15 @@ pub async fn make_service(
     config: Config,
 ) -> Result<IntoMakeService<Router>, ApplicationStateInitializationError> {
     let app_state = AppState::from_config(config).await?;
+
+    if let AdminBootstrapStatus::RegistrationRequired(token) =
+        ensure_admin_bootstrap(&app_state.database).await?
+    {
+        println!("==========================================================");
+        println!("  No admin user found. Use this token to register:");
+        println!("  {}", token.id);
+        println!("==========================================================");
+    }
 
     Ok(handler::create_routes(Arc::new(app_state))
         .await

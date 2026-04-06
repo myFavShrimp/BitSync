@@ -16,3 +16,9 @@ pub struct TotpRecoveryCode {
     pub user_id: Uuid,
     pub code: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct InviteToken {
+    pub id: Uuid,
+    pub is_admin: bool,
+}

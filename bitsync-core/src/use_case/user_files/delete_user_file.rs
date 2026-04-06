@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use bitsync_database::entity::User;
 use bitsync_storage::{
@@ -30,13 +30,13 @@ pub enum UserFileDeletionError {
 }
 
 pub async fn delete_user_file(
-    storage_root_dir: &PathBuf,
+    storage_root_dir: &Path,
     path: &str,
     user: &User,
 ) -> Result<UserFileDeletionResult, UserFileDeletionError> {
     let user_storage = UserStorage {
         user_id: user.id,
-        storage_root: storage_root_dir.clone(),
+        storage_root: storage_root_dir.to_path_buf(),
     };
 
     ensure_user_storage_exists(&user_storage).await?;

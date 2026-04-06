@@ -38,7 +38,10 @@ pub struct TotpSetupResult {
 }
 
 const RECOVERY_CODE_COUNT: usize = 8;
-const _: () = assert!(RECOVERY_CODE_COUNT % 4 == 0, "count must be divisible by 4");
+const _: () = assert!(
+    RECOVERY_CODE_COUNT.is_multiple_of(4),
+    "count must be divisible by 4"
+);
 
 pub async fn setup_totp(
     database: &Database,

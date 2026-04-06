@@ -95,7 +95,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             div class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::base::ClassName::NAV_CONTEXT_MENU)) id="nav-menu" popover {
                                 button
                                     class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPage.to_string()))
+                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPage))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 {
                                     (crate::icons::bolt::Bolt)

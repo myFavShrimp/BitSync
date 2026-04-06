@@ -189,7 +189,7 @@ impl Renderable for FilesHomePage {
                         }
                     }
 
-                    ((FileStorageTable { dir_content: self.dir_content.clone() }))
+                    (FileStorageTable { dir_content: self.dir_content.clone() })
                 }
             }
         }.render_to(buffer);
@@ -409,7 +409,7 @@ impl From<DirectoryCreationResult> for FilesHomePageChangeResult {
 impl Renderable for FilesHomePageChangeResult {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            ((FileStorageTable { dir_content: self.dir_content.clone() }))
+            (FileStorageTable { dir_content: self.dir_content.clone() })
         }
         .render_to(buffer);
     }
