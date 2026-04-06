@@ -1,5 +1,6 @@
 pub mod ensure_admin_bootstrap;
 pub mod login;
+pub mod logout;
 pub mod redeem_invite_token;
 pub mod registration;
 pub mod resolve_session;

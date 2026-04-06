@@ -5,7 +5,7 @@ use axum::{
 };
 use axum_extra::extract::CookieJar;
 use axum_extra::routing::RouterExt;
-use bitsync_database::repository;
+use bitsync_core::use_case::auth::logout::logout;
 
 use crate::auth::{AuthData, require_login_and_totp_setup_middleware};
 
@@ -28,9 +28,7 @@ async fn logout_action_handler(
     Extension(auth_data): Extension<AuthData>,
     cookie_jar: CookieJar,
 ) -> impl IntoResponse {
-    if let Ok(mut connection) = state.database.acquire_connection().await {
-        let _ = repository::session::delete_by_id(&mut *connection, &auth_data.session.id).await;
-    }
+    let _ = logout(&state.database, &auth_data.session.id).await;
 
     let cookie_jar = cookie_jar.remove(crate::auth::AUTH_COOKIE_NAME);
 
