@@ -100,7 +100,7 @@ impl Renderable for FilesHomePage {
                         FileUploadForm file_upload_url=(self.file_upload_url.clone());
 
                         button
-                            class=(crate::styles::files_home_page::ClassName::ACTION_BUTTON)
+                            class=(crate::styles::base::ClassName::BUTTON, " ", crate::styles::files_home_page::ClassName::ACTION_BUTTON)
                             title="New Folder"
                             onclick=(format_args!("openDialogModalById('{}')", &self.directory_creation_dialog_id))
                         {
@@ -129,8 +129,22 @@ impl Renderable for FilesHomePage {
                                 }
                             }
                             div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
-                                button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
-                                button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Create" }
+                                button
+                                    type="button"
+                                    class=(crate::styles::base::ClassName::BUTTON)
+                                    onclick="closeClosestDialog(this)"
+                                {
+                                    "Cancel"
+                                }
+                                button
+                                    type="submit"
+                                    class=(
+                                        crate::styles::base::ClassName::BUTTON, " ",
+                                        crate::styles::base::ClassName::BUTTON_PRIMARY,
+                                    )
+                                {
+                                    "Create"
+                                }
                             }
                         }
                     }
@@ -155,8 +169,22 @@ impl Renderable for FilesHomePage {
                                 }
                             }
                             div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
-                                button type="button" class=(crate::styles::modal::ClassName::MODAL_BUTTON) onclick="closeClosestDialog(this)" { "Cancel" }
-                                button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Move" }
+                                button
+                                    type="button"
+                                    class=(crate::styles::base::ClassName::BUTTON)
+                                    onclick="closeClosestDialog(this)"
+                                {
+                                    "Cancel"
+                                }
+                                button
+                                    type="submit"
+                                    class=(
+                                        crate::styles::base::ClassName::BUTTON, " ",
+                                        crate::styles::base::ClassName::BUTTON_PRIMARY,
+                                    )
+                                {
+                                    "Move"
+                                }
                             }
                         }
                     }
@@ -192,8 +220,9 @@ impl Renderable for FileUploadForm {
                 button
                     type="button"
                     class=(
-                        crate::styles::files_home_page::ClassName::ACTION_BUTTON, " ",
-                        crate::styles::files_home_page::ClassName::ACTION_BUTTON_PRIMARY,
+                        crate::styles::base::ClassName::BUTTON, " ",
+                        crate::styles::base::ClassName::BUTTON_PRIMARY, " ",
+                        crate::styles::files_home_page::ClassName::ACTION_BUTTON,
                     )
                     title="Upload Files"
                     onclick="this.previousElementSibling.click()"

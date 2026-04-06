@@ -61,7 +61,15 @@ impl Renderable for SettingsDialog {
                             "Confirm New Password"
                             input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password_repeated" placeholder="Repeat your new password";
                         }
-                        button type="submit" class=(format!("{} {}", crate::styles::modal::ClassName::MODAL_BUTTON, crate::styles::modal::ClassName::MODAL_BUTTON_PRIMARY)) { "Change Password" }
+                        button
+                            type="submit"
+                            class=(
+                                crate::styles::base::ClassName::BUTTON, " ",
+                                crate::styles::base::ClassName::BUTTON_PRIMARY
+                            )
+                        {
+                            "Change Password"
+                        }
                     }
                 }
             }

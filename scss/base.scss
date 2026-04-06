@@ -194,26 +194,35 @@ body {
     }
 
     .Button {
-        color: $text-color;
-        display: flex;
-        width: 100%;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5em;
-        padding: 0.875em 1.5em;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid $border-color;
         border-radius: $border-radius;
+        color: $text-color;
         font-size: 0.875rem;
         font-weight: 500;
+        font-family: inherit;
         cursor: pointer;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(8px);
+        transition: all 0.2s ease;
         text-decoration: none;
 
         &:hover {
             background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.2);
+        }
+    }
+
+    .ButtonPrimary {
+        background: linear-gradient(135deg, $primary-color, $primary-dark);
+        border: 1px solid $primary-dark;
+
+        &:hover {
+            background: linear-gradient(135deg, $primary-light, $primary-color);
+            box-shadow: 0 4px 12px rgba(113, 113, 122, 0.3);
         }
     }
 
