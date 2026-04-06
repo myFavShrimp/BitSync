@@ -15,8 +15,7 @@ use axum_extra::{
 use bitsync_core::use_case::{
     self,
     user_files::{
-        create_directory::UserFileDirecoryCreationError,
-        upload_user_file::upload_user_file,
+        create_directory::UserFileDirecoryCreationError, upload_user_file::upload_user_file,
     },
 };
 use bitsync_frontend::{

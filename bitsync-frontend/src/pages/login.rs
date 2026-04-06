@@ -82,6 +82,7 @@ impl Renderable for LoginForm {
                 action=(bitsync_routes::PostLoginAction.to_string())
                 method="POST"
             {
+                input type="hidden" name="platform" data-init="this.value = navigator.platform";
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "Username"
                     div class=(crate::styles::login_page::ClassName::INPUT) {

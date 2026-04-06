@@ -25,6 +25,7 @@ pub struct TotpNotSetUp;
 
 pub async fn verify_totp(
     user: &User,
+    session_id: &uuid::Uuid,
     totp_value: &str,
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
@@ -41,7 +42,7 @@ pub async fn verify_totp(
 
     let jwt_expiration = time::OffsetDateTime::now_utc().unix_timestamp() + jwt_expiration_seconds;
     let jwt = JwtClaims {
-        sub: user.id,
+        sub: *session_id,
         exp: jwt_expiration,
         login_state: LoginState::Full,
     }

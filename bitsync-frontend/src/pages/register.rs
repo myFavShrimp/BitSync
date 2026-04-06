@@ -153,6 +153,7 @@ impl Renderable for RegisterForm {
                 action=(bitsync_routes::PostRegisterAction.with_query_params(bitsync_routes::PostRegisterActionQueryParameters { token: self.token.clone() }).to_string())
                 method="POST"
             {
+                input type="hidden" name="platform" data-init="this.value = navigator.platform";
                 label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
                     "Username"
                     div class=(crate::styles::register_page::ClassName::INPUT) {

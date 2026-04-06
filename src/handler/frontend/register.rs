@@ -147,6 +147,7 @@ async fn redeem_invite_token_handler(
 struct RegisterActionFormData {
     username: String,
     password: String,
+    platform: String,
 }
 
 async fn register_action_handler(
@@ -169,6 +170,7 @@ async fn register_action_handler(
         &registration_data.username,
         &registration_data.password,
         &token_uuid,
+        &registration_data.platform,
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
@@ -255,6 +257,7 @@ async fn register_totp_setup_submit_handler(
     match setup_totp(
         &state.database,
         &auth_data.user,
+        &auth_data.session.id,
         &totp_setup_data.totp,
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,

@@ -81,6 +81,7 @@ async fn login_page_handler(_: bitsync_routes::GetLoginPage) -> impl IntoRespons
 struct LoginActionFormData {
     username: String,
     password: String,
+    platform: String,
 }
 
 async fn login_action_handler(
@@ -93,6 +94,7 @@ async fn login_action_handler(
         &state.database,
         &login_data.username,
         &login_data.password,
+        &login_data.platform,
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
@@ -157,6 +159,7 @@ async fn login_totp_auth_submit_handler(
 ) -> impl IntoResponse {
     match verify_totp(
         &auth_data.user,
+        &auth_data.session.id,
         &totp_setup_data.totp,
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,

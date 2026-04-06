@@ -1,4 +1,5 @@
 pub mod invite_token;
+pub mod session;
 pub mod totp_recovery_code;
 pub mod user;
 

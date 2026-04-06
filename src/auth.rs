@@ -14,14 +14,16 @@ use axum_extra::extract::{
     CookieJar,
     cookie::{Cookie, SameSite},
 };
-use bitsync_core::jwt::{JwtClaims, LoginState};
-use bitsync_database::{database::ConnectionAcquisitionError, entity::User, repository};
+use bitsync_core::{
+    jwt::{JwtClaims, LoginState},
+    use_case::auth::resolve_session::{ResolveSessionError, resolve_session},
+};
+use bitsync_database::entity::{Session, User};
 
 #[derive(Debug, thiserror::Error)]
 #[error("The provided auth token is invalid")]
 pub enum AuthTokenDecodeError {
-    Database(#[from] repository::QueryError),
-    ConnectionAcquisition(#[from] ConnectionAcquisitionError),
+    ResolveSession(#[from] ResolveSessionError),
     Decode(#[from] bitsync_core::jwt::Error),
 }
 
@@ -29,12 +31,14 @@ async fn decode_auth_token(
     app_state: Arc<AppState>,
     token: &str,
 ) -> Result<AuthData, AuthTokenDecodeError> {
-    let mut connection = app_state.database.acquire_connection().await?;
-
     let claims = JwtClaims::decode_and_validate(token, &app_state.config.auth.jwt_secret)?;
-    let user = repository::user::find_by_id(&mut *connection, &claims.sub).await?;
+    let result = resolve_session(&app_state.database, &claims.sub).await?;
 
-    Ok(AuthData { claims, user })
+    Ok(AuthData {
+        claims,
+        session: result.session,
+        user: result.user,
+    })
 }
 
 pub static AUTH_COOKIE_NAME: &str = "auth";
@@ -43,6 +47,7 @@ pub static AUTH_COOKIE_NAME: &str = "auth";
 #[derive(Debug, Clone)]
 pub struct AuthData {
     pub claims: JwtClaims,
+    pub session: Session,
     pub user: User,
 }
 

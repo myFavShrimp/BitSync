@@ -22,3 +22,22 @@ pub struct InviteToken {
     pub id: Uuid,
     pub is_admin: bool,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, sqlx::Type)]
+#[sqlx(type_name = "session_platform", rename_all = "lowercase")]
+pub enum SessionPlatform {
+    MacOs,
+    Windows,
+    Linux,
+    IOs,
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Session {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub platform: SessionPlatform,
+    pub created_at: time::OffsetDateTime,
+    pub last_seen_at: time::OffsetDateTime,
+}

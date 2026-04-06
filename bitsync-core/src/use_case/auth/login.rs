@@ -24,6 +24,7 @@ pub async fn perform_login(
     database: &Database,
     username: &str,
     password: &str,
+    platform: &str,
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<LoginResult, LoginError> {
@@ -33,9 +34,13 @@ pub async fn perform_login(
 
     verify_password_hash(&user.password, password)?;
 
+    let session_platform = crate::use_case::auth::parse_navigator_platform(platform);
+    let session =
+        repository::session::create(&mut *connection, &user.id, &session_platform).await?;
+
     let jwt_expiration = time::OffsetDateTime::now_utc().unix_timestamp() + jwt_expiration_seconds;
     let jwt = JwtClaims {
-        sub: user.id,
+        sub: session.id,
         exp: jwt_expiration,
         login_state: LoginState::Basic,
     }
