@@ -28,7 +28,12 @@ pub enum UserFileDirecoryCreationError {
     DirectoryName(#[from] PathIsJustFileNameValidationError),
     CreateDirectory(#[from] CreateDirectoryError),
     ReadDirContents(#[from] ReadDirContentsError),
+    EmptyPath(#[from] EmptyPathError),
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("path must not be empty")]
+pub struct EmptyPathError;
 
 pub async fn create_direcory(
     storage_root_dir: &Path,
@@ -36,6 +41,10 @@ pub async fn create_direcory(
     direcory_name: &str,
     user: &User,
 ) -> Result<DirectoryCreationResult, UserFileDirecoryCreationError> {
+    if direcory_name.is_empty() {
+        return Err(EmptyPathError)?;
+    }
+
     validate_path_is_just_file_name(direcory_name)?;
 
     let user_storage = UserStorage {

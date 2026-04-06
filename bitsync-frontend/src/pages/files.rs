@@ -1,3 +1,5 @@
+pub mod directory_creation;
+
 use bitsync_core::use_case::user_files::{
     create_directory::DirectoryCreationResult, delete_user_file::UserFileDeletionResult,
     move_user_file::UserFileMoveResult, read_user_directory_contents::UserDirectoryContentsResult,
@@ -11,6 +13,8 @@ use crate::{
     models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind},
     pages::base::LoggedInDocument,
 };
+
+use directory_creation::DirectoryCreationDialog;
 
 pub enum FilesHomePageElementId {
     FileUploadForm,
@@ -108,46 +112,9 @@ impl Renderable for FilesHomePage {
                         }
                     }
 
-                    dialog
-                        class=(crate::styles::modal::ClassName::MODAL)
-                        id=(self.directory_creation_dialog_id)
-                        onclick="if (event.target === this) this.close()"
-                    {
-                        div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
-                            h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Create New Folder" }
-                            button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "×" }
-                        }
-                        form
-                            data-hijack
-                            action=(self.directory_creation_url)
-                            method="POST"
-                        {
-                            div class=(crate::styles::modal::ClassName::MODAL_BODY) {
-                                label class=(crate::styles::modal::ClassName::FORM_LABEL) {
-                                    "Folder Name"
-                                    input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="directory_name" placeholder="Enter folder name";
-                                }
-                            }
-                            div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
-                                button
-                                    type="button"
-                                    class=(crate::styles::base::ClassName::BUTTON)
-                                    onclick="closeClosestDialog(this)"
-                                {
-                                    "Cancel"
-                                }
-                                button
-                                    type="submit"
-                                    class=(
-                                        crate::styles::base::ClassName::BUTTON, " ",
-                                        crate::styles::base::ClassName::BUTTON_PRIMARY,
-                                    )
-                                {
-                                    "Create"
-                                }
-                            }
-                        }
-                    }
+                    (DirectoryCreationDialog {
+                        action_url: self.directory_creation_url.clone(),
+                    })
 
                     dialog
                         class=(crate::styles::modal::ClassName::MODAL)

@@ -12,14 +12,24 @@ use axum_extra::{
     response::Attachment,
     routing::RouterExt,
 };
-use bitsync_core::use_case::{self, user_files::upload_user_file::upload_user_file};
+use bitsync_core::use_case::{
+    self,
+    user_files::{
+        create_directory::UserFileDirecoryCreationError,
+        upload_user_file::upload_user_file,
+    },
+};
 use bitsync_frontend::{
     BODY_SELECTOR_TARGET, Component, Render,
     error_modal::ErrorModal,
-    pages::files::FilesHomePageChangeResult,
+    pages::files::{
+        FilesHomePageChangeResult,
+        directory_creation::{DirectoryCreationDisplayError, DirectoryCreationForm},
+    },
     toast::{TOAST_CONTAINER_SELECTOR, Toast},
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
+use bitsync_routes::TypedPath;
 use serde::Deserialize;
 
 use crate::{
@@ -292,6 +302,27 @@ async fn user_file_directory_creation_handler(
                     code: format!("document.getElementById('{dialog_id}').close()"),
                 },
             ])
+            .into_response()
+        }
+        Err(UserFileDirecoryCreationError::EmptyPath(..)) => {
+            let directory_creation_url = bitsync_routes::PostUserFileDirectoryCreation
+                .with_query_params(
+                    bitsync_routes::PostUserFileDirectoryCreationQueryParameters {
+                        path: query_parameters.path.clone(),
+                    },
+                )
+                .to_string();
+
+            let form = DirectoryCreationForm {
+                action_url: directory_creation_url,
+                error: Some(DirectoryCreationDisplayError::EmptyName),
+            };
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: form.render(),
+                patch_target: form.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
             .into_response()
         }
         Err(error) => Json(HyperStimCommand::HsPatchHtml {
