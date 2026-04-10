@@ -8,6 +8,8 @@ pub struct LoggedInDocument<R: Renderable> {
     pub children: R,
 }
 
+const NAV_MENU_ID: &str = "nav-menu";
+
 impl<R: Renderable> Renderable for LoggedInDocument<R> {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
@@ -35,9 +37,13 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                 }
                 body {
                     header {
-                        a class=(crate::styles::base::ClassName::HEADER_LOGO) href=(bitsync_routes::GetFilesHomePage.to_string()) {
+                        a
+                            class=(crate::styles::base::ClassName::HEADER_LOGO)
+                            href=(bitsync_routes::GetFilesHomePage.to_string())
+                        {
                             (crate::icons::logo::Logo::default())
                         }
+
                         nav {
                             button
                                 class=(crate::styles::base::ClassName::SEARCH_BUTTON)
@@ -90,15 +96,19 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             }
 
 
-                            button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="nav-menu" title="Menu" {
+                            button
+                                class=(crate::styles::base::ClassName::NAV_MENU_BUTTON)
+                                popovertarget=(NAV_MENU_ID)
+                                title="Menu"
+                            {
                                 (crate::icons::menu::Menu)
                             }
                             div
+                                id=(NAV_MENU_ID)
                                 class=(
                                     crate::styles::base::ClassName::CONTEXT_MENU, " ",
                                     crate::styles::base::ClassName::NAV_CONTEXT_MENU,
                                 )
-                                id="nav-menu"
                                 popover
                             {
                                 button
@@ -110,7 +120,13 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     span { "Settings" }
                                 }
                                 div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
-                                a class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU_ITEM, crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER)) href=(bitsync_routes::GetLogoutAction.to_string()) {
+                                a
+                                    class=(
+                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                    )
+                                    href=(bitsync_routes::GetLogoutAction.to_string())
+                                {
                                     (crate::icons::log_out::LogOut)
                                     span { "Sign Out" }
                                 }

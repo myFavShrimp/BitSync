@@ -219,11 +219,17 @@ impl Component for FileStorageTable {
 impl Renderable for FileStorageTable {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            table id=(self.id()) class=(crate::styles::files_home_page::ClassName::FILE_BROWSER) {
+            table
+                id=(self.id())
+                class=(crate::styles::files_home_page::ClassName::FILE_BROWSER)
+            {
                 @if self.dir_content.is_empty() {
                     tbody {
                         tr {
-                            td class=(crate::styles::files_home_page::ClassName::EMPTY_STATE) colspan="4" {
+                            td
+                                class=(crate::styles::files_home_page::ClassName::EMPTY_STATE)
+                                colspan="4"
+                            {
                                 (crate::icons::cloudy::Cloudy)
                                 p { "This folder is empty" }
                             }
@@ -246,25 +252,34 @@ impl Renderable for FileStorageTable {
                                         td class=(crate::styles::files_home_page::ClassName::FILE_ICON) {
                                             (crate::icons::folder::Folder)
                                         }
+
                                         td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
                                             a href=(url) { (dir_item.name) }
                                         }
                                     }
                                     StorageItemPresentationKind::File => {
-                                        td class=(format!("{} {}", crate::styles::files_home_page::ClassName::FILE_ICON, crate::styles::files_home_page::ClassName::FILE_ICON_SECONDARY)) {
+                                        td
+                                            class=(
+                                                crate::styles::files_home_page::ClassName::FILE_ICON, " ",
+                                                crate::styles::files_home_page::ClassName::FILE_ICON_SECONDARY,
+                                            )
+                                        {
                                             (crate::icons::file_text::FileText)
                                         }
+
                                         td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
                                             (dir_item.name)
                                         }
                                     }
                                 }
+
                                 td class=(crate::styles::files_home_page::ClassName::FILE_SIZE) {
                                     @match &dir_item.kind {
                                         StorageItemPresentationKind::Directory { .. } => { "\u{2014}" }
                                         StorageItemPresentationKind::File => { (dir_item.size) }
                                     }
                                 }
+
                                 td class=(crate::styles::files_home_page::ClassName::FILE_ACTIONS) {
                                     button
                                         title="More"
@@ -273,24 +288,44 @@ impl Renderable for FileStorageTable {
                                     {
                                         (crate::icons::ellipsis_vertical::EllipsisVertical)
                                     }
-                                    dialog class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::files_home_page::ClassName::FILE_CONTEXT_MENU)) popover id=(dir_item.actions_popover_id) {
+
+                                    dialog
+                                        id=(dir_item.actions_popover_id)
+                                        class=(
+                                            crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                            crate::styles::files_home_page::ClassName::FILE_CONTEXT_MENU,
+                                        )
+                                        popover
+                                    {
                                         button
                                             class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                            onclick=(format_args!(
-                                                "closeClosestPopover(this); openMoveModal('{}', '{}', '{}')",
-                                                FilesHomePageElementId::FileMoveDialog.to_str(),
-                                                dir_item.move_url,
-                                                dir_item.path,
-                                            ))
+                                            onclick=(
+                                                format_args!(
+                                                    "closeClosestPopover(this); openMoveModal('{}', '{}', '{}')",
+                                                    FilesHomePageElementId::FileMoveDialog.to_str(),
+                                                    dir_item.move_url,
+                                                    dir_item.path,
+                                                )
+                                            )
                                         {
                                             span { "Move" }
                                         }
-                                        a class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM) href=(dir_item.download_url) onclick="closeClosestDialog(this)" {
+
+                                        a
+                                            class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                            href=(dir_item.download_url)
+                                            onclick="closeClosestDialog(this)"
+                                        {
                                             span { "Download" }
                                         }
+
                                         div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+
                                         button
-                                            class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU_ITEM, crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER))
+                                            class=(
+                                                crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
+                                                crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                            )
                                             data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
                                             data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
                                         {

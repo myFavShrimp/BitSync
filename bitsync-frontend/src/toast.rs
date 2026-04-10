@@ -44,11 +44,10 @@ impl Renderable for Toast {
 
         maud! {
             div
-                class=(format!(
-                    "{} {}",
-                    crate::styles::toast::ClassName::TOAST,
+                class=(
+                    crate::styles::toast::ClassName::TOAST, " ",
                     self.kind_class(),
-                ))
+                )
                 data-init=(format!(
                     "this._remaining = {TOAST_AUTO_DISMISS_MS}, this._start = Date.now(), this._tid = setTimeout(() => this.classList.add('{dismissing_class}'), this._remaining)"
                 ))
