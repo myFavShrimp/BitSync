@@ -46,7 +46,12 @@ impl Renderable for LoginPage {
                 style { (crate::styles::login_page::STYLE_SHEET) }
 
                 (crate::icons::logo::Logo::with_class(crate::styles::login_page::ClassName::LOGO))
-                p class=(crate::styles::login_page::ClassName::PAGE_HINT) {("Sign in to access your secure storage")}
+
+                p
+                    class=(crate::styles::login_page::ClassName::PAGE_HINT)
+                {
+                    ("Sign in to access your secure storage")
+                }
 
                 main {
                     @match &self {
@@ -84,24 +89,43 @@ impl Renderable for LoginForm {
             {
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "Username"
+
                     div class=(crate::styles::login_page::ClassName::INPUT) {
-                        input class=(crate::styles::base::ClassName::FORM_CONTROL) value=[&self.username] name="username" placeholder="Enter your username" required;
+                        input
+                            class=(crate::styles::base::ClassName::FORM_CONTROL)
+                            value=[&self.username]
+                            name="username"
+                            placeholder="Enter your username"
+                            required;
                     }
                 }
                 label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
                     "Password"
+
                     div class=(crate::styles::login_page::ClassName::INPUT) {
-                        input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" placeholder="Enter your password" required name="password";
+                        input
+                            class=(crate::styles::base::ClassName::FORM_CONTROL)
+                            type="password"
+                            placeholder="Enter your password"
+                            required
+                            name="password";
                     }
                 }
 
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                 div class=(crate::styles::login_page::ClassName::ACTIONS) {
-                    button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                    button
+                        type="submit"
+                        class=(crate::styles::base::ClassName::BUTTON)
+                    {
                         "Sign in"
                     }
-                    a href=(bitsync_routes::GetRegisterPage.to_string()) class=(crate::styles::base::ClassName::TEXT_LINK) {
+
+                    a
+                        href=(bitsync_routes::GetRegisterPage.to_string())
+                        class=(crate::styles::base::ClassName::TEXT_LINK)
+                    {
                         "I don't have an account"
                     }
                 }
@@ -134,9 +158,18 @@ impl Renderable for TotpForm {
                     "TOTP Code"
 
                     div class=(crate::styles::login_page::ClassName::TOTP_INPUT_WRAPPER) {
-                        input class=(crate::styles::base::ClassName::FORM_CONTROL) name="totp" placeholder="Enter your one-time password" required;
+                        input
+                            class=(crate::styles::base::ClassName::FORM_CONTROL)
+                            name="totp"
+                            placeholder="Enter your one-time password"
+                            required;
 
-                        p id="totp-timer" class=(crate::styles::login_page::ClassName::TOTP_TIMER) {"30"}
+                        p
+                            id="totp-timer"
+                            class=(crate::styles::login_page::ClassName::TOTP_TIMER)
+                        {
+                            "30"
+                        }
 
                         script {(hypertext::Raw::dangerously_create(r#"
                             setInterval(() => {
@@ -151,7 +184,10 @@ impl Renderable for TotpForm {
 
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
-                button type="submit" class=(crate::styles::base::ClassName::BUTTON) {
+                button
+                    type="submit"
+                    class=(crate::styles::base::ClassName::BUTTON)
+                {
                     "Login"
                 }
             }

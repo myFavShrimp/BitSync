@@ -36,7 +36,13 @@ impl Renderable for SettingsDialog {
             {
                 div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
                     h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Settings" }
-                    button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialogAndRemoveElement(this)" { "×" }
+
+                    button
+                        class=(crate::styles::modal::ClassName::MODAL_CLOSE)
+                        onclick="closeClosestDialogAndRemoveElement(this)"
+                    {
+                        "×"
+                    }
                 }
                 (SettingsTabArea {
                     active_tab: SettingsTab::Sessions {

@@ -92,7 +92,10 @@ impl Renderable for FilesHomePage {
                 {
                     @match &self.parent_directory_url {
                         Some(link_data) => {
-                            a class=(crate::styles::files_home_page::ClassName::BREADCRUMB) href=(link_data.parent_directory_url) {
+                            a
+                                class=(crate::styles::files_home_page::ClassName::BREADCRUMB)
+                                href=(link_data.parent_directory_url)
+                            {
                                 (crate::icons::chevron_left::ChevronLeft)
                                 (link_data.current_directory_name)
                             }
@@ -123,7 +126,13 @@ impl Renderable for FilesHomePage {
                     {
                         div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
                             h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Move Item" }
-                            button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "×" }
+
+                            button
+                                class=(crate::styles::modal::ClassName::MODAL_CLOSE)
+                                onclick="closeClosestDialog(this)"
+                            {
+                                "×"
+                            }
                         }
                         form
                             data-hijack
@@ -132,7 +141,13 @@ impl Renderable for FilesHomePage {
                             div class=(crate::styles::modal::ClassName::MODAL_BODY) {
                                 label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                                     "Destination Path"
-                                    input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="destination_path" placeholder="Enter destination path";
+
+                                    input
+                                        class=(crate::styles::base::ClassName::FORM_CONTROL)
+                                        type="text"
+                                        name="destination_path"
+                                        placeholder="Enter destination path"
+                                    ;
                                 }
                             }
                             div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
@@ -183,7 +198,13 @@ impl Renderable for FileUploadForm {
                 method="POST"
                 enctype="multipart/form-data"
             {
-                input type="file" name="upload" hidden onchange="this.form.requestSubmit()";
+                input
+                    type="file"
+                    name="upload"
+                    hidden
+                    onchange="this.form.requestSubmit()"
+                ;
+
                 button
                     type="button"
                     class=(

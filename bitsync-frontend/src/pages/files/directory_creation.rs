@@ -41,7 +41,12 @@ impl Renderable for DirectoryCreationForm {
                 div class=(crate::styles::modal::ClassName::MODAL_BODY) {
                     label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                         "Folder Name"
-                        input class=(crate::styles::base::ClassName::FORM_CONTROL) type="text" name="directory_name" placeholder="Enter folder name";
+
+                        input
+                            class=(crate::styles::base::ClassName::FORM_CONTROL)
+                            type="text"
+                            name="directory_name"
+                            placeholder="Enter folder name";
                     }
 
                     OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
@@ -92,7 +97,13 @@ impl Renderable for DirectoryCreationDialog {
             {
                 div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
                     h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Create New Folder" }
-                    button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialog(this)" { "×" }
+
+                    button
+                        class=(crate::styles::modal::ClassName::MODAL_CLOSE)
+                        onclick="closeClosestDialog(this)"
+                    {
+                        "×"
+                    }
                 }
                 (DirectoryCreationForm {
                     action_url: self.action_url.clone(),
