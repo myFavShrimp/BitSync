@@ -1,8 +1,29 @@
+use bitsync_database::entity::Session;
 use hypertext::prelude::*;
+use uuid::Uuid;
+
+use crate::Component;
+
+pub mod password;
+pub mod sessions;
+
+use self::{password::PasswordTabContent, sessions::SessionsTabContent};
 
 pub static SETTINGS_DIALOG_ID: &str = "settings-dialog";
+static SETTINGS_TAB_AREA_ID: &str = "settings-tab-area";
 
-pub struct SettingsDialog;
+pub enum SettingsTab {
+    Password,
+    Sessions {
+        sessions: Vec<Session>,
+        current_session_id: Uuid,
+    },
+}
+
+pub struct SettingsDialog {
+    pub sessions: Vec<Session>,
+    pub current_session_id: Uuid,
+}
 
 impl Renderable for SettingsDialog {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
@@ -17,6 +38,55 @@ impl Renderable for SettingsDialog {
                     h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Settings" }
                     button class=(crate::styles::modal::ClassName::MODAL_CLOSE) onclick="closeClosestDialogAndRemoveElement(this)" { "×" }
                 }
+                (SettingsTabArea {
+                    active_tab: SettingsTab::Sessions {
+                        sessions: self.sessions.clone(),
+                        current_session_id: self.current_session_id,
+                    },
+                })
+            }
+        }
+        .render_to(buffer);
+    }
+}
+
+pub struct SettingsTabArea {
+    pub active_tab: SettingsTab,
+}
+
+impl Component for SettingsTabArea {
+    fn id(&self) -> String {
+        SETTINGS_TAB_AREA_ID.to_owned()
+    }
+}
+
+impl Renderable for SettingsTabArea {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        let is_password_active = matches!(self.active_tab, SettingsTab::Password);
+        let is_sessions_active = matches!(self.active_tab, SettingsTab::Sessions { .. });
+
+        let password_tab_class = if is_password_active {
+            format!(
+                "{} {}",
+                crate::styles::modal::ClassName::TAB,
+                crate::styles::modal::ClassName::ACTIVE,
+            )
+        } else {
+            crate::styles::modal::ClassName::TAB.to_owned()
+        };
+
+        let sessions_tab_class = if is_sessions_active {
+            format!(
+                "{} {}",
+                crate::styles::modal::ClassName::TAB,
+                crate::styles::modal::ClassName::ACTIVE,
+            )
+        } else {
+            crate::styles::modal::ClassName::TAB.to_owned()
+        };
+
+        maud! {
+            div id=(self.id()) {
                 div class=(crate::styles::modal::ClassName::TAB_BAR_WRAPPER) {
                     div
                         class=(crate::styles::modal::ClassName::TAB_BAR)
@@ -27,49 +97,49 @@ impl Renderable for SettingsDialog {
                         ))
                         data-on-scroll="this.updateOverflow()"
                     {
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::ACTIVE) { "Password" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "TOTP" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Sessions" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Shares" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "TOTP" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Sessions" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Shares" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "TOTP" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Sessions" }
-                        button class=(crate::styles::modal::ClassName::TAB, " ", crate::styles::modal::ClassName::DISABLED) disabled { "Shares" }
-                    }
-                }
-                form
-                    data-hijack
-                    action=(bitsync_routes::PostUserSettingsChangePassword.to_string())
-                    method="POST"
-                {
-                    div class=(crate::styles::modal::ClassName::MODAL_BODY) {
-                        p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
-                            "Update your password below. Changing your password will sign out all other active sessions."
-                        }
-                        label class=(crate::styles::modal::ClassName::FORM_LABEL) {
-                            "Current Password"
-                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="current_password" placeholder="Enter your current password";
-                        }
-                        div class=(crate::styles::modal::ClassName::FORM_DIVIDER) {}
-                        label class=(crate::styles::modal::ClassName::FORM_LABEL) {
-                            "New Password"
-                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password" placeholder="Enter a new password";
-                        }
-                        label class=(crate::styles::modal::ClassName::FORM_LABEL) {
-                            "Confirm New Password"
-                            input class=(crate::styles::base::ClassName::FORM_CONTROL) type="password" name="new_password_repeated" placeholder="Repeat your new password";
+                        button
+                            class=(sessions_tab_class)
+                            data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsSessionsTab))
+                            data-on-click="this.fetch.trigger()"
+                        {
+                            "Sessions"
                         }
                         button
-                            type="submit"
                             class=(
-                                crate::styles::base::ClassName::BUTTON, " ",
-                                crate::styles::base::ClassName::BUTTON_PRIMARY
+                                crate::styles::modal::ClassName::TAB, " ",
+                                crate::styles::modal::ClassName::DISABLED,
                             )
+                            disabled
                         {
-                            "Change Password"
+                            "Shares"
                         }
+                        button
+                            class=(password_tab_class)
+                            data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPasswordTab))
+                            data-on-click="this.fetch.trigger()"
+                        {
+                            "Password"
+                        }
+                        button
+                            class=(
+                                crate::styles::modal::ClassName::TAB, " ",
+                                crate::styles::modal::ClassName::DISABLED,
+                            )
+                            disabled
+                        {
+                            "TOTP"
+                        }
+                    }
+                }
+                @match &self.active_tab {
+                    SettingsTab::Password => {
+                        (PasswordTabContent)
+                    }
+                    SettingsTab::Sessions { sessions, current_session_id } => {
+                        (SessionsTabContent {
+                            sessions: sessions.clone(),
+                            current_session_id: *current_session_id,
+                        })
                     }
                 }
             }

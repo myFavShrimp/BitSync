@@ -8,6 +8,7 @@ use axum::{
     response::{Html, IntoResponse},
 };
 use axum_extra::{
+    TypedHeader,
     extract::{CookieJar, Form},
     routing::RouterExt,
 };
@@ -67,16 +68,8 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         )
         .merge(
             Router::new()
-                .typed_post(redeem_invite_token_handler)
-                .route_layer(from_fn_with_state(
-                    state.clone(),
-                    require_logout_middleware::<RedirectHyperStim>,
-                ))
-                .with_state(state.clone()),
-        )
-        .merge(
-            Router::new()
                 .typed_post(register_action_handler)
+                .typed_post(redeem_invite_token_handler)
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_logout_middleware::<RedirectHyperStim>,
@@ -119,6 +112,7 @@ async fn redeem_invite_token_handler(
                     token: Some(form_data.token.clone()),
                 })
                 .to_string();
+
             hyperstim_redirect_response(&redirect_url).into_response()
         }
         Err(RedeemInviteTokenError::InvalidInviteTokenError(..)) => {
@@ -147,12 +141,12 @@ async fn redeem_invite_token_handler(
 struct RegisterActionFormData {
     username: String,
     password: String,
-    platform: String,
 }
 
 async fn register_action_handler(
     _: bitsync_routes::PostRegisterAction,
     State(state): State<Arc<AppState>>,
+    TypedHeader(user_agent): axum_extra::TypedHeader<headers::UserAgent>,
     Query(query_parameters): Query<bitsync_routes::PostRegisterActionQueryParameters>,
     cookie_jar: CookieJar,
     Form(registration_data): Form<RegisterActionFormData>,
@@ -170,7 +164,7 @@ async fn register_action_handler(
         &registration_data.username,
         &registration_data.password,
         &token_uuid,
-        &registration_data.platform,
+        user_agent.as_str(),
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )

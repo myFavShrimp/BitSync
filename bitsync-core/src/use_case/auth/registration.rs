@@ -45,7 +45,7 @@ pub async fn perform_registration(
     username: &str,
     password: &str,
     invite_token_id: &Uuid,
-    platform: &str,
+    user_agent: &str,
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<RegistrationResult, RegistrationError> {
@@ -78,9 +78,16 @@ pub async fn perform_registration(
 
     ensure_user_storage_exists(&user_storage).await?;
 
-    let session_platform = crate::use_case::auth::parse_navigator_platform(platform);
-    let session =
-        repository::session::create(&mut *transaction, &user.id, &session_platform).await?;
+    let session_platform = super::parse_user_agent_platform(user_agent);
+    let session_browser = super::parse_user_agent_browser(user_agent);
+
+    let session = repository::session::create(
+        &mut *transaction,
+        &user.id,
+        &session_platform,
+        &session_browser,
+    )
+    .await?;
 
     transaction.commit().await?;
 

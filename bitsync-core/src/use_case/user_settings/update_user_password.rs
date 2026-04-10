@@ -3,6 +3,7 @@ use bitsync_database::{
     entity::User,
     repository,
 };
+use uuid::Uuid;
 
 use crate::hash::{
     PasswordHashCreationError, PasswordHashVerificationError, hash_password, verify_password_hash,
@@ -29,6 +30,7 @@ pub async fn update_user_password(
     current_password: &str,
     new_password: &str,
     new_password_repeated: &str,
+    current_session_id: &Uuid,
 ) -> Result<(), UpdateUserPasswordError> {
     verify_password_hash(&user.password, current_password)?;
 
@@ -40,6 +42,12 @@ pub async fn update_user_password(
 
     let mut transaction = database.begin_transaction().await?;
     repository::user::update_password(&mut *transaction, &user.id, &hashed_password).await?;
+    repository::session::delete_all_by_user_id_except(
+        &mut *transaction,
+        &user.id,
+        current_session_id,
+    )
+    .await?;
 
     transaction.commit().await?;
 

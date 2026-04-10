@@ -47,7 +47,7 @@ pub async fn delete_by_id<'e, E>(executor: E, id: &Uuid) -> Result<(), QueryErro
 where
     E: PgExecutor<'e>,
 {
-    sqlx::query!(r#"DELETE FROM "invite_token" WHERE id = $1"#, id,)
+    sqlx::query!(r#"DELETE FROM "invite_token" WHERE id = $1"#, id)
         .execute(executor)
         .await?;
     Ok(())

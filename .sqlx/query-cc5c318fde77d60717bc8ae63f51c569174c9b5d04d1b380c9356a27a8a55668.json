@@ -1,0 +1,110 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO \"session\" (user_id, platform, browser) VALUES ($1, $2, $3) RETURNING id, user_id, platform AS \"platform: SessionPlatform\", browser AS \"browser: SessionBrowser\", created_at, last_seen_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "platform: SessionPlatform",
+        "type_info": {
+          "Custom": {
+            "name": "session_platform",
+            "kind": {
+              "Enum": [
+                "macos",
+                "windows",
+                "linux",
+                "ios",
+                "android",
+                "unknown"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "browser: SessionBrowser",
+        "type_info": {
+          "Custom": {
+            "name": "session_browser",
+            "kind": {
+              "Enum": [
+                "chrome",
+                "firefox",
+                "safari",
+                "edge",
+                "opera",
+                "unknown"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "last_seen_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "session_platform",
+            "kind": {
+              "Enum": [
+                "macos",
+                "windows",
+                "linux",
+                "ios",
+                "android",
+                "unknown"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "session_browser",
+            "kind": {
+              "Enum": [
+                "chrome",
+                "firefox",
+                "safari",
+                "edge",
+                "opera",
+                "unknown"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "cc5c318fde77d60717bc8ae63f51c569174c9b5d04d1b380c9356a27a8a55668"
+}

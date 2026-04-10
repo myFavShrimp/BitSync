@@ -22,7 +22,7 @@ where
         let message = format!("Error: {}", error);
 
         let trace = error.source().map(|previous_error| {
-            let mut trace = format!("Caused by: {previous_error}",);
+            let mut trace = format!("Caused by: {previous_error}");
             let mut trace_error = error.source();
 
             while let Some(current_error) = trace_error {

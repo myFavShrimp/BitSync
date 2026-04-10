@@ -8,6 +8,7 @@ use axum::{
     response::{Html, IntoResponse},
 };
 use axum_extra::{
+    TypedHeader,
     extract::{CookieJar, Form},
     routing::RouterExt,
 };
@@ -81,12 +82,12 @@ async fn login_page_handler(_: bitsync_routes::GetLoginPage) -> impl IntoRespons
 struct LoginActionFormData {
     username: String,
     password: String,
-    platform: String,
 }
 
 async fn login_action_handler(
     _: bitsync_routes::PostLoginAction,
     State(state): State<Arc<AppState>>,
+    TypedHeader(user_agent): axum_extra::TypedHeader<headers::UserAgent>,
     cookie_jar: CookieJar,
     Form(login_data): Form<LoginActionFormData>,
 ) -> impl IntoResponse {
@@ -94,7 +95,7 @@ async fn login_action_handler(
         &state.database,
         &login_data.username,
         &login_data.password,
-        &login_data.platform,
+        user_agent.as_str(),
         state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
@@ -181,6 +182,7 @@ async fn login_totp_auth_submit_handler(
                 VerifyTotpError::TotpNotSetUp(..) => TotpVerificationDisplayError::NotSetUp,
                 error => {
                     emit_error(error);
+
                     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
                 }
             };

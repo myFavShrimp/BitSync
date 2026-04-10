@@ -7,3 +7,4 @@ edition = "2024"
 axum = { workspace =  true }
 axum-extra = { workspace = true, features = ["typed-routing"] }
 serde.workspace = true
+uuid.workspace = true

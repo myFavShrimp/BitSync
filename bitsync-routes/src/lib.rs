@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 pub use axum_extra::routing::TypedPath;
 
@@ -134,8 +135,26 @@ pub struct GetSearchQueryParameters {
 
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings")]
-pub struct GetUserSettingsPage;
+pub struct GetUserSettingsDialog;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/password")]
+pub struct GetUserSettingsPasswordTab;
 
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/change-password")]
 pub struct PostUserSettingsChangePassword;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/sessions")]
+pub struct GetUserSettingsSessionsTab;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/sessions/terminate/{session_id}")]
+pub struct PostTerminateSession {
+    pub session_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/sessions/terminate-all-others")]
+pub struct PostTerminateAllOtherSessions;

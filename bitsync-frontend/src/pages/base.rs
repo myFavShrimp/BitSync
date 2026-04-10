@@ -31,6 +31,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     style { (crate::styles::error_banner::STYLE_SHEET) }
                     style { (crate::styles::search_launcher::STYLE_SHEET) }
                     style { (crate::styles::toast::STYLE_SHEET) }
+                    style { (crate::styles::user_settings_page::STYLE_SHEET) }
                 }
                 body {
                     header {
@@ -92,10 +93,17 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             button class=(crate::styles::base::ClassName::NAV_MENU_BUTTON) popovertarget="nav-menu" title="Menu" {
                                 (crate::icons::menu::Menu)
                             }
-                            div class=(format!("{} {}", crate::styles::base::ClassName::CONTEXT_MENU, crate::styles::base::ClassName::NAV_CONTEXT_MENU)) id="nav-menu" popover {
+                            div
+                                class=(
+                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                    crate::styles::base::ClassName::NAV_CONTEXT_MENU,
+                                )
+                                id="nav-menu"
+                                popover
+                            {
                                 button
                                     class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPage))
+                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 {
                                     (crate::icons::bolt::Bolt)

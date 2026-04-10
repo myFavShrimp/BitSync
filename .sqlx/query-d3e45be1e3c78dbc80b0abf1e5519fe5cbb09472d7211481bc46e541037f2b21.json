@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, user_id, platform AS \"platform: SessionPlatform\", browser AS \"browser: SessionBrowser\", created_at, last_seen_at FROM \"session\" WHERE user_id = $1 ORDER BY last_seen_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "platform: SessionPlatform",
+        "type_info": {
+          "Custom": {
+            "name": "session_platform",
+            "kind": {
+              "Enum": [
+                "macos",
+                "windows",
+                "linux",
+                "ios",
+                "android",
+                "unknown"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "browser: SessionBrowser",
+        "type_info": {
+          "Custom": {
+            "name": "session_browser",
+            "kind": {
+              "Enum": [
+                "chrome",
+                "firefox",
+                "safari",
+                "edge",
+                "opera",
+                "unknown"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "last_seen_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d3e45be1e3c78dbc80b0abf1e5519fe5cbb09472d7211481bc46e541037f2b21"
+}
