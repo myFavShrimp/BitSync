@@ -64,7 +64,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     class=(crate::styles::search_launcher::ClassName::CLOSE_BUTTON)
                                     onclick="closeClosestDialog(this)"
                                 {
-                                    "×"
+                                    (crate::icons::x::X)
                                 }
 
                                 form

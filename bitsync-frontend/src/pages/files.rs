@@ -131,7 +131,7 @@ impl Renderable for FilesHomePage {
                                 class=(crate::styles::modal::ClassName::MODAL_CLOSE)
                                 onclick="closeClosestDialog(this)"
                             {
-                                "×"
+                                (crate::icons::x::X)
                             }
                         }
                         form

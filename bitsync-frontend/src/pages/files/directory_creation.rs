@@ -102,7 +102,7 @@ impl Renderable for DirectoryCreationDialog {
                         class=(crate::styles::modal::ClassName::MODAL_CLOSE)
                         onclick="closeClosestDialog(this)"
                     {
-                        "×"
+                        (crate::icons::x::X)
                     }
                 }
                 (DirectoryCreationForm {

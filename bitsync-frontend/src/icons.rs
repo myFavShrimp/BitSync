@@ -11,3 +11,4 @@ pub mod logo;
 pub mod menu;
 pub mod search;
 pub mod upload;
+pub mod x;

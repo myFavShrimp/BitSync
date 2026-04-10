@@ -41,7 +41,7 @@ impl Renderable for SettingsDialog {
                         class=(crate::styles::modal::ClassName::MODAL_CLOSE)
                         onclick="closeClosestDialogAndRemoveElement(this)"
                     {
-                        "×"
+                        (crate::icons::x::X)
                     }
                 }
                 (SettingsTabArea {
