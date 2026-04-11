@@ -9,6 +9,7 @@ use crate::{
 pub enum RegistrationDisplayError {
     UsernameTaken,
     InvalidInviteToken,
+    EmptyPassword,
     InternalServerError,
 }
 
@@ -17,6 +18,7 @@ impl RegistrationDisplayError {
         match self {
             Self::UsernameTaken => "The username is already taken",
             Self::InvalidInviteToken => "The invite token is invalid or has already been used",
+            Self::EmptyPassword => "Password cannot be empty",
             Self::InternalServerError => "An internal server error occurred",
         }
     }

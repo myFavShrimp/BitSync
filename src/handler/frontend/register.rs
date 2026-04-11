@@ -24,7 +24,8 @@ use bitsync_frontend::{
         error::ErrorPage,
         register::{
             InviteTokenDisplayError, InviteTokenForm, RegisterForm, RegisterPage,
-            RegistrationDisplayError, TotpRecoveryCodesPrompt, TotpSetupDisplayError, TotpSetupForm,
+            RegistrationDisplayError, TotpRecoveryCodesPrompt, TotpSetupDisplayError,
+            TotpSetupForm,
         },
     },
 };
@@ -171,7 +172,21 @@ async fn register_action_handler(
     let token_uuid = match uuid::Uuid::parse_str(&query_parameters.token) {
         Ok(uuid) => uuid,
         Err(_) => {
-            return StatusCode::BAD_REQUEST.into_response();
+            let register_form = RegisterForm {
+                token: query_parameters.token,
+                username: Some(registration_data.username),
+                error: Some(RegistrationDisplayError::InvalidInviteToken),
+            };
+
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: register_form.render(),
+                    patch_target: register_form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response();
         }
     };
 
@@ -198,12 +213,18 @@ async fn register_action_handler(
         }
         Err(error) => {
             let (status_code, display_error) = match error {
-                RegistrationError::UserExists(..) => {
-                    (StatusCode::CONFLICT, RegistrationDisplayError::UsernameTaken)
-                }
-                RegistrationError::InvalidInviteTokenError(..) => {
-                    (StatusCode::BAD_REQUEST, RegistrationDisplayError::InvalidInviteToken)
-                }
+                RegistrationError::UserExists(..) => (
+                    StatusCode::CONFLICT,
+                    RegistrationDisplayError::UsernameTaken,
+                ),
+                RegistrationError::InvalidInviteTokenError(..) => (
+                    StatusCode::BAD_REQUEST,
+                    RegistrationDisplayError::InvalidInviteToken,
+                ),
+                RegistrationError::EmptyPassword(..) => (
+                    StatusCode::BAD_REQUEST,
+                    RegistrationDisplayError::EmptyPassword,
+                ),
                 error => {
                     emit_error(error);
                     (

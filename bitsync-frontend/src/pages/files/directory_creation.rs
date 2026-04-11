@@ -6,12 +6,18 @@ use super::FilesHomePageElementId;
 
 pub enum DirectoryCreationDisplayError {
     EmptyName,
+    InvalidName,
+    InvalidPath,
+    InternalServerError,
 }
 
 impl DirectoryCreationDisplayError {
     pub fn message(&self) -> &'static str {
         match self {
             Self::EmptyName => "Folder name must not be empty",
+            Self::InvalidName => "Folder name must not contain path separators",
+            Self::InvalidPath => "The path is invalid",
+            Self::InternalServerError => "An internal server error occurred",
         }
     }
 }

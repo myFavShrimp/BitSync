@@ -15,6 +15,7 @@ use crate::{
     hash::{PasswordHashCreationError, hash_password},
     jwt::{JwtClaims, LoginState},
     use_case::auth::InvalidInviteTokenError,
+    validation::is_blank,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -24,15 +25,20 @@ pub enum RegistrationError {
     DatabaseQuery(#[from] repository::QueryError),
     DatabaseTransaction(#[from] TransactionCommitError),
     TransactionBegin(#[from] TransactionBeginError),
-    UserExists(#[from] UserExists),
+    UserExists(#[from] UserExistsError),
     InvalidInviteTokenError(#[from] InvalidInviteTokenError),
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
+    EmptyPassword(#[from] EmptyPasswordError),
     Jwt(#[from] crate::jwt::Error),
 }
 
 #[derive(thiserror::Error, Debug)]
 #[error("the user already exists")]
-pub struct UserExists;
+pub struct UserExistsError;
+
+#[derive(thiserror::Error, Debug)]
+#[error("password cannot be empty")]
+pub struct EmptyPasswordError;
 
 pub struct RegistrationResult {
     pub user: User,
@@ -49,14 +55,21 @@ pub async fn perform_registration(
     jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<RegistrationResult, RegistrationError> {
+    if is_blank(password) {
+        Err(EmptyPasswordError)?;
+    }
+
     let mut transaction = database.begin_transaction().await?;
 
     let invite_token =
         repository::invite_token::find_by_id(&mut *transaction, invite_token_id).await?;
     let invite_token = invite_token.ok_or(InvalidInviteTokenError)?;
 
-    if let Ok(_user) = repository::user::find_by_username(&mut *transaction, username).await {
-        Err(UserExists)?;
+    if repository::user::find_by_username(&mut *transaction, username)
+        .await?
+        .is_some()
+    {
+        Err(UserExistsError)?;
     }
 
     let hashed_password = hash_password(password)?;

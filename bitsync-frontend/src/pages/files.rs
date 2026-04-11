@@ -1,4 +1,5 @@
 pub mod directory_creation;
+pub mod file_operations;
 
 use bitsync_core::use_case::user_files::{
     create_directory::DirectoryCreationResult, delete_user_file::UserFileDeletionResult,

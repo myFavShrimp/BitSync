@@ -113,9 +113,10 @@ async fn login_action_handler(
         }
         Err(error) => {
             let (status_code, display_error) = match error {
-                LoginError::PasswordHashVerification(..) | LoginError::DatabaseQuery(..) => {
-                    (StatusCode::UNAUTHORIZED, LoginDisplayError::InvalidCredentials)
-                }
+                LoginError::PasswordHashVerification(..) | LoginError::UserNotFound(..) => (
+                    StatusCode::UNAUTHORIZED,
+                    LoginDisplayError::InvalidCredentials,
+                ),
                 error => {
                     emit_error(error);
                     (
@@ -181,12 +182,14 @@ async fn login_totp_auth_submit_handler(
         }
         Err(error) => {
             let (status_code, display_error) = match error {
-                VerifyTotpError::TotpInvalid(..) => {
-                    (StatusCode::UNAUTHORIZED, TotpVerificationDisplayError::InvalidCode)
-                }
-                VerifyTotpError::TotpNotSetUp(..) => {
-                    (StatusCode::UNAUTHORIZED, TotpVerificationDisplayError::NotSetUp)
-                }
+                VerifyTotpError::TotpInvalid(..) => (
+                    StatusCode::UNAUTHORIZED,
+                    TotpVerificationDisplayError::InvalidCode,
+                ),
+                VerifyTotpError::TotpNotSetUp(..) => (
+                    StatusCode::UNAUTHORIZED,
+                    TotpVerificationDisplayError::NotSetUp,
+                ),
                 error => {
                     emit_error(error);
                     (

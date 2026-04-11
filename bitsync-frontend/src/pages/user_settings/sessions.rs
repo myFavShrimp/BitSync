@@ -2,7 +2,21 @@ use bitsync_database::entity::{Session, SessionBrowser, SessionPlatform};
 use hypertext::prelude::*;
 use uuid::Uuid;
 
-use crate::Component;
+use crate::{Component, error_banner::OptionalErrorBanner};
+
+pub enum SessionsDisplayError {
+    InternalServerError,
+    CannotTerminateCurrentSession,
+}
+
+impl SessionsDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::InternalServerError => "An internal server error occurred",
+            Self::CannotTerminateCurrentSession => "Cannot terminate the current session",
+        }
+    }
+}
 
 static SESSION_LIST_ID: &str = "session-list";
 
@@ -64,6 +78,7 @@ impl Renderable for SessionsTabContent {
                 (SessionList {
                     sessions: self.sessions.clone(),
                     current_session_id: self.current_session_id,
+                    error: None,
                 })
                 @if has_other_sessions {
                     form
@@ -91,6 +106,7 @@ impl Renderable for SessionsTabContent {
 pub struct SessionList {
     pub sessions: Vec<Session>,
     pub current_session_id: Uuid,
+    pub error: Option<SessionsDisplayError>,
 }
 
 impl Component for SessionList {
@@ -106,8 +122,12 @@ impl Renderable for SessionList {
                 id=(self.id())
                 class=(crate::styles::user_settings_page::ClassName::SESSION_LIST)
             {
+                OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
+
                 @for session in &self.sessions {
+                    // TODO move to use case?
                     @let is_current = session.id == self.current_session_id;
+
                     div class=(
                         if is_current {
                             format!(

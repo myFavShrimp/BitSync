@@ -4,12 +4,18 @@ use crate::{Component, error_banner::OptionalErrorBanner};
 
 pub enum PasswordDisplayError {
     InternalServerError,
+    InvalidCurrentPassword,
+    NewPasswordsMismatch,
+    EmptyNewPassword,
 }
 
 impl PasswordDisplayError {
     pub fn message(&self) -> &'static str {
         match self {
             Self::InternalServerError => "An internal server error occurred",
+            Self::InvalidCurrentPassword => "Current password is incorrect",
+            Self::NewPasswordsMismatch => "New passwords do not match",
+            Self::EmptyNewPassword => "Password cannot be empty",
         }
     }
 }
@@ -37,6 +43,8 @@ impl Renderable for PasswordTabContent {
                     p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
                         "Update your password below. Changing your password will sign out all other active sessions."
                     }
+
+                    OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                     label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                         "Current Password"
@@ -69,8 +77,6 @@ impl Renderable for PasswordTabContent {
                             name="new_password_repeated"
                             placeholder="Repeat your new password";
                     }
-
-                    OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                     button
                         type="submit"

@@ -56,7 +56,10 @@ where
         .await?)
 }
 
-pub async fn find_by_username<'e, E>(executor: E, username: &str) -> Result<User, QueryError>
+pub async fn find_by_username<'e, E>(
+    executor: E,
+    username: &str,
+) -> Result<Option<User>, QueryError>
 where
     E: PgExecutor<'e>,
 {
@@ -65,7 +68,7 @@ where
         r#"SELECT * FROM "user" WHERE username = $1"#,
         username,
     )
-    .fetch_one(executor)
+    .fetch_optional(executor)
     .await?)
 }
 

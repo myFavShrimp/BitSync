@@ -94,3 +94,15 @@ pub fn internal_server_error_toast_response() -> Response {
     )
         .into_response()
 }
+
+pub fn user_error_toast_response(message: impl Into<String>) -> Response {
+    (
+        StatusCode::BAD_REQUEST,
+        Json(HyperStimCommand::HsPatchHtml {
+            html: Toast::error(message).render(),
+            patch_target: TOAST_CONTAINER_SELECTOR.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        }),
+    )
+        .into_response()
+}

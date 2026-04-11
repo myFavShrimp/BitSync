@@ -7,13 +7,18 @@ use crate::jwt::{JwtClaims, LoginState};
 use crate::hash::{PasswordHashVerificationError, verify_password_hash};
 
 #[derive(thiserror::Error, Debug)]
-#[error("Username or password wrong")]
+#[error("login failed")]
 pub enum LoginError {
     PasswordHashVerification(#[from] PasswordHashVerificationError),
     DatabaseQuery(#[from] repository::QueryError),
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),
+    UserNotFound(#[from] UserNotFoundError),
     Jwt(#[from] crate::jwt::Error),
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("user not found")]
+pub struct UserNotFoundError;
 
 pub struct LoginResult {
     pub user: User,
@@ -30,7 +35,9 @@ pub async fn perform_login(
 ) -> Result<LoginResult, LoginError> {
     let mut connection = database.acquire_connection().await?;
 
-    let user = repository::user::find_by_username(&mut *connection, username).await?;
+    let user = repository::user::find_by_username(&mut *connection, username)
+        .await?
+        .ok_or(UserNotFoundError)?;
 
     verify_password_hash(&user.password, password)?;
 

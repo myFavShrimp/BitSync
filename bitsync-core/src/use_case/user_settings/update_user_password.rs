@@ -5,24 +5,33 @@ use bitsync_database::{
 };
 use uuid::Uuid;
 
-use crate::hash::{
-    PasswordHashCreationError, PasswordHashVerificationError, hash_password, verify_password_hash,
+use crate::{
+    hash::{
+        PasswordHashCreationError, PasswordHashVerificationError, hash_password,
+        verify_password_hash,
+    },
+    validation::is_blank,
 };
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to update user password")]
+#[error("failed to update user password")]
 pub enum UpdateUserPasswordError {
     PasswordHashVerification(#[from] PasswordHashVerificationError),
     PasswordHash(#[from] PasswordHashCreationError),
     Database(#[from] repository::QueryError),
     TransactionBegin(#[from] TransactionBeginError),
-    PasswordsMismatch(#[from] NewPasswordsMismatch),
+    NewPasswordsMismatch(#[from] NewPasswordsMismatch),
+    EmptyNewPassword(#[from] EmptyNewPasswordError),
     DatabaseTransaction(#[from] TransactionCommitError),
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("The new passwords do not match")]
+#[error("the new passwords do not match")]
 pub struct NewPasswordsMismatch;
+
+#[derive(thiserror::Error, Debug)]
+#[error("new password cannot be empty")]
+pub struct EmptyNewPasswordError;
 
 pub async fn update_user_password(
     database: &Database,
@@ -33,6 +42,10 @@ pub async fn update_user_password(
     current_session_id: &Uuid,
 ) -> Result<(), UpdateUserPasswordError> {
     verify_password_hash(&user.password, current_password)?;
+
+    if is_blank(new_password) || is_blank(new_password_repeated) {
+        Err(EmptyNewPasswordError)?;
+    }
 
     if new_password != new_password_repeated {
         Err(NewPasswordsMismatch)?;

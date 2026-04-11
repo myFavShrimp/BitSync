@@ -15,17 +15,23 @@ use axum_extra::{
 use bitsync_core::use_case::{
     self,
     user_files::{
-        create_directory::UserFileDirecoryCreationError, upload_user_file::upload_user_file,
+        create_directory::UserFileDirecoryCreationError,
+        delete_user_file::UserFileDeletionError,
+        download_user_file::UserFileDownloadError,
+        move_user_file::UserFileMoveError,
+        upload_user_file::{UserFileUploadError, upload_user_file},
     },
 };
 use bitsync_frontend::{
-    BODY_SELECTOR_TARGET, Component, Render,
-    error_modal::ErrorModal,
+    Component, Render,
     pages::files::{
         FilesHomePageChangeResult,
         directory_creation::{DirectoryCreationDisplayError, DirectoryCreationForm},
+        file_operations::{
+            UserFileDeletionDisplayError, UserFileDownloadDisplayError, UserFileMoveDisplayError,
+            UserFileUploadDisplayError,
+        },
     },
-    toast::{TOAST_CONTAINER_SELECTOR, Toast},
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use bitsync_routes::TypedPath;
@@ -34,7 +40,8 @@ use serde::Deserialize;
 use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
-    handler::{RedirectHttp, RedirectHyperStim},
+    error_report::emit_error,
+    handler::{RedirectHttp, RedirectHyperStim, user_error_toast_response},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -94,12 +101,9 @@ where
         let multipart_field = match multipart_data.next_field().await {
             Ok(Some(multipart_field)) => multipart_field,
             Ok(None) => {
-                return Err(Json(HyperStimCommand::HsPatchHtml {
-                    html: ErrorModal::with_message("No file was provided".to_owned()).render(),
-                    patch_target: BODY_SELECTOR_TARGET.to_owned(),
-                    patch_mode: HyperStimPatchMode::Append,
-                })
-                .into_response());
+                return Err(user_error_toast_response(
+                    UserFileUploadDisplayError::NoFileProvided.message(),
+                ));
             }
             Err(error) => return Err(error.body_text().into_response()),
         };
@@ -107,12 +111,9 @@ where
         let file_name = match multipart_field.file_name() {
             Some(file_name) => file_name.to_owned(),
             None => {
-                return Err(Json(HyperStimCommand::HsPatchHtml {
-                    html: ErrorModal::with_message("No file name was provided".to_owned()).render(),
-                    patch_target: BODY_SELECTOR_TARGET.to_owned(),
-                    patch_mode: HyperStimPatchMode::Append,
-                })
-                .into_response());
+                return Err(user_error_toast_response(
+                    UserFileUploadDisplayError::NoFileNameProvided.message(),
+                ));
             }
         };
 
@@ -149,12 +150,17 @@ async fn user_file_upload_handler(
             })
             .into_response()
         }
-        Err(error) => Json(HyperStimCommand::HsPatchHtml {
-            html: ErrorModal::from(error).render(),
-            patch_target: BODY_SELECTOR_TARGET.to_owned(),
-            patch_mode: HyperStimPatchMode::Append,
-        })
-        .into_response(),
+        Err(error) => {
+            let display_error = match error {
+                UserFileUploadError::StoragePath(..) => UserFileUploadDisplayError::InvalidPath,
+                error => {
+                    emit_error(error);
+                    UserFileUploadDisplayError::InternalServerError
+                }
+            };
+
+            user_error_toast_response(display_error.message())
+        }
     }
 }
 
@@ -178,12 +184,17 @@ async fn user_file_download_handler(
 
             (axum_extra::TypedHeader(content_type), attachment).into_response()
         }
-        Err(error) => Json(HyperStimCommand::HsPatchHtml {
-            html: ErrorModal::from(error).render(),
-            patch_target: BODY_SELECTOR_TARGET.to_owned(),
-            patch_mode: HyperStimPatchMode::Append,
-        })
-        .into_response(),
+        Err(error) => {
+            let display_error = match error {
+                UserFileDownloadError::StoragePath(..) => UserFileDownloadDisplayError::InvalidPath,
+                error => {
+                    emit_error(error);
+                    UserFileDownloadDisplayError::InternalServerError
+                }
+            };
+
+            user_error_toast_response(display_error.message())
+        }
     }
 }
 
@@ -210,12 +221,17 @@ async fn user_file_delete_handler(
             })
             .into_response()
         }
-        Err(error) => Json(HyperStimCommand::HsPatchHtml {
-            html: Toast::error(format!("{error}")).render(),
-            patch_target: TOAST_CONTAINER_SELECTOR.to_owned(),
-            patch_mode: HyperStimPatchMode::Append,
-        })
-        .into_response(),
+        Err(error) => {
+            let display_error = match error {
+                UserFileDeletionError::StoragePath(..) => UserFileDeletionDisplayError::InvalidPath,
+                error => {
+                    emit_error(error);
+                    UserFileDeletionDisplayError::InternalServerError
+                }
+            };
+
+            user_error_toast_response(display_error.message())
+        }
     }
 }
 
@@ -256,12 +272,17 @@ async fn user_file_move_handler(
             ])
             .into_response()
         }
-        Err(error) => Json(HyperStimCommand::HsPatchHtml {
-            html: ErrorModal::from(error).render(),
-            patch_target: BODY_SELECTOR_TARGET.to_owned(),
-            patch_mode: HyperStimPatchMode::Append,
-        })
-        .into_response(),
+        Err(error) => {
+            let display_error = match error {
+                UserFileMoveError::StoragePath(..) => UserFileMoveDisplayError::InvalidPath,
+                error => {
+                    emit_error(error);
+                    UserFileMoveDisplayError::InternalServerError
+                }
+            };
+
+            user_error_toast_response(display_error.message())
+        }
     }
 }
 
@@ -303,7 +324,23 @@ async fn user_file_directory_creation_handler(
             ])
             .into_response()
         }
-        Err(UserFileDirecoryCreationError::EmptyPath(..)) => {
+        Err(error) => {
+            let display_error = match error {
+                UserFileDirecoryCreationError::EmptyPath(..) => {
+                    DirectoryCreationDisplayError::EmptyName
+                }
+                UserFileDirecoryCreationError::DirectoryNameContainsSeparator(..) => {
+                    DirectoryCreationDisplayError::InvalidName
+                }
+                UserFileDirecoryCreationError::StoragePath(..) => {
+                    DirectoryCreationDisplayError::InvalidPath
+                }
+                error => {
+                    emit_error(error);
+                    DirectoryCreationDisplayError::InternalServerError
+                }
+            };
+
             let directory_creation_url = bitsync_routes::PostUserFileDirectoryCreation
                 .with_query_params(
                     bitsync_routes::PostUserFileDirectoryCreationQueryParameters {
@@ -314,7 +351,7 @@ async fn user_file_directory_creation_handler(
 
             let form = DirectoryCreationForm {
                 action_url: directory_creation_url,
-                error: Some(DirectoryCreationDisplayError::EmptyName),
+                error: Some(display_error),
             };
 
             Json(HyperStimCommand::HsPatchHtml {
@@ -324,11 +361,5 @@ async fn user_file_directory_creation_handler(
             })
             .into_response()
         }
-        Err(error) => Json(HyperStimCommand::HsPatchHtml {
-            html: ErrorModal::from(error).render(),
-            patch_target: BODY_SELECTOR_TARGET.to_owned(),
-            patch_mode: HyperStimPatchMode::Append,
-        })
-        .into_response(),
     }
 }

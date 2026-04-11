@@ -8,7 +8,7 @@ use axum_extra::{extract::Form, routing::RouterExt};
 use bitsync_core::use_case::user_settings::{
     list_sessions::list_sessions,
     terminate_all_other_sessions::terminate_all_other_sessions,
-    terminate_session::terminate_session,
+    terminate_session::{TerminateSessionError, terminate_session},
     update_user_password::{UpdateUserPasswordError, update_user_password},
 };
 use bitsync_frontend::{
@@ -16,7 +16,7 @@ use bitsync_frontend::{
     pages::user_settings::{
         SettingsDialog, SettingsTab, SettingsTabArea,
         password::{PasswordDisplayError, PasswordTabContent},
-        sessions::SessionList,
+        sessions::{SessionList, SessionsDisplayError},
     },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
@@ -130,7 +130,7 @@ async fn user_settings_password_change_handler(
     Extension(auth_data): Extension<AuthData>,
     Form(change_password_form_data): Form<ChangePasswordFormData>,
 ) -> impl IntoResponse {
-    match update_user_password(
+    let result = update_user_password(
         &state.database,
         &auth_data.user,
         &change_password_form_data.current_password,
@@ -138,32 +138,44 @@ async fn user_settings_password_change_handler(
         &change_password_form_data.new_password_repeated,
         &auth_data.session.id,
     )
-    .await
-    {
-        Ok(()) => StatusCode::OK.into_response(),
-        Err(UpdateUserPasswordError::PasswordHashVerification(..)) => {
-            StatusCode::BAD_REQUEST.into_response()
-        }
-        Err(UpdateUserPasswordError::PasswordsMismatch(..)) => {
-            StatusCode::BAD_REQUEST.into_response()
-        }
+    .await;
+
+    let (status_code, display_error) = match result {
+        Ok(()) => (StatusCode::OK, None),
+        Err(UpdateUserPasswordError::PasswordHashVerification(..)) => (
+            StatusCode::BAD_REQUEST,
+            Some(PasswordDisplayError::InvalidCurrentPassword),
+        ),
+        Err(UpdateUserPasswordError::NewPasswordsMismatch(..)) => (
+            StatusCode::BAD_REQUEST,
+            Some(PasswordDisplayError::NewPasswordsMismatch),
+        ),
+        Err(UpdateUserPasswordError::EmptyNewPassword(..)) => (
+            StatusCode::BAD_REQUEST,
+            Some(PasswordDisplayError::EmptyNewPassword),
+        ),
         Err(error) => {
             emit_error(error);
-            let form = PasswordTabContent {
-                error: Some(PasswordDisplayError::InternalServerError),
-            };
-
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(HyperStimCommand::HsPatchHtml {
-                    html: form.render(),
-                    patch_target: form.id_target(),
-                    patch_mode: HyperStimPatchMode::Outer,
-                }),
+                Some(PasswordDisplayError::InternalServerError),
             )
-                .into_response()
         }
-    }
+    };
+
+    let form = PasswordTabContent {
+        error: display_error,
+    };
+
+    (
+        status_code,
+        Json(HyperStimCommand::HsPatchHtml {
+            html: form.render(),
+            patch_target: form.id_target(),
+            patch_mode: HyperStimPatchMode::Outer,
+        }),
+    )
+        .into_response()
 }
 
 async fn user_settings_terminate_session_handler(
@@ -171,33 +183,65 @@ async fn user_settings_terminate_session_handler(
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    match terminate_session(
+    let result = terminate_session(
         &state.database,
         &auth_data.user.id,
         &path.session_id,
         &auth_data.session.id,
     )
-    .await
-    {
-        Ok(sessions) => {
-            let sessions_list = SessionList {
-                sessions,
-                current_session_id: auth_data.session.id,
+    .await;
+
+    let (status_code, sessions, display_error) = match result {
+        Ok(sessions) => (StatusCode::OK, sessions, None),
+        Err(TerminateSessionError::CannotTerminateCurrentSession(..)) => {
+            let sessions = match list_sessions(&state.database, &auth_data.user.id).await {
+                Ok(sessions) => sessions,
+                Err(error) => {
+                    emit_error(error);
+                    return internal_server_error_toast_response();
+                }
             };
 
-            Json(HyperStimCommand::HsPatchHtml {
-                html: sessions_list.render(),
-                patch_target: sessions_list.id_target(),
-                patch_mode: HyperStimPatchMode::Outer,
-            })
-            .into_response()
+            (
+                StatusCode::BAD_REQUEST,
+                sessions,
+                Some(SessionsDisplayError::CannotTerminateCurrentSession),
+            )
         }
         Err(error) => {
             emit_error(error);
 
-            internal_server_error_toast_response()
+            let sessions = match list_sessions(&state.database, &auth_data.user.id).await {
+                Ok(sessions) => sessions,
+                Err(error) => {
+                    emit_error(error);
+                    return internal_server_error_toast_response();
+                }
+            };
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                sessions,
+                Some(SessionsDisplayError::InternalServerError),
+            )
         }
-    }
+    };
+
+    let sessions_list = SessionList {
+        sessions,
+        current_session_id: auth_data.session.id,
+        error: display_error,
+    };
+
+    (
+        status_code,
+        Json(HyperStimCommand::HsPatchHtml {
+            html: sessions_list.render(),
+            patch_target: sessions_list.id_target(),
+            patch_mode: HyperStimPatchMode::Outer,
+        }),
+    )
+        .into_response()
 }
 
 async fn user_settings_terminate_all_other_sessions_handler(
@@ -205,26 +249,44 @@ async fn user_settings_terminate_all_other_sessions_handler(
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    match terminate_all_other_sessions(&state.database, &auth_data.user.id, &auth_data.session.id)
-        .await
-    {
-        Ok(sessions) => {
-            let sessions_list = SessionList {
-                sessions,
-                current_session_id: auth_data.session.id,
-            };
+    let result =
+        terminate_all_other_sessions(&state.database, &auth_data.user.id, &auth_data.session.id)
+            .await;
 
-            Json(HyperStimCommand::HsPatchHtml {
-                html: sessions_list.render(),
-                patch_target: sessions_list.id_target(),
-                patch_mode: HyperStimPatchMode::Outer,
-            })
-            .into_response()
-        }
+    let (status_code, sessions, display_error) = match result {
+        Ok(sessions) => (StatusCode::OK, sessions, None),
         Err(error) => {
             emit_error(error);
 
-            internal_server_error_toast_response()
+            let sessions = match list_sessions(&state.database, &auth_data.user.id).await {
+                Ok(sessions) => sessions,
+                Err(error) => {
+                    emit_error(error);
+                    return internal_server_error_toast_response();
+                }
+            };
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                sessions,
+                Some(SessionsDisplayError::InternalServerError),
+            )
         }
-    }
+    };
+
+    let sessions_list = SessionList {
+        sessions,
+        current_session_id: auth_data.session.id,
+        error: display_error,
+    };
+
+    (
+        status_code,
+        Json(HyperStimCommand::HsPatchHtml {
+            html: sessions_list.render(),
+            patch_target: sessions_list.id_target(),
+            patch_mode: HyperStimPatchMode::Outer,
+        }),
+    )
+        .into_response()
 }

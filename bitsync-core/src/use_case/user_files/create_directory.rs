@@ -25,7 +25,7 @@ pub enum UserFileDirecoryCreationError {
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     StoragePath(#[from] StoragePathError),
     ReadStorageItem(#[from] ReadStorageItemError),
-    DirectoryName(#[from] PathIsJustFileNameValidationError),
+    DirectoryNameContainsSeparator(#[from] PathIsJustFileNameValidationError),
     CreateDirectory(#[from] CreateDirectoryError),
     ReadDirContents(#[from] ReadDirContentsError),
     EmptyPath(#[from] EmptyPathError),
