@@ -7,26 +7,26 @@ pub mod transaction;
 pub struct Database(sqlx::PgPool);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to create database")]
+#[error("failed to create database")]
 pub struct DatabaseCreationError(#[from] sqlx::Error);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to connect to database")]
+#[error("failed to connect to database")]
 pub struct ConnectionPoolCreationError(#[source] sqlx::Error);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to migrate database")]
+#[error("failed to migrate database")]
 pub struct DatabaseMigrationApplicationFailure(#[source] sqlx::migrate::MigrateError);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to migrate database")]
+#[error("failed to migrate database")]
 pub enum DatabaseMigrationError {
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),
     DatabaseMigrationApplication(#[from] DatabaseMigrationApplicationFailure),
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to connect to database and apply migrations")]
+#[error("failed to connect to database and apply migrations")]
 pub enum ConnectAndMigrateError {
     Creation(#[from] DatabaseCreationError),
     Connection(#[from] ConnectionPoolCreationError),
@@ -66,11 +66,11 @@ impl Database {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not begin a new database transaction")]
+#[error("could not begin a new database transaction")]
 pub struct TransactionBeginError(#[from] sqlx::Error);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not acquire a new database connection")]
+#[error("could not acquire a new database connection")]
 pub struct ConnectionAcquisitionError(#[from] sqlx::Error);
 
 impl Database {

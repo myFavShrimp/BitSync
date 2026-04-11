@@ -17,7 +17,7 @@ pub struct UserDirectoryContentsResult {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to read user directory contents")]
+#[error("failed to read user directory contents")]
 pub enum ReadUserDirectoryContentsError {
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     ReadDirContents(#[from] ReadDirContentsError),

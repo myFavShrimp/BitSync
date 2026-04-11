@@ -20,7 +20,7 @@ pub struct DirectoryCreationResult {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to delete a user's file")]
+#[error("failed to delete a user's file")]
 pub enum UserFileDirecoryCreationError {
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     StoragePath(#[from] StoragePathError),

@@ -23,7 +23,7 @@ pub struct AppState {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to initialize application state")]
+#[error("failed to initialize application state")]
 pub enum ApplicationStateInitializationError {
     ConnectAndMigrate(#[from] ConnectAndMigrateError),
     AdminBootstrap(#[from] EnsureAdminBootstrapError),

@@ -5,11 +5,11 @@ use sqlx::{Database, Postgres, Transaction as SqlxTransaction};
 pub struct Transaction(pub(crate) SqlxTransaction<'static, Postgres>);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Database transaction commit failed")]
+#[error("database transaction commit failed")]
 pub struct TransactionCommitError(#[from] sqlx::Error);
 
 #[derive(thiserror::Error, Debug)]
-#[error("Database transaction rollback failed")]
+#[error("database transaction rollback failed")]
 pub struct TransactionRollbackError(#[from] sqlx::Error);
 
 impl Transaction {

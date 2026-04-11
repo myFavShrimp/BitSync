@@ -3,7 +3,7 @@ use bitsync_database::entity::User;
 use crate::totp::{TotpCreationError, build_totp_for_user};
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to create totp setup data")]
+#[error("failed to create totp setup data")]
 pub enum RetrieveTotpSetupDataError {
     TotpCreation(#[from] TotpCreationError),
     TotpSecretBase64QrCode(#[from] TotpSecretBase64QrCodeError),
@@ -11,7 +11,7 @@ pub enum RetrieveTotpSetupDataError {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to create totp qr code - {0}")]
+#[error("failed to create totp qr code - {0}")]
 pub struct TotpSecretBase64QrCodeError(String);
 
 #[derive(thiserror::Error, Debug)]

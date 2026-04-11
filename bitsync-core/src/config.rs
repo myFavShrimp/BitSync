@@ -33,7 +33,7 @@ pub struct RawServiceAddress {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to parse host address configuration")]
+#[error("failed to parse host address configuration")]
 pub struct HostParseError(#[from] AddrParseError);
 
 impl TryFrom<RawServiceAddress> for ServiceAddress {

@@ -6,7 +6,7 @@ use crate::{
 };
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to verify totp")]
+#[error("failed to verify totp")]
 pub enum VerifyTotpError {
     TotpCreation(#[from] TotpCreationError),
     SystemTime(#[from] std::time::SystemTimeError),

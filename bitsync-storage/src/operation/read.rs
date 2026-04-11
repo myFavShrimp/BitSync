@@ -7,7 +7,7 @@ use crate::{
 use super::error::{MetadataError, OpenFileError, ReadDirectoryError};
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not read a directory's contents")]
+#[error("could not read a directory's contents")]
 pub enum ReadDirContentsError {
     ReadDirectory(#[from] ReadDirectoryError),
     StorageItemCreation(#[from] StorageItemCreationError),
@@ -47,7 +47,7 @@ pub async fn read_dir_contents(
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not read a file's contents")]
+#[error("could not read a file's contents")]
 pub enum ReadFileStreamError {
     OpenFile(#[from] OpenFileError),
     StorageItemCreation(#[from] StorageItemCreationError),
@@ -65,7 +65,7 @@ pub async fn read_file_stream(path: &StoragePath) -> Result<AsyncFileRead, ReadF
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not read an items information")]
+#[error("could not read an items information")]
 pub enum ReadStorageItemError {
     Metadata(#[from] MetadataError),
     StorageItemCreation(#[from] StorageItemCreationError),

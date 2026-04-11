@@ -23,7 +23,7 @@ pub struct UserFileDownloadResult {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("An error occurred during user file download")]
+#[error("an error occurred during user file download")]
 pub enum UserFileDownloadError {
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     ReadFileStream(#[from] ReadFileStreamError),

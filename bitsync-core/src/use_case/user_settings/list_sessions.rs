@@ -6,7 +6,7 @@ use bitsync_database::{
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to list sessions")]
+#[error("failed to list sessions")]
 pub enum ListSessionsError {
     DatabaseQuery(#[from] repository::QueryError),
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),

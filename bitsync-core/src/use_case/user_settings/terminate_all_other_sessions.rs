@@ -6,7 +6,7 @@ use bitsync_database::{
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to terminate all other sessions")]
+#[error("failed to terminate all other sessions")]
 pub enum TerminateAllOtherSessionsError {
     DatabaseQuery(#[from] repository::QueryError),
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),

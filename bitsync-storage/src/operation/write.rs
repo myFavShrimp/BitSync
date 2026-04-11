@@ -11,7 +11,7 @@ use crate::{
 use super::error::{DirectoryCreationError, OpenFileError};
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not ensure that the storage exists")]
+#[error("could not ensure that the storage exists")]
 pub struct EnsureUserStorageExistsError(#[from] DirectoryCreationError);
 
 pub async fn ensure_user_storage_exists(
@@ -28,14 +28,14 @@ pub async fn ensure_user_storage_exists(
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not read a file's contents")]
+#[error("could not read a file's contents")]
 pub enum AsyncFileReadError {
     OpenFile(#[from] OpenFileError),
     StorageItemCreation(#[from] StorageItemCreationError),
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not read a file's contents")]
+#[error("could not read a file's contents")]
 pub enum WriteFileStreamError {
     OpenFile(#[from] OpenFileError),
     StorageItemCreation(#[from] StorageItemCreationError),
@@ -69,7 +69,7 @@ where
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to remove directory")]
+#[error("failed to remove directory")]
 pub struct DeleteDirectoryError {
     pub source: IoError,
     pub path: PathBuf,
@@ -87,7 +87,7 @@ pub async fn delete_directory(path: &StoragePath) -> Result<(), DeleteDirectoryE
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to remove file")]
+#[error("failed to remove file")]
 pub struct DeleteFileError {
     pub source: IoError,
     pub path: PathBuf,
@@ -105,7 +105,7 @@ pub async fn delete_file(path: &StoragePath) -> Result<(), DeleteFileError> {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to rename item")]
+#[error("failed to rename item")]
 pub struct RenameItemError {
     pub source: IoError,
     pub from_path: PathBuf,
@@ -128,7 +128,7 @@ pub async fn rename_item(
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to rename item")]
+#[error("failed to rename item")]
 pub struct CreateDirectoryError {
     pub source: IoError,
     pub direcory_path: PathBuf,

@@ -10,7 +10,7 @@ pub struct StoragePath {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Could not map path to storage")]
+#[error("could not map path to storage")]
 pub enum StoragePathError {
     Invalid(#[from] crate::validation::ScopedPathValidationError),
 }

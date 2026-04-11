@@ -31,7 +31,7 @@ pub struct UserFileResult {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("An error occurred during user file upload")]
+#[error("an error occurred during user file upload")]
 pub enum UserFileUploadError {
     StorageEnsurance(#[from] EnsureUserStorageExistsError),
     WriteFileStream(#[from] WriteFileStreamError),

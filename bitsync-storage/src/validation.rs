@@ -1,7 +1,7 @@
 use std::path::{Component, Path};
 
 #[derive(Debug, thiserror::Error)]
-#[error("The path '{0}' is not allowed. Paths must not contain '..' segments")]
+#[error("the path '{0}' is not allowed. Paths must not contain '..' segments")]
 pub struct ScopedPathValidationError(pub String);
 
 pub(crate) fn validate_scoped_path<P: AsRef<Path>>(
@@ -22,9 +22,9 @@ pub(crate) fn validate_scoped_path<P: AsRef<Path>>(
 
 #[derive(Debug, thiserror::Error)]
 pub enum PathIsJustFileNameValidationError {
-    #[error("The path '{0}' was expected to be just a file name.")]
+    #[error("the path '{0}' was expected to be just a file name.")]
     TooManyComponents(String),
-    #[error("The path '{0}' was expected to be a file name.")]
+    #[error("the path '{0}' was expected to be a file name.")]
     NotAFileName(String),
 }
 

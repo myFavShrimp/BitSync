@@ -19,7 +19,7 @@ pub struct UserFileDeletionResult {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to delete a user's file")]
+#[error("failed to delete a user's file")]
 pub enum UserFileDeletionError {
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     StoragePath(#[from] StoragePathError),

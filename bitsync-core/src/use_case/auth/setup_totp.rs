@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to setup totp")]
+#[error("failed to setup totp")]
 pub enum TotpSetupError {
     TotpCreation(#[from] TotpCreationError),
     SystemTime(#[from] std::time::SystemTimeError),

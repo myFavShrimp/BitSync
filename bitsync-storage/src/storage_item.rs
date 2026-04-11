@@ -17,9 +17,9 @@ pub struct StorageItem {
 
 #[derive(thiserror::Error, Debug)]
 pub enum StorageItemCreationError {
-    #[error("Storage item is of unsupported type: symlink")]
+    #[error("storage item is of unsupported type: symlink")]
     IsSymlink { path: PathBuf },
-    #[error("Could not gather metadata while creating a storage item")]
+    #[error("could not gather metadata while creating a storage item")]
     Metadata { source: IoError, path: PathBuf },
 }
 

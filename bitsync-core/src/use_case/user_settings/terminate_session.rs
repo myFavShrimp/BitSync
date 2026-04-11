@@ -6,11 +6,11 @@ use bitsync_database::{
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
-#[error("Cannot terminate the current session")]
+#[error("cannot terminate the current session")]
 pub struct CannotTerminateCurrentSessionError;
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to terminate session")]
+#[error("failed to terminate session")]
 pub enum TerminateSessionError {
     DatabaseQuery(#[from] repository::QueryError),
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),

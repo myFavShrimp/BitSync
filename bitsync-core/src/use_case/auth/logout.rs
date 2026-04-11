@@ -5,7 +5,7 @@ use bitsync_database::{
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to logout")]
+#[error("failed to logout")]
 pub enum LogoutError {
     DatabaseQuery(#[from] repository::QueryError),
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),

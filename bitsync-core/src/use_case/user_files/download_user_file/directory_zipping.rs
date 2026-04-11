@@ -8,11 +8,11 @@ use tokio::io::DuplexStream;
 use tokio_util::compat::TokioAsyncReadCompatExt;
 
 #[derive(Debug, thiserror::Error)]
-#[error("Failed to copy a stream")]
+#[error("failed to copy a stream")]
 pub struct StreamCopyError(#[from] std::io::Error);
 
 #[derive(Debug, thiserror::Error)]
-#[error("An error occurred while writing a directory zip")]
+#[error("an error occurred while writing a directory zip")]
 pub enum DirectoryZipError {
     ReadDirContents(#[from] ReadDirContentsError),
     Zip(#[from] async_zip::error::ZipError),

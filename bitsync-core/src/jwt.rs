@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
-#[error("Error on jwt operation")]
+#[error("error on jwt operation")]
 pub struct Error(#[from] jsonwebtoken::errors::Error);
 
 pub use jsonwebtoken::errors::{Error as InnerError, ErrorKind as InnerErrorKind};

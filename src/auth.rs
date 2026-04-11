@@ -21,7 +21,7 @@ use bitsync_core::{
 use bitsync_database::entity::{Session, User};
 
 #[derive(Debug, thiserror::Error)]
-#[error("The provided auth token is invalid")]
+#[error("the provided auth token is invalid")]
 pub enum AuthTokenDecodeError {
     ResolveSession(#[from] ResolveSessionError),
     Decode(#[from] bitsync_core::jwt::Error),

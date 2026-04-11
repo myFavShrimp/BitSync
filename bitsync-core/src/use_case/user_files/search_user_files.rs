@@ -30,7 +30,7 @@ pub enum SearchUserFilesResult {
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Failed to search user files")]
+#[error("failed to search user files")]
 pub enum SearchUserFilesError {
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     ReadDirContents(#[from] ReadDirContentsError),

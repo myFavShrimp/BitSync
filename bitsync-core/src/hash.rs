@@ -4,7 +4,7 @@ use argon2::{
 };
 
 #[derive(thiserror::Error, Debug)]
-#[error("Password hash creation failed")]
+#[error("password hash creation failed")]
 pub struct PasswordHashCreationError(#[from] argon2::password_hash::Error);
 
 pub fn hash_password(password: &str) -> Result<String, PasswordHashCreationError> {
@@ -17,7 +17,7 @@ pub fn hash_password(password: &str) -> Result<String, PasswordHashCreationError
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("Password hash verification failed")]
+#[error("password hash verification failed")]
 pub struct PasswordHashVerificationError(#[from] argon2::password_hash::Error);
 
 pub fn verify_password_hash(
