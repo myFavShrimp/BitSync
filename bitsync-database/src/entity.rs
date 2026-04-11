@@ -7,8 +7,8 @@ pub struct User {
     pub username: String,
     pub password: String,
     pub is_admin: bool,
-    pub totp_secret: Vec<u8>,
-    pub is_totp_set_up: bool,
+    pub active_totp_secret: Option<Vec<u8>>,
+    pub dangling_totp_secret: Option<Vec<u8>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]

@@ -174,3 +174,15 @@ pub struct PostTerminateSession {
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/sessions/terminate-all-others")]
 pub struct PostTerminateAllOtherSessions;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/totp")]
+pub struct GetUserSettingsTotpTab;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/totp/initiate-reset")]
+pub struct PostUserSettingsTotpInitiateReset;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/totp/reset")]
+pub struct PostUserSettingsTotpReset;

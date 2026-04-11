@@ -1,9 +1,10 @@
-use bitsync_core::use_case::auth::setup_totp::TotpSetupResult;
+use bitsync_core::use_case::auth::setup_totp::SetupTotpResult;
 use bitsync_routes::TypedPath;
 use hypertext::prelude::*;
 
 use crate::{
-    Component, error_banner::OptionalErrorBanner, pages::base::GuestDocument, totp::totp_qr_src,
+    Component, error_banner::OptionalErrorBanner, error_card::ErrorCard,
+    pages::base::GuestDocument, totp::totp_qr_src,
 };
 
 pub enum RegistrationDisplayError {
@@ -300,12 +301,47 @@ impl Renderable for TotpSetupForm {
     }
 }
 
+pub struct TotpAlreadySetUpNotice;
+
+impl Component for TotpAlreadySetUpNotice {
+    fn id(&self) -> String {
+        REGISTER_TOTP_FORM_ID.to_owned()
+    }
+}
+
+impl Renderable for TotpAlreadySetUpNotice {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            div
+                id=(self.id())
+                class=(crate::styles::register_page::ClassName::FORM)
+            {
+                div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
+                    h1 {"Two-Factor Authentication"}
+                }
+
+                ErrorCard
+                    title=("Already active".to_owned())
+                    message=("Your account is already protected by a two-factor authenticator. If you weren't the one who set it up, contact an administrator right away. Someone else may have access to your account.".to_owned());
+
+                a
+                    class=(crate::styles::base::ClassName::BUTTON)
+                    href=(bitsync_routes::GetLogoutAction.to_string())
+                {
+                    "Sign out"
+                }
+            }
+        }
+        .render_to(buffer);
+    }
+}
+
 pub struct TotpRecoveryCodesPrompt {
     recovery_codes: Vec<String>,
 }
 
-impl From<TotpSetupResult> for TotpRecoveryCodesPrompt {
-    fn from(value: TotpSetupResult) -> Self {
+impl From<SetupTotpResult> for TotpRecoveryCodesPrompt {
+    fn from(value: SetupTotpResult) -> Self {
         Self {
             recovery_codes: value.recovery_codes,
         }

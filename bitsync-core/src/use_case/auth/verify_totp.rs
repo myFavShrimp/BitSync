@@ -2,7 +2,7 @@ use bitsync_database::entity::User;
 
 use crate::{
     jwt::{JwtClaims, LoginState},
-    totp::{TotpCreationError, build_totp_for_user},
+    totp::{TotpCreationError, build_totp},
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -10,18 +10,18 @@ use crate::{
 pub enum VerifyTotpError {
     TotpCreation(#[from] TotpCreationError),
     SystemTime(#[from] std::time::SystemTimeError),
-    TotpInvalid(#[from] TotpInvalid),
-    TotpNotSetUp(#[from] TotpNotSetUp),
+    TotpInvalid(#[from] TotpInvalidError),
+    TotpNotSetUp(#[from] TotpNotSetUpError),
     Jwt(#[from] crate::jwt::Error),
 }
 
 #[derive(thiserror::Error, Debug)]
 #[error("user provided an invalid totp value")]
-pub struct TotpInvalid;
+pub struct TotpInvalidError;
 
 #[derive(thiserror::Error, Debug)]
 #[error("totp is not set up")]
-pub struct TotpNotSetUp;
+pub struct TotpNotSetUpError;
 
 pub async fn verify_totp(
     user: &User,
@@ -29,14 +29,12 @@ pub async fn verify_totp(
     totp_value: &str,
     jwt_secret: &str,
 ) -> Result<String, VerifyTotpError> {
-    if !user.is_totp_set_up {
-        return Err(TotpNotSetUp)?;
-    }
+    let active_secret = user.active_totp_secret.as_ref().ok_or(TotpNotSetUpError)?;
 
-    let totp = build_totp_for_user(user)?;
+    let totp = build_totp(active_secret, &user.username)?;
 
     if !totp.check_current(totp_value)? {
-        Err(TotpInvalid)?;
+        Err(TotpInvalidError)?;
     }
 
     let jwt = JwtClaims {

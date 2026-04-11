@@ -14,6 +14,8 @@ use uuid::Uuid;
 use crate::{
     hash::{PasswordHashCreationError, hash_password},
     jwt::{JwtClaims, LoginState},
+    random::GenerateRandomBytesError,
+    totp::generate_totp_secret,
     use_case::auth::InvalidInviteTokenError,
     validation::is_blank,
 };
@@ -29,6 +31,7 @@ pub enum RegistrationError {
     InvalidInviteTokenError(#[from] InvalidInviteTokenError),
     EnsureUserStorageExists(#[from] EnsureUserStorageExistsError),
     EmptyPassword(#[from] EmptyPasswordError),
+    GenerateRandomBytes(#[from] GenerateRandomBytesError),
     Jwt(#[from] crate::jwt::Error),
 }
 
@@ -72,11 +75,13 @@ pub async fn perform_registration(
     }
 
     let hashed_password = hash_password(password)?;
+    let dangling_totp_secret = generate_totp_secret()?;
+
     let user = repository::user::create_with_admin(
         &mut *transaction,
         username,
         &hashed_password,
-        &uuid::Uuid::nil().into_bytes(),
+        &dangling_totp_secret,
         invite_token.is_admin,
     )
     .await?;

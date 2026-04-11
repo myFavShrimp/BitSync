@@ -5,26 +5,6 @@ use crate::entity::User;
 
 use super::QueryError;
 
-pub async fn create<'e, E>(
-    connection: E,
-    username: &str,
-    password: &str,
-    totp_secret: &[u8],
-) -> Result<User, QueryError>
-where
-    E: PgExecutor<'e>,
-{
-    Ok(sqlx::query_as!(
-        User,
-        r#"INSERT INTO "user" (username, password, totp_secret) VALUES ($1, $2, $3) RETURNING *"#,
-        username,
-        password,
-        totp_secret,
-    )
-    .fetch_one(connection)
-    .await?)
-}
-
 pub async fn find_by_ids<'e, E>(executor: E, ids: &[Uuid]) -> Result<Vec<User>, QueryError>
 where
     E: PgExecutor<'e>,
@@ -94,7 +74,7 @@ pub async fn create_with_admin<'e, E>(
     connection: E,
     username: &str,
     password: &str,
-    totp_secret: &[u8],
+    dangling_totp_secret: &[u8],
     is_admin: bool,
 ) -> Result<User, QueryError>
 where
@@ -102,10 +82,10 @@ where
 {
     Ok(sqlx::query_as!(
         User,
-        r#"INSERT INTO "user" (username, password, totp_secret, is_admin) VALUES ($1, $2, $3, $4) RETURNING *"#,
+        r#"INSERT INTO "user" (username, password, dangling_totp_secret, is_admin) VALUES ($1, $2, $3, $4) RETURNING *"#,
         username,
         password,
-        totp_secret,
+        dangling_totp_secret,
         is_admin,
     )
     .fetch_one(connection)
@@ -123,19 +103,35 @@ where
     .await?)
 }
 
-pub async fn set_totp_setup_state<'e, E>(
+pub async fn activate_dangling_totp_secret<'e, E>(
     executor: E,
     user_id: &Uuid,
-    is_totp_setup: bool,
 ) -> Result<User, QueryError>
 where
     E: PgExecutor<'e>,
 {
     Ok(sqlx::query_as!(
         User,
-        r#"UPDATE "user" SET is_totp_set_up = $2 WHERE id = $1 RETURNING *"#,
+        r#"UPDATE "user" SET active_totp_secret = dangling_totp_secret, dangling_totp_secret = NULL WHERE id = $1 RETURNING *"#,
         user_id,
-        is_totp_setup,
+    )
+    .fetch_one(executor)
+    .await?)
+}
+
+pub async fn set_dangling_totp_secret<'e, E>(
+    executor: E,
+    user_id: &Uuid,
+    dangling_totp_secret: &[u8],
+) -> Result<User, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"UPDATE "user" SET dangling_totp_secret = $2 WHERE id = $1 RETURNING *"#,
+        user_id,
+        dangling_totp_secret,
     )
     .fetch_one(executor)
     .await?)

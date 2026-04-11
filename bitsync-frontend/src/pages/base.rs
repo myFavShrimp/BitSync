@@ -31,6 +31,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
+                    style { (crate::styles::error_card::STYLE_SHEET) }
                     style { (crate::styles::search_launcher::STYLE_SHEET) }
                     style { (crate::styles::toast::STYLE_SHEET) }
                     style { (crate::styles::user_settings_page::STYLE_SHEET) }
@@ -172,6 +173,7 @@ impl<R: Renderable> Renderable for GuestDocument<R> {
 
                     style { (crate::styles::base::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
+                    style { (crate::styles::error_card::STYLE_SHEET) }
                     style { (crate::styles::toast::STYLE_SHEET) }
                 }
 

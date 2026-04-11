@@ -1,4 +1,5 @@
 pub mod error_banner;
+pub mod error_card;
 pub mod error_modal;
 pub mod icons;
 pub mod models;

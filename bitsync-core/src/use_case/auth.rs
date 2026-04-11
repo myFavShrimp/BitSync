@@ -1,10 +1,12 @@
 pub mod ensure_admin_bootstrap;
+pub mod initiate_totp_setup;
 pub mod login;
 pub mod logout;
+pub mod prepare_totp_setup;
 pub mod redeem_invite_token;
 pub mod registration;
+pub mod reset_totp;
 pub mod resolve_session;
-pub mod retrieve_totp_setup_data;
 pub mod setup_totp;
 pub mod verify_totp;
 

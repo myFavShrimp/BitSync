@@ -103,7 +103,7 @@ async fn login_action_handler(
         Ok(result) => {
             let cookie_jar = cookie_jar.add(jwt_cookie(&result.jwt));
 
-            let redirect_url = match result.user.is_totp_set_up {
+            let redirect_url = match result.user.active_totp_secret.is_some() {
                 true => bitsync_routes::GetLoginTotpAuthPage.to_string(),
                 false => bitsync_routes::GetRegisterTotpSetupPage.to_string(),
             };

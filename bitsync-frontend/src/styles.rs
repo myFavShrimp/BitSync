@@ -6,6 +6,10 @@ pub mod error_banner {
     turf::style_sheet!("../scss/error_banner.scss");
 }
 
+pub mod error_card {
+    turf::style_sheet!("../scss/error_card.scss");
+}
+
 pub mod error_modal {
     turf::style_sheet!("../scss/error_modal.scss");
 }

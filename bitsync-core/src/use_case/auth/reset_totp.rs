@@ -6,7 +6,6 @@ use bitsync_database::{
 
 use crate::{
     hash::{PasswordHashCreationError, hash_password},
-    jwt::{JwtClaims, LoginState},
     totp::recovery_code::{GenerateRecoveryCodeError, generate_recovery_codes_batch},
     totp::{
         BuildTotpSetupDataError, TotpCreationError, TotpSetupData, build_totp,
@@ -15,29 +14,23 @@ use crate::{
 };
 
 #[derive(thiserror::Error, Debug)]
-#[error("failed to setup totp")]
-pub enum SetupTotpError {
+#[error("failed to reset totp")]
+pub enum ResetTotpError {
     TotpCreation(#[from] TotpCreationError),
     SystemTime(#[from] std::time::SystemTimeError),
     TransactionBegin(#[from] TransactionBeginError),
     TransactionCommit(#[from] TransactionCommitError),
     Query(#[from] QueryError),
     PasswordHashCreation(#[from] PasswordHashCreationError),
-    TotpAlreadySetUp(#[from] TotpAlreadySetUpError),
-    NoTotpSetupInProgress(#[from] NoTotpSetupInProgressError),
+    NoTotpResetInProgress(#[from] NoTotpResetInProgressError),
     InvalidTotpCode(#[from] InvalidTotpCodeError),
     GenerateRecoveryCode(#[from] GenerateRecoveryCodeError),
     BuildTotpSetupData(#[from] BuildTotpSetupDataError),
-    Jwt(#[from] crate::jwt::Error),
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("no totp setup is in progress")]
-pub struct NoTotpSetupInProgressError;
-
-#[derive(thiserror::Error, Debug)]
-#[error("totp is already set up")]
-pub struct TotpAlreadySetUpError;
+#[error("no totp reset is in progress")]
+pub struct NoTotpResetInProgressError;
 
 #[derive(thiserror::Error, Debug)]
 #[error("the entered totp code is invalid")]
@@ -45,9 +38,8 @@ pub struct InvalidTotpCodeError {
     pub setup_data: TotpSetupData,
 }
 
-pub struct SetupTotpResult {
+pub struct ResetTotpResult {
     pub recovery_codes: Vec<String>,
-    pub jwt: String,
 }
 
 const RECOVERY_CODE_COUNT: usize = 8;
@@ -56,21 +48,15 @@ const _: () = assert!(
     "count must be divisible by 4"
 );
 
-pub async fn setup_totp(
+pub async fn reset_totp(
     database: &Database,
     user: &User,
-    session_id: &uuid::Uuid,
     totp_value: &str,
-    jwt_secret: &str,
-) -> Result<SetupTotpResult, SetupTotpError> {
-    if user.active_totp_secret.is_some() {
-        Err(TotpAlreadySetUpError)?;
-    }
-
+) -> Result<ResetTotpResult, ResetTotpError> {
     let dangling_secret = user
         .dangling_totp_secret
         .as_ref()
-        .ok_or(NoTotpSetupInProgressError)?;
+        .ok_or(NoTotpResetInProgressError)?;
 
     let totp = build_totp(dangling_secret, &user.username)?;
 
@@ -83,6 +69,7 @@ pub async fn setup_totp(
     let mut transaction = database.begin_transaction().await?;
 
     repository::user::activate_dangling_totp_secret(&mut *transaction, &user.id).await?;
+    repository::totp_recovery_code::delete_all_for_user(&mut *transaction, &user.id).await?;
 
     let mut recovery_codes = Vec::with_capacity(RECOVERY_CODE_COUNT);
     for _ in 0..(RECOVERY_CODE_COUNT / 4) {
@@ -105,14 +92,5 @@ pub async fn setup_totp(
 
     transaction.commit().await?;
 
-    let jwt = JwtClaims {
-        sub: *session_id,
-        login_state: LoginState::Full,
-    }
-    .encode(jwt_secret)?;
-
-    Ok(SetupTotpResult {
-        recovery_codes,
-        jwt,
-    })
+    Ok(ResetTotpResult { recovery_codes })
 }

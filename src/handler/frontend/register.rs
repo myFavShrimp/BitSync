@@ -13,10 +13,10 @@ use axum_extra::{
     routing::RouterExt,
 };
 use bitsync_core::use_case::auth::{
+    prepare_totp_setup::prepare_totp_setup,
     redeem_invite_token::{RedeemInviteTokenError, redeem_invite_token},
     registration::{RegistrationError, perform_registration},
-    retrieve_totp_setup_data::{RetrieveTotpSetupDataError, retrieve_totp_setup_data},
-    setup_totp::{TotpSetupError, setup_totp},
+    setup_totp::{SetupTotpError, setup_totp},
 };
 use bitsync_frontend::{
     Component, Render,
@@ -24,8 +24,8 @@ use bitsync_frontend::{
         error::ErrorPage,
         register::{
             InviteTokenDisplayError, InviteTokenForm, RegisterForm, RegisterPage,
-            RegistrationDisplayError, TotpRecoveryCodesPrompt, TotpSetupDisplayError,
-            TotpSetupForm,
+            RegistrationDisplayError, TotpAlreadySetUpNotice, TotpRecoveryCodesPrompt,
+            TotpSetupDisplayError, TotpSetupForm,
         },
     },
 };
@@ -54,7 +54,8 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_no_totp_setup_middleware::<RedirectHttp>,
-                )),
+                ))
+                .with_state(state.clone()),
         )
         .merge(
             Router::new()
@@ -254,9 +255,10 @@ async fn register_action_handler(
 
 async fn register_totp_setup_page_handler(
     _: bitsync_routes::GetRegisterTotpSetupPage,
+    State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    match retrieve_totp_setup_data(&auth_data.user).await {
+    match prepare_totp_setup(&state.database, &auth_data.user).await {
         Ok(totp_setup_data) => Html(
             RegisterPage::TotpSetup(TotpSetupForm {
                 totp_secret_image_base64_img_src: totp_setup_data.secret_base64_qr_code,
@@ -266,21 +268,16 @@ async fn register_totp_setup_page_handler(
             .render(),
         )
         .into_response(),
-        Err(error) => match error {
-            RetrieveTotpSetupDataError::TotpAlreadySetUp(..) => {
-                hyperstim_redirect_response(&bitsync_routes::GetFilesHomePage.to_string())
-            }
-            error => {
-                emit_error(error);
-                Html(
-                    ErrorPage {
-                        error_message: "An internal server error occurred".to_owned(),
-                    }
-                    .render(),
-                )
-                .into_response()
-            }
-        },
+        Err(error) => {
+            emit_error(error);
+            Html(
+                ErrorPage {
+                    error_message: "An internal server error occurred".to_owned(),
+                }
+                .render(),
+            )
+            .into_response()
+        }
     }
 }
 
@@ -319,54 +316,43 @@ async fn register_totp_setup_submit_handler(
             })
                 .into_response()
         }
-        Err(error) => match error {
-            TotpSetupError::TotpAlreadySetUp(..) => {
-                hyperstim_redirect_response(&bitsync_routes::GetFilesHomePage.to_string())
-            }
-            TotpSetupError::TotpInvalid(..) => {
-                match retrieve_totp_setup_data(&auth_data.user).await {
-                    Ok(totp_setup_data) => {
-                        let totp_form = TotpSetupForm {
-                            totp_secret_image_base64_img_src: totp_setup_data.secret_base64_qr_code,
-                            totp_secret: totp_setup_data.secret_base32,
-                            error: Some(TotpSetupDisplayError::InvalidCode),
-                        };
+        Err(SetupTotpError::InvalidTotpCode(error)) => {
+            let totp_form = TotpSetupForm {
+                totp_secret_image_base64_img_src: error.setup_data.secret_base64_qr_code,
+                totp_secret: error.setup_data.secret_base32,
+                error: Some(TotpSetupDisplayError::InvalidCode),
+            };
 
-                        Json(HyperStimCommand::HsPatchHtml {
-                            html: totp_form.render(),
-                            patch_target: totp_form.id_target(),
-                            patch_mode: HyperStimPatchMode::Outer,
-                        })
-                        .into_response()
-                    }
-                    Err(error) => {
-                        emit_error(error);
-                        internal_server_error_toast_response()
-                    }
-                }
-            }
-            error => {
-                emit_error(error);
-                match retrieve_totp_setup_data(&auth_data.user).await {
-                    Ok(totp_setup_data) => {
-                        let totp_form = TotpSetupForm {
-                            totp_secret_image_base64_img_src: totp_setup_data.secret_base64_qr_code,
-                            totp_secret: totp_setup_data.secret_base32,
-                            error: Some(TotpSetupDisplayError::InternalServerError),
-                        };
-                        (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(HyperStimCommand::HsPatchHtml {
-                                html: totp_form.render(),
-                                patch_target: totp_form.id_target(),
-                                patch_mode: HyperStimPatchMode::Outer,
-                            }),
-                        )
-                            .into_response()
-                    }
-                    Err(_) => internal_server_error_toast_response(),
-                }
-            }
-        },
+            (
+                StatusCode::BAD_REQUEST,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: totp_form.render(),
+                    patch_target: totp_form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response()
+        }
+        Err(SetupTotpError::TotpAlreadySetUp(..)) => {
+            let notice = TotpAlreadySetUpNotice;
+
+            (
+                StatusCode::BAD_REQUEST,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: notice.render(),
+                    patch_target: notice.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response()
+        }
+        Err(SetupTotpError::NoTotpSetupInProgress(..)) => {
+            hyperstim_redirect_response(&bitsync_routes::GetRegisterPage.to_string())
+        }
+        Err(error) => {
+            emit_error(error);
+
+            internal_server_error_toast_response()
+        }
     }
 }

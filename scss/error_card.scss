@@ -1,0 +1,36 @@
+@import "vars";
+
+.ErrorCard {
+    border-radius: calc($border-radius / 2);
+    overflow: clip;
+    display: flex;
+    flex-direction: row;
+    background-color: $danger-light-color;
+
+    .Border {
+        background-color: $danger-color;
+        width: calc($border-radius / 4);
+        flex-shrink: 0;
+    }
+
+    .Content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 0.85rem 1rem;
+    }
+
+    .Title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: $danger-color;
+        margin: 0;
+    }
+
+    p {
+        font-size: 0.85rem;
+        color: $text-secondary;
+        line-height: 1.35rem;
+        margin: 0;
+    }
+}

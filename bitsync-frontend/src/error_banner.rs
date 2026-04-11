@@ -1,7 +1,7 @@
 use hypertext::prelude::*;
 
 pub struct ErrorBanner {
-    message: String,
+    pub message: String,
 }
 
 impl Renderable for ErrorBanner {

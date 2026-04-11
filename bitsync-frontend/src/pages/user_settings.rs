@@ -6,8 +6,9 @@ use crate::Component;
 
 pub mod password;
 pub mod sessions;
+pub mod totp;
 
-use self::{password::PasswordTabContent, sessions::SessionsTabContent};
+use self::{password::PasswordTabContent, sessions::SessionsTabContent, totp::TotpTabContent};
 
 pub static SETTINGS_DIALOG_ID: &str = "settings-dialog";
 static SETTINGS_TAB_AREA_ID: &str = "settings-tab-area";
@@ -18,6 +19,7 @@ pub enum SettingsTab {
         sessions: Vec<Session>,
         current_session_id: Uuid,
     },
+    Totp(TotpTabContent),
 }
 
 pub struct SettingsDialog {
@@ -70,26 +72,23 @@ impl Renderable for SettingsTabArea {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         let is_password_active = matches!(self.active_tab, SettingsTab::Password);
         let is_sessions_active = matches!(self.active_tab, SettingsTab::Sessions { .. });
+        let is_totp_active = matches!(self.active_tab, SettingsTab::Totp(..));
 
-        let password_tab_class = if is_password_active {
-            format!(
-                "{} {}",
-                crate::styles::modal::ClassName::TAB,
-                crate::styles::modal::ClassName::ACTIVE,
-            )
-        } else {
-            crate::styles::modal::ClassName::TAB.to_owned()
-        };
+        fn tab_class(active: bool) -> String {
+            if active {
+                format!(
+                    "{} {}",
+                    crate::styles::modal::ClassName::TAB,
+                    crate::styles::modal::ClassName::ACTIVE,
+                )
+            } else {
+                crate::styles::modal::ClassName::TAB.to_owned()
+            }
+        }
 
-        let sessions_tab_class = if is_sessions_active {
-            format!(
-                "{} {}",
-                crate::styles::modal::ClassName::TAB,
-                crate::styles::modal::ClassName::ACTIVE,
-            )
-        } else {
-            crate::styles::modal::ClassName::TAB.to_owned()
-        };
+        let password_tab_class = tab_class(is_password_active);
+        let sessions_tab_class = tab_class(is_sessions_active);
+        let totp_tab_class = tab_class(is_totp_active);
 
         maud! {
             div id=(self.id()) {
@@ -127,11 +126,9 @@ impl Renderable for SettingsTabArea {
                             "Password"
                         }
                         button
-                            class=(
-                                crate::styles::modal::ClassName::TAB, " ",
-                                crate::styles::modal::ClassName::DISABLED,
-                            )
-                            disabled
+                            class=(totp_tab_class)
+                            data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsTotpTab))
+                            data-on-click="this.fetch.trigger()"
                         {
                             "TOTP"
                         }
@@ -146,6 +143,9 @@ impl Renderable for SettingsTabArea {
                             sessions: sessions.clone(),
                             current_session_id: *current_session_id,
                         })
+                    }
+                    SettingsTab::Totp(content) => {
+                        (content.clone())
                     }
                 }
             }

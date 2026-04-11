@@ -49,3 +49,17 @@ where
     .fetch_all(executor)
     .await?)
 }
+
+pub async fn delete_all_for_user<'e, E>(executor: E, user_id: &Uuid) -> Result<(), QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query!(
+        r#"DELETE FROM "totp_recovery_code" WHERE user_id = $1"#,
+        user_id,
+    )
+    .execute(executor)
+    .await?;
+
+    Ok(())
+}
