@@ -1,4 +1,5 @@
 pub mod directory_creation;
+pub mod file_move;
 pub mod file_operations;
 
 use bitsync_core::use_case::user_files::{
@@ -14,8 +15,6 @@ use crate::{
     models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind},
     pages::base::LoggedInDocument,
 };
-
-use directory_creation::DirectoryCreationDialog;
 
 pub enum FilesHomePageElementId {
     FileUploadForm,
@@ -38,9 +37,7 @@ pub struct FilesHomePage {
     dir_content: Vec<StorageItemPresentation>,
     parent_directory_url: Option<ParentDirectoryLink>,
     file_upload_url: String,
-    directory_creation_url: String,
-    directory_creation_dialog_id: String,
-    file_move_dialog_id: String,
+    directory_creation_dialog_url: String,
 }
 
 impl From<UserDirectoryContentsResult> for FilesHomePage {
@@ -57,9 +54,9 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
             })
             .to_string();
 
-        let directory_creation_url = bitsync_routes::PostUserFileDirectoryCreation
+        let directory_creation_dialog_url = bitsync_routes::GetUserFileDirectoryCreationDialog
             .with_query_params(
-                bitsync_routes::PostUserFileDirectoryCreationQueryParameters {
+                bitsync_routes::GetUserFileDirectoryCreationDialogQueryParameters {
                     path: value.path.path(),
                 },
             )
@@ -70,11 +67,7 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
             dir_content: displayable_dir_content,
             parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
             file_upload_url,
-            directory_creation_url,
-            directory_creation_dialog_id: FilesHomePageElementId::DirectoryCreationDialog
-                .to_str()
-                .to_owned(),
-            file_move_dialog_id: FilesHomePageElementId::FileMoveDialog.to_str().to_owned(),
+            directory_creation_dialog_url,
         }
     }
 }
@@ -110,65 +103,10 @@ impl Renderable for FilesHomePage {
                         button
                             class=(crate::styles::base::ClassName::BUTTON, " ", crate::styles::files_home_page::ClassName::ACTION_BUTTON)
                             title="New Folder"
-                            onclick=(format_args!("openDialogModalById('{}')", &self.directory_creation_dialog_id))
+                            data-init=(format!("this.fetch = fetch('{}')", self.directory_creation_dialog_url))
+                            data-on-click="this.fetch.trigger()"
                         {
                             (crate::icons::folder_plus::FolderPlus)
-                        }
-                    }
-
-                    (DirectoryCreationDialog {
-                        action_url: self.directory_creation_url.clone(),
-                    })
-
-                    dialog
-                        class=(crate::styles::modal::ClassName::MODAL)
-                        id=(self.file_move_dialog_id)
-                        onclick="if (event.target === this) this.close()"
-                    {
-                        div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
-                            h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Move Item" }
-
-                            button
-                                class=(crate::styles::modal::ClassName::MODAL_CLOSE)
-                                onclick="closeClosestDialog(this)"
-                            {
-                                (crate::icons::x::X)
-                            }
-                        }
-                        form
-                            data-hijack
-                            method="POST"
-                        {
-                            div class=(crate::styles::modal::ClassName::MODAL_BODY) {
-                                label class=(crate::styles::modal::ClassName::FORM_LABEL) {
-                                    "Destination Path"
-
-                                    input
-                                        class=(crate::styles::base::ClassName::FORM_CONTROL)
-                                        type="text"
-                                        name="destination_path"
-                                        placeholder="Enter destination path"
-                                    ;
-                                }
-                            }
-                            div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
-                                button
-                                    type="button"
-                                    class=(crate::styles::base::ClassName::BUTTON)
-                                    onclick="closeClosestDialog(this)"
-                                {
-                                    "Cancel"
-                                }
-                                button
-                                    type="submit"
-                                    class=(
-                                        crate::styles::base::ClassName::BUTTON, " ",
-                                        crate::styles::base::ClassName::BUTTON_PRIMARY,
-                                    )
-                                {
-                                    "Move"
-                                }
-                            }
                         }
                     }
 
@@ -321,14 +259,8 @@ impl Renderable for FileStorageTable {
                                     {
                                         button
                                             class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                            onclick=(
-                                                format_args!(
-                                                    "closeClosestPopover(this); openMoveModal('{}', '{}', '{}')",
-                                                    FilesHomePageElementId::FileMoveDialog.to_str(),
-                                                    dir_item.move_url,
-                                                    dir_item.path,
-                                                )
-                                            )
+                                            data-init=(format!("this.fetch = fetch('{}')", dir_item.move_dialog_url))
+                                            data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                         {
                                             span { "Move" }
                                         }

@@ -23,10 +23,13 @@ use bitsync_core::use_case::{
     },
 };
 use bitsync_frontend::{
-    Component, Render,
+    Component, DIALOG_WRAPPER_SELECTOR, Render,
     pages::files::{
         FilesHomePageChangeResult,
-        directory_creation::{DirectoryCreationDisplayError, DirectoryCreationForm},
+        directory_creation::{
+            DirectoryCreationDialog, DirectoryCreationDisplayError, DirectoryCreationForm,
+        },
+        file_move::FileMoveDialog,
         file_operations::{
             UserFileDeletionDisplayError, UserFileDownloadDisplayError, UserFileMoveDisplayError,
             UserFileUploadDisplayError,
@@ -72,7 +75,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
             Router::new()
                 .typed_get(user_file_delete_handler)
                 .typed_post(user_file_move_handler)
+                .typed_get(user_file_move_dialog_handler)
                 .typed_post(user_file_directory_creation_handler)
+                .typed_get(user_file_directory_creation_dialog_handler)
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -267,7 +272,9 @@ async fn user_file_move_handler(
                     patch_mode: HyperStimPatchMode::Outer,
                 },
                 HyperStimCommand::HsExecute {
-                    code: format!("document.getElementById('{dialog_id}').close()"),
+                    code: format!(
+                        "closeClosestDialogAndRemoveElement(document.getElementById('{dialog_id}'))"
+                    ),
                 },
             ])
             .into_response()
@@ -319,7 +326,9 @@ async fn user_file_directory_creation_handler(
                     patch_mode: HyperStimPatchMode::Outer,
                 },
                 HyperStimCommand::HsExecute {
-                    code: format!("document.getElementById('{dialog_id}').close()"),
+                    code: format!(
+                        "closeClosestDialogAndRemoveElement(document.getElementById('{dialog_id}'))"
+                    ),
                 },
             ])
             .into_response()
@@ -362,4 +371,49 @@ async fn user_file_directory_creation_handler(
             .into_response()
         }
     }
+}
+
+async fn user_file_directory_creation_dialog_handler(
+    _: bitsync_routes::GetUserFileDirectoryCreationDialog,
+    query_parameters: Query<bitsync_routes::GetUserFileDirectoryCreationDialogQueryParameters>,
+) -> impl IntoResponse {
+    let action_url = bitsync_routes::PostUserFileDirectoryCreation
+        .with_query_params(
+            bitsync_routes::PostUserFileDirectoryCreationQueryParameters {
+                path: query_parameters.path.clone(),
+            },
+        )
+        .to_string();
+
+    let dialog = DirectoryCreationDialog { action_url };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn user_file_move_dialog_handler(
+    _: bitsync_routes::GetUserFileMoveDialog,
+    query_parameters: Query<bitsync_routes::GetUserFileMoveDialogQueryParameters>,
+) -> impl IntoResponse {
+    let action_url = bitsync_routes::PostUserFileMove
+        .with_query_params(bitsync_routes::PostUserFileMoveQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let dialog = FileMoveDialog {
+        action_url,
+        source_path: query_parameters.path.clone(),
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
 }

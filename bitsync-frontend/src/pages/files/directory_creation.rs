@@ -99,14 +99,15 @@ impl Renderable for DirectoryCreationDialog {
             dialog
                 class=(crate::styles::modal::ClassName::MODAL)
                 id=(self.id())
-                onclick="if (event.target === this) this.close()"
+                data-init="this.showModal()"
+                onclick="if (event.target === this) closeClosestDialogAndRemoveElement(this)"
             {
                 div class=(crate::styles::modal::ClassName::MODAL_HEADER) {
                     h2 class=(crate::styles::modal::ClassName::MODAL_TITLE) { "Create New Folder" }
 
                     button
                         class=(crate::styles::modal::ClassName::MODAL_CLOSE)
-                        onclick="closeClosestDialog(this)"
+                        onclick="closeClosestDialogAndRemoveElement(this)"
                     {
                         (crate::icons::x::X)
                     }

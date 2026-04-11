@@ -13,7 +13,7 @@ pub struct StorageItemPresentation {
     pub kind: StorageItemPresentationKind,
     pub actions_popover_id: String,
     pub download_url: String,
-    pub move_url: String,
+    pub move_dialog_url: String,
     pub delete_url: String,
 }
 
@@ -52,8 +52,8 @@ impl From<StorageItem> for StorageItemPresentation {
             })
             .to_string();
 
-        let move_url = bitsync_routes::PostUserFileMove
-            .with_query_params(bitsync_routes::PostUserFileMoveQueryParameters {
+        let move_dialog_url = bitsync_routes::GetUserFileMoveDialog
+            .with_query_params(bitsync_routes::GetUserFileMoveDialogQueryParameters {
                 path: value.path.path(),
             })
             .to_string();
@@ -73,7 +73,7 @@ impl From<StorageItem> for StorageItemPresentation {
             kind: StorageItemPresentationKind::from(value),
             actions_popover_id,
             download_url,
-            move_url,
+            move_dialog_url,
             delete_url,
         }
     }

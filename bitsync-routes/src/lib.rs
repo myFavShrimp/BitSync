@@ -113,10 +113,26 @@ pub struct PostUserFileMoveQueryParameters {
 pub struct PostUserFileMove;
 
 #[derive(TypedPath, Deserialize)]
-#[typed_path("/user-file/create_directory")]
+#[typed_path("/user-file/create-directory")]
 pub struct PostUserFileDirectoryCreation;
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PostUserFileDirectoryCreationQueryParameters {
+    pub path: String,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-file/create-directory/dialog")]
+pub struct GetUserFileDirectoryCreationDialog;
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GetUserFileDirectoryCreationDialogQueryParameters {
+    pub path: String,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-file/move/dialog")]
+pub struct GetUserFileMoveDialog;
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GetUserFileMoveDialogQueryParameters {
     pub path: String,
 }
 
@@ -134,7 +150,7 @@ pub struct GetSearchQueryParameters {
 // account
 
 #[derive(TypedPath, Deserialize)]
-#[typed_path("/user-settings")]
+#[typed_path("/user-settings/dialog")]
 pub struct GetUserSettingsDialog;
 
 #[derive(TypedPath, Deserialize)]
@@ -142,7 +158,7 @@ pub struct GetUserSettingsDialog;
 pub struct GetUserSettingsPasswordTab;
 
 #[derive(TypedPath, Deserialize)]
-#[typed_path("/user-settings/change-password")]
+#[typed_path("/user-settings/password/change")]
 pub struct PostUserSettingsChangePassword;
 
 #[derive(TypedPath, Deserialize)]

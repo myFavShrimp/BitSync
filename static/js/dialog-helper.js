@@ -1,13 +1,5 @@
 // dialog elements
 
-function openDialogModalById(id) {
-  const dialog = document.getElementById(id)
-
-  if (dialog == null || dialog.nodeName != 'DIALOG') return
-
-  dialog.showModal()
-}
-
 function closeClosestDialog(element) {
   const dialog = element.closest('dialog')
 
@@ -23,22 +15,14 @@ function closeClosestDialogAndRemoveElement(element) {
 
   dialog.close()
 
+  // if the same dialog is opened before the removal, id selectors may not work
+  dialog.removeAttribute('id')
+  dialog.querySelectorAll('[id]').forEach((child) => child.removeAttribute('id'))
+
   setTimeout(
       () => dialog.remove(),
       1500,
   )
-}
-
-function openMoveModal(dialogId, action, path) {
-  const dialog = document.getElementById(dialogId)
-
-  if (dialog == null || dialog.nodeName != 'DIALOG') return
-
-  const form = dialog.querySelector('form')
-  form.hsFetch.resource(action)
-  form.querySelector('input[name="destination_path"]').value = path
-
-  dialog.showModal()
 }
 
 // popover
