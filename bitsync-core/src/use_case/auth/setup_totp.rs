@@ -48,7 +48,6 @@ pub async fn setup_totp(
     user: &User,
     session_id: &uuid::Uuid,
     totp_value: &str,
-    jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<TotpSetupResult, TotpSetupError> {
     if user.is_totp_set_up {
@@ -85,10 +84,8 @@ pub async fn setup_totp(
 
     transaction.commit().await?;
 
-    let jwt_expiration = time::OffsetDateTime::now_utc().unix_timestamp() + jwt_expiration_seconds;
     let jwt = JwtClaims {
         sub: *session_id,
-        exp: jwt_expiration,
         login_state: LoginState::Full,
     }
     .encode(jwt_secret)?;

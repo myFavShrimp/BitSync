@@ -96,7 +96,6 @@ async fn login_action_handler(
         &login_data.username,
         &login_data.password,
         user_agent.as_str(),
-        state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
     .await
@@ -166,7 +165,6 @@ async fn login_totp_auth_submit_handler(
         &auth_data.user,
         &auth_data.session.id,
         &totp_setup_data.totp,
-        state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
     .await

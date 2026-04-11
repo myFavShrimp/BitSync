@@ -18,7 +18,6 @@ pub struct Config {
 #[derive(Deserialize, Debug)]
 pub struct Auth {
     pub jwt_secret: String,
-    pub jwt_expiration_seconds: i64,
     pub enforce_totp: bool,
 }
 

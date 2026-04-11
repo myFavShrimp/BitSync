@@ -30,7 +30,6 @@ pub async fn perform_login(
     username: &str,
     password: &str,
     user_agent: &str,
-    jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<LoginResult, LoginError> {
     let mut connection = database.acquire_connection().await?;
@@ -52,10 +51,8 @@ pub async fn perform_login(
     )
     .await?;
 
-    let jwt_expiration = time::OffsetDateTime::now_utc().unix_timestamp() + jwt_expiration_seconds;
     let jwt = JwtClaims {
         sub: session.id,
-        exp: jwt_expiration,
         login_state: LoginState::Basic,
     }
     .encode(jwt_secret)?;

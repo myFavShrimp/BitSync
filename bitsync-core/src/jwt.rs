@@ -17,7 +17,6 @@ pub enum LoginState {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct JwtClaims {
     pub sub: Uuid,
-    pub exp: i64,
     pub login_state: LoginState,
 }
 
@@ -26,6 +25,8 @@ impl JwtClaims {
         let decoding_key = DecodingKey::from_secret(secret.as_bytes());
         let header = jsonwebtoken::decode_header(token)?;
         let mut validation = Validation::new(header.alg);
+        validation.validate_exp = false;
+        validation.required_spec_claims.clear();
         validation.leeway = 0;
 
         Ok(
@@ -38,6 +39,8 @@ impl JwtClaims {
         let invalid_decoding_key = DecodingKey::from_secret(&[]);
         let header = jsonwebtoken::decode_header(token)?;
         let mut validation = Validation::new(header.alg);
+        validation.validate_exp = false;
+        validation.required_spec_claims.clear();
         validation.insecure_disable_signature_validation();
 
         Ok(

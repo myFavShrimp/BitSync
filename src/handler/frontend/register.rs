@@ -197,7 +197,6 @@ async fn register_action_handler(
         &registration_data.password,
         &token_uuid,
         user_agent.as_str(),
-        state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
     .await
@@ -302,7 +301,6 @@ async fn register_totp_setup_submit_handler(
         &auth_data.user,
         &auth_data.session.id,
         &totp_setup_data.totp,
-        state.config.auth.jwt_expiration_seconds,
         &state.config.auth.jwt_secret,
     )
     .await

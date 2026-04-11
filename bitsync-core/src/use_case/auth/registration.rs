@@ -52,7 +52,6 @@ pub async fn perform_registration(
     password: &str,
     invite_token_id: &Uuid,
     user_agent: &str,
-    jwt_expiration_seconds: i64,
     jwt_secret: &str,
 ) -> Result<RegistrationResult, RegistrationError> {
     if is_blank(password) {
@@ -104,10 +103,8 @@ pub async fn perform_registration(
 
     transaction.commit().await?;
 
-    let jwt_expiration = time::OffsetDateTime::now_utc().unix_timestamp() + jwt_expiration_seconds;
     let jwt = JwtClaims {
         sub: session.id,
-        exp: jwt_expiration,
         login_state: LoginState::Basic,
     }
     .encode(jwt_secret)?;
