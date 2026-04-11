@@ -1,11 +1,34 @@
 use hypertext::prelude::*;
 
-pub struct PasswordTabContent;
+use crate::{Component, error_banner::OptionalErrorBanner};
+
+pub enum PasswordDisplayError {
+    InternalServerError,
+}
+
+impl PasswordDisplayError {
+    pub fn message(&self) -> &'static str {
+        match self {
+            Self::InternalServerError => "An internal server error occurred",
+        }
+    }
+}
+
+pub struct PasswordTabContent {
+    pub error: Option<PasswordDisplayError>,
+}
+
+impl Component for PasswordTabContent {
+    fn id(&self) -> String {
+        "password-tab-content".to_owned()
+    }
+}
 
 impl Renderable for PasswordTabContent {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             form
+                id=(self.id())
                 data-hijack
                 action=(bitsync_routes::PostUserSettingsChangePassword.to_string())
                 method="POST"
@@ -46,6 +69,8 @@ impl Renderable for PasswordTabContent {
                             name="new_password_repeated"
                             placeholder="Repeat your new password";
                     }
+
+                    OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                     button
                         type="submit"

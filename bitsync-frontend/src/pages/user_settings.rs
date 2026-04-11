@@ -139,7 +139,7 @@ impl Renderable for SettingsTabArea {
                 }
                 @match &self.active_tab {
                     SettingsTab::Password => {
-                        (PasswordTabContent)
+                        (PasswordTabContent { error: None })
                     }
                     SettingsTab::Sessions { sessions, current_session_id } => {
                         (SessionsTabContent {

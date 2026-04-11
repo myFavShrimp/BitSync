@@ -48,16 +48,12 @@ impl Renderable for Toast {
                     crate::styles::toast::ClassName::TOAST, " ",
                     self.kind_class(),
                 )
-                data-init=(format!(
-                    "this._remaining = {TOAST_AUTO_DISMISS_MS}, this._start = Date.now(), this._tid = setTimeout(() => this.classList.add('{dismissing_class}'), this._remaining)"
-                ))
-                data-on-mouseenter="clearTimeout(this._tid), this._remaining -= Date.now() - this._start"
-                data-on-mouseleave=(format!(
-                    "this._start = Date.now(), this._tid = setTimeout(() => this.classList.add('{dismissing_class}'), this._remaining)"
-                ))
-                data-on-click=(format!(
-                    "clearTimeout(this._tid), this.classList.add('{dismissing_class}')"
-                ))
+                // popover needs to be repropagated. otherwise it will be behind dialogs/backdrop
+                data-init=(format!(r"
+                    this.parentElement.hidePopover(),
+                    this.parentElement.showPopover(),
+                    setTimeout(() => this.classList.add('{dismissing_class}'), {TOAST_AUTO_DISMISS_MS})
+                "))
                 data-on-animationend=(format!(
                     "this.classList.contains('{dismissing_class}') && this.remove()"
                 ))

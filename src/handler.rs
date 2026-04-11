@@ -7,7 +7,11 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use bitsync_hyperstim::HyperStimCommand;
+use bitsync_frontend::{
+    Render,
+    toast::{TOAST_CONTAINER_SELECTOR, Toast},
+};
+use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use headers::Header;
 use tower_http::{limit::RequestBodyLimitLayer, trace::TraceLayer};
 
@@ -77,4 +81,16 @@ pub fn redirect_response<KIND: Redirection>(redirect_route: &str) -> Response {
         RedirectionKind::HyperStim => hyperstim_redirect_response(redirect_route),
         RedirectionKind::Http => http_redirect_response(redirect_route),
     }
+}
+
+pub fn internal_server_error_toast_response() -> Response {
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        Json(HyperStimCommand::HsPatchHtml {
+            html: Toast::error("An internal server error occurred").render(),
+            patch_target: TOAST_CONTAINER_SELECTOR.to_owned(),
+            patch_mode: HyperStimPatchMode::Append,
+        }),
+    )
+        .into_response()
 }

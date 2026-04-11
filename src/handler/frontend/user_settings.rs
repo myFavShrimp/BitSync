@@ -13,8 +13,11 @@ use bitsync_core::use_case::user_settings::{
 };
 use bitsync_frontend::{
     Component, DIALOG_WRAPPER_SELECTOR, Render,
-    pages::user_settings::sessions::SessionList,
-    pages::user_settings::{SettingsDialog, SettingsTab, SettingsTabArea},
+    pages::user_settings::{
+        SettingsDialog, SettingsTab, SettingsTabArea,
+        password::{PasswordDisplayError, PasswordTabContent},
+        sessions::SessionList,
+    },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;
@@ -23,7 +26,7 @@ use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
     error_report::emit_error,
-    handler::RedirectHyperStim,
+    handler::{RedirectHyperStim, internal_server_error_toast_response},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -64,7 +67,8 @@ async fn user_settings_dialog_handler(
         }
         Err(error) => {
             emit_error(error);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+
+            internal_server_error_toast_response()
         }
     }
 }
@@ -107,7 +111,8 @@ async fn user_settings_sessions_tab_handler(
         }
         Err(error) => {
             emit_error(error);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+
+            internal_server_error_toast_response()
         }
     }
 }
@@ -144,7 +149,19 @@ async fn user_settings_password_change_handler(
         }
         Err(error) => {
             emit_error(error);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            let form = PasswordTabContent {
+                error: Some(PasswordDisplayError::InternalServerError),
+            };
+
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: form.render(),
+                    patch_target: form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response()
         }
     }
 }
@@ -177,7 +194,8 @@ async fn user_settings_terminate_session_handler(
         }
         Err(error) => {
             emit_error(error);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+
+            internal_server_error_toast_response()
         }
     }
 }
@@ -205,7 +223,8 @@ async fn user_settings_terminate_all_other_sessions_handler(
         }
         Err(error) => {
             emit_error(error);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+
+            internal_server_error_toast_response()
         }
     }
 }

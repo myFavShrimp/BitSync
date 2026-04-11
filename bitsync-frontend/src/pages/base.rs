@@ -144,6 +144,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                         class=(crate::styles::toast::ClassName::TOAST_CONTAINER)
                         role="status"
                         aria-live="polite"
+                        popover="manual"
                     {}
                 }
             }
@@ -182,6 +183,7 @@ impl<R: Renderable> Renderable for GuestDocument<R> {
                         class=(crate::styles::toast::ClassName::TOAST_CONTAINER)
                         role="status"
                         aria-live="polite"
+                        popover="manual"
                     {}
                 }
             }

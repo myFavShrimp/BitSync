@@ -4,12 +4,14 @@ use crate::{Component, error_banner::OptionalErrorBanner, pages::base::GuestDocu
 
 pub enum LoginDisplayError {
     InvalidCredentials,
+    InternalServerError,
 }
 
 impl LoginDisplayError {
     pub fn message(&self) -> &'static str {
         match self {
             Self::InvalidCredentials => "Invalid username or password",
+            Self::InternalServerError => "An internal server error occurred",
         }
     }
 }
@@ -17,6 +19,7 @@ impl LoginDisplayError {
 pub enum TotpVerificationDisplayError {
     InvalidCode,
     NotSetUp,
+    InternalServerError,
 }
 
 impl TotpVerificationDisplayError {
@@ -24,6 +27,7 @@ impl TotpVerificationDisplayError {
         match self {
             Self::InvalidCode => "Invalid verification code",
             Self::NotSetUp => "TOTP is not set up",
+            Self::InternalServerError => "An internal server error occurred",
         }
     }
 }

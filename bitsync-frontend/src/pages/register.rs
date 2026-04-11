@@ -9,6 +9,7 @@ use crate::{
 pub enum RegistrationDisplayError {
     UsernameTaken,
     InvalidInviteToken,
+    InternalServerError,
 }
 
 impl RegistrationDisplayError {
@@ -16,18 +17,21 @@ impl RegistrationDisplayError {
         match self {
             Self::UsernameTaken => "The username is already taken",
             Self::InvalidInviteToken => "The invite token is invalid or has already been used",
+            Self::InternalServerError => "An internal server error occurred",
         }
     }
 }
 
 pub enum TotpSetupDisplayError {
     InvalidCode,
+    InternalServerError,
 }
 
 impl TotpSetupDisplayError {
     pub fn message(&self) -> &'static str {
         match self {
             Self::InvalidCode => "The entered TOTP code is invalid",
+            Self::InternalServerError => "An internal server error occurred",
         }
     }
 }
@@ -84,12 +88,14 @@ impl Component for InviteTokenForm {
 
 pub enum InviteTokenDisplayError {
     InvalidToken,
+    InternalServerError,
 }
 
 impl InviteTokenDisplayError {
     pub fn message(&self) -> &'static str {
         match self {
             Self::InvalidToken => "The invite token is invalid or has already been used",
+            Self::InternalServerError => "An internal server error occurred",
         }
     }
 }

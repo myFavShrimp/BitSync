@@ -20,9 +20,12 @@ use bitsync_core::use_case::auth::{
 };
 use bitsync_frontend::{
     Component, Render,
-    pages::register::{
-        InviteTokenDisplayError, InviteTokenForm, RegisterForm, RegisterPage,
-        RegistrationDisplayError, TotpRecoveryCodesPrompt, TotpSetupDisplayError, TotpSetupForm,
+    pages::{
+        error::ErrorPage,
+        register::{
+            InviteTokenDisplayError, InviteTokenForm, RegisterForm, RegisterPage,
+            RegistrationDisplayError, TotpRecoveryCodesPrompt, TotpSetupDisplayError, TotpSetupForm,
+        },
     },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
@@ -34,7 +37,10 @@ use crate::{
         AuthData, jwt_cookie, require_login_and_no_totp_setup_middleware, require_logout_middleware,
     },
     error_report::emit_error,
-    handler::{RedirectHttp, RedirectHyperStim, hyperstim_redirect_response},
+    handler::{
+        RedirectHttp, RedirectHyperStim, hyperstim_redirect_response,
+        internal_server_error_toast_response,
+    },
 };
 
 use crate::AppState;
@@ -132,7 +138,18 @@ async fn redeem_invite_token_handler(
         }
         Err(error) => {
             emit_error(error);
-            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            let invite_token_form = InviteTokenForm {
+                error: Some(InviteTokenDisplayError::InternalServerError),
+            };
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(HyperStimCommand::HsPatchHtml {
+                    html: invite_token_form.render(),
+                    patch_target: invite_token_form.id_target(),
+                    patch_mode: HyperStimPatchMode::Outer,
+                }),
+            )
+                .into_response()
         }
     }
 }
@@ -180,14 +197,19 @@ async fn register_action_handler(
                 .into_response()
         }
         Err(error) => {
-            let display_error = match error {
-                RegistrationError::UserExists(..) => RegistrationDisplayError::UsernameTaken,
+            let (status_code, display_error) = match error {
+                RegistrationError::UserExists(..) => {
+                    (StatusCode::CONFLICT, RegistrationDisplayError::UsernameTaken)
+                }
                 RegistrationError::InvalidInviteTokenError(..) => {
-                    RegistrationDisplayError::InvalidInviteToken
+                    (StatusCode::BAD_REQUEST, RegistrationDisplayError::InvalidInviteToken)
                 }
                 error => {
                     emit_error(error);
-                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        RegistrationDisplayError::InternalServerError,
+                    )
                 }
             };
 
@@ -198,7 +220,7 @@ async fn register_action_handler(
             };
 
             (
-                StatusCode::CONFLICT,
+                status_code,
                 Json(HyperStimCommand::HsPatchHtml {
                     html: register_form.render(),
                     patch_target: register_form.id_target(),
@@ -230,7 +252,13 @@ async fn register_totp_setup_page_handler(
             }
             error => {
                 emit_error(error);
-                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                Html(
+                    ErrorPage {
+                        error_message: "An internal server error occurred".to_owned(),
+                    }
+                    .render(),
+                )
+                .into_response()
             }
         },
     }
@@ -294,13 +322,31 @@ async fn register_totp_setup_submit_handler(
                     }
                     Err(error) => {
                         emit_error(error);
-                        StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                        internal_server_error_toast_response()
                     }
                 }
             }
             error => {
                 emit_error(error);
-                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+                match retrieve_totp_setup_data(&auth_data.user).await {
+                    Ok(totp_setup_data) => {
+                        let totp_form = TotpSetupForm {
+                            totp_secret_image_base64_img_src: totp_setup_data.secret_base64_qr_code,
+                            totp_secret: totp_setup_data.secret_base32,
+                            error: Some(TotpSetupDisplayError::InternalServerError),
+                        };
+                        (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(HyperStimCommand::HsPatchHtml {
+                                html: totp_form.render(),
+                                patch_target: totp_form.id_target(),
+                                patch_mode: HyperStimPatchMode::Outer,
+                            }),
+                        )
+                            .into_response()
+                    }
+                    Err(_) => internal_server_error_toast_response(),
+                }
             }
         },
     }

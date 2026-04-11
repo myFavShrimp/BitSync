@@ -112,13 +112,16 @@ async fn login_action_handler(
             (cookie_jar, hyperstim_redirect_response(&redirect_url)).into_response()
         }
         Err(error) => {
-            let display_error = match error {
+            let (status_code, display_error) = match error {
                 LoginError::PasswordHashVerification(..) | LoginError::DatabaseQuery(..) => {
-                    LoginDisplayError::InvalidCredentials
+                    (StatusCode::UNAUTHORIZED, LoginDisplayError::InvalidCredentials)
                 }
                 error => {
                     emit_error(error);
-                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        LoginDisplayError::InternalServerError,
+                    )
                 }
             };
 
@@ -128,7 +131,7 @@ async fn login_action_handler(
             };
 
             (
-                StatusCode::UNAUTHORIZED,
+                status_code,
                 Json(HyperStimCommand::HsPatchHtml {
                     html: login_form.render(),
                     patch_target: login_form.id_target(),
@@ -177,13 +180,19 @@ async fn login_totp_auth_submit_handler(
                 .into_response()
         }
         Err(error) => {
-            let display_error = match error {
-                VerifyTotpError::TotpInvalid(..) => TotpVerificationDisplayError::InvalidCode,
-                VerifyTotpError::TotpNotSetUp(..) => TotpVerificationDisplayError::NotSetUp,
+            let (status_code, display_error) = match error {
+                VerifyTotpError::TotpInvalid(..) => {
+                    (StatusCode::UNAUTHORIZED, TotpVerificationDisplayError::InvalidCode)
+                }
+                VerifyTotpError::TotpNotSetUp(..) => {
+                    (StatusCode::UNAUTHORIZED, TotpVerificationDisplayError::NotSetUp)
+                }
                 error => {
                     emit_error(error);
-
-                    return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        TotpVerificationDisplayError::InternalServerError,
+                    )
                 }
             };
 
@@ -192,7 +201,7 @@ async fn login_totp_auth_submit_handler(
             };
 
             (
-                StatusCode::UNAUTHORIZED,
+                status_code,
                 Json(HyperStimCommand::HsPatchHtml {
                     html: totp_form.render(),
                     patch_target: totp_form.id_target(),
