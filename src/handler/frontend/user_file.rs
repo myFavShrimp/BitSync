@@ -282,6 +282,9 @@ async fn user_file_move_handler(
         Err(error) => {
             let display_error = match error {
                 UserFileMoveError::StoragePath(..) => UserFileMoveDisplayError::InvalidPath,
+                UserFileMoveError::DestinationSameAsSource(..) => {
+                    UserFileMoveDisplayError::DestinationSameAsSource
+                }
                 error => {
                     emit_error(error);
                     UserFileMoveDisplayError::InternalServerError
@@ -360,6 +363,7 @@ async fn user_file_directory_creation_handler(
 
             let form = DirectoryCreationForm {
                 action_url: directory_creation_url,
+                directory_name: Some(directory_name),
                 error: Some(display_error),
             };
 

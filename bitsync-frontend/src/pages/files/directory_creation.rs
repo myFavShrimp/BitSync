@@ -16,7 +16,7 @@ impl DirectoryCreationDisplayError {
         match self {
             Self::EmptyName => "Folder name must not be empty",
             Self::InvalidName => "Folder name must not contain path separators",
-            Self::InvalidPath => "The path is invalid",
+            Self::InvalidPath => "Path must not contain '..' segments",
             Self::InternalServerError => "An internal server error occurred",
         }
     }
@@ -26,6 +26,7 @@ static DIRECTORY_CREATION_FORM_ID: &str = "directory-creation-form";
 
 pub struct DirectoryCreationForm {
     pub action_url: String,
+    pub directory_name: Option<String>,
     pub error: Option<DirectoryCreationDisplayError>,
 }
 
@@ -52,6 +53,7 @@ impl Renderable for DirectoryCreationForm {
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             type="text"
                             name="directory_name"
+                            value=(self.directory_name.clone().unwrap_or_default())
                             placeholder="Enter folder name";
                     }
 
@@ -114,6 +116,7 @@ impl Renderable for DirectoryCreationDialog {
                 }
                 (DirectoryCreationForm {
                     action_url: self.action_url.clone(),
+                    directory_name: None,
                     error: None,
                 })
             }

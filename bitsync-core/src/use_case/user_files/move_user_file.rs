@@ -25,7 +25,12 @@ pub enum UserFileMoveError {
     ReadStorageItem(#[from] ReadStorageItemError),
     RenameItem(#[from] RenameItemError),
     ReadDirContents(#[from] ReadDirContentsError),
+    DestinationSameAsSource(#[from] DestinationSameAsSourceError),
 }
+
+#[derive(thiserror::Error, Debug)]
+#[error("destination path is the same as the source path")]
+pub struct DestinationSameAsSourceError;
 
 pub async fn move_user_file(
     storage_root_dir: &Path,
@@ -46,6 +51,10 @@ pub async fn move_user_file(
     let storage_path_to_move = StoragePath::new(user_storage.clone(), scoped_path_to_move.clone())?;
     let move_destination_storage_path =
         StoragePath::new(user_storage.clone(), scoped_move_destination_path)?;
+
+    if storage_path_to_move.scoped_path == move_destination_storage_path.scoped_path {
+        Err(DestinationSameAsSourceError)?;
+    }
 
     rename_item(&storage_path_to_move, &move_destination_storage_path).await?;
 
