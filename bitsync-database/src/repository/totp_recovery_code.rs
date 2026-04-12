@@ -63,3 +63,18 @@ where
 
     Ok(())
 }
+
+pub async fn delete<'e, E>(executor: E, user_id: &Uuid, code_hash: &str) -> Result<(), QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query!(
+        r#"DELETE FROM "totp_recovery_code" WHERE user_id = $1 AND code = $2"#,
+        user_id,
+        code_hash,
+    )
+    .execute(executor)
+    .await?;
+
+    Ok(())
+}

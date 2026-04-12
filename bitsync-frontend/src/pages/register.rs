@@ -268,7 +268,7 @@ impl Renderable for TotpSetupForm {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             name="totp"
-                            placeholder="Enter your one-time password"
+                            placeholder="Enter the 6-digit code"
                             required;
 
                         p
@@ -369,8 +369,13 @@ impl Renderable for TotpRecoveryCodesPrompt {
                 p {
                     ("To ensure you don't lose access to your account, please save these recovery codes in a secure location.")
                 }
+
                 p {
-                    ("These codes will only be shown once. If you navigate away without saving them, you'll need to generate new codes.")
+                    ("If you ever lose access to your authenticator app, you can enter any of these codes in the TOTP field when signing in. Each code works only once.")
+                }
+
+                p {
+                    ("These codes will only be shown now. If you navigate away without saving them, you'll need to generate new ones.")
                 }
 
                 details

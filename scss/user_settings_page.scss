@@ -90,11 +90,15 @@ body {
     .TotpManualSecret {
         padding: 0;
         font-size: 0.8125rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
 
         summary {
             color: $text-secondary;
             cursor: pointer;
             user-select: none;
+            text-align: center;
 
             &:hover {
                 color: $text-color;
@@ -109,6 +113,8 @@ body {
             border-radius: $border-radius-sm;
             color: $text-secondary;
             overflow-x: auto;
+            user-select: all;
+            width: fit-content;
 
             code {
                 font-family: monospace;

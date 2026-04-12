@@ -88,6 +88,8 @@ impl Renderable for TotpTabContent {
                             pre { code { (totp_secret) } }
                         }
 
+                        div class=(crate::styles::modal::ClassName::FORM_DIVIDER) {}
+
                         label class=(crate::styles::modal::ClassName::FORM_LABEL) {
                             "TOTP Code"
 
@@ -118,8 +120,18 @@ impl Renderable for TotpTabContent {
                         class=(crate::styles::modal::ClassName::MODAL_BODY)
                     {
                         p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
-                            "Your two-factor authentication has been updated. Save these recovery codes in a secure location — they'll only be shown once, and each can only be used once."
+                            ("To ensure you don't lose access to your account, please save these recovery codes in a secure location.")
                         }
+
+                        p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
+                            ("If you ever lose access to your authenticator app, you can enter any of these codes in the TOTP field when signing in. Each code works only once.")
+                        }
+
+                        p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
+                            ("These codes will only be shown now. If you navigate away without saving them, you'll need to generate new ones.")
+                        }
+
+                        div class=(crate::styles::modal::ClassName::FORM_DIVIDER) {}
 
                         div class=(crate::styles::user_settings_page::ClassName::RECOVERY_CODES_GRID) {
                             @for recovery_code in recovery_codes {

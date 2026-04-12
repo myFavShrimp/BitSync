@@ -1,6 +1,11 @@
-use bitsync_database::entity::User;
+use bitsync_database::{
+    database::{ConnectionAcquisitionError, Database},
+    entity::User,
+    repository::{self, QueryError},
+};
 
 use crate::{
+    hash::verify_password_hash,
     jwt::{JwtClaims, LoginState},
     totp::{TotpCreationError, build_totp},
 };
@@ -12,11 +17,13 @@ pub enum VerifyTotpError {
     SystemTime(#[from] std::time::SystemTimeError),
     TotpInvalid(#[from] TotpInvalidError),
     TotpNotSetUp(#[from] TotpNotSetUpError),
+    DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),
+    Query(#[from] QueryError),
     Jwt(#[from] crate::jwt::Error),
 }
 
 #[derive(thiserror::Error, Debug)]
-#[error("user provided an invalid totp value")]
+#[error("the entered totp code is invalid")]
 pub struct TotpInvalidError;
 
 #[derive(thiserror::Error, Debug)]
@@ -24,6 +31,7 @@ pub struct TotpInvalidError;
 pub struct TotpNotSetUpError;
 
 pub async fn verify_totp(
+    database: &Database,
     user: &User,
     session_id: &uuid::Uuid,
     totp_value: &str,
@@ -33,8 +41,21 @@ pub async fn verify_totp(
 
     let totp = build_totp(active_secret, &user.username)?;
 
-    if !totp.check_current(totp_value)? {
-        Err(TotpInvalidError)?;
+    let is_valid_totp = totp.check_current(totp_value)?;
+
+    if !is_valid_totp {
+        let mut connection = database.acquire_connection().await?;
+
+        let stored_codes =
+            repository::totp_recovery_code::find_by_user_id(&mut *connection, user.id).await?;
+
+        let matched_hash = stored_codes
+            .into_iter()
+            .find(|recovery_code| verify_password_hash(&recovery_code.code, totp_value).is_ok())
+            .map(|recovery_code| recovery_code.code)
+            .ok_or(TotpInvalidError)?;
+
+        repository::totp_recovery_code::delete(&mut *connection, &user.id, &matched_hash).await?;
     }
 
     let jwt = JwtClaims {

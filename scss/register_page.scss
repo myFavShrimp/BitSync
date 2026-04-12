@@ -149,6 +149,7 @@ body {
                     width: fit-content;
                     border-radius: $border-radius;
                     color: $text-secondary;
+                    user-select: all;
 
                     code {
                         font-family: monospace;

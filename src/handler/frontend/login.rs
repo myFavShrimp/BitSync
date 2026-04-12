@@ -162,6 +162,7 @@ async fn login_totp_auth_submit_handler(
     Form(totp_setup_data): Form<TotpAuthFormData>,
 ) -> impl IntoResponse {
     match verify_totp(
+        &state.database,
         &auth_data.user,
         &auth_data.session.id,
         &totp_setup_data.totp,
