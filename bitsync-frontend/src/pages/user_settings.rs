@@ -1,3 +1,4 @@
+use bitsync_core::use_case::user_share::list_shared_paths::SharedPath;
 use bitsync_database::entity::{InviteToken, Session, User};
 use hypertext::prelude::*;
 use uuid::Uuid;
@@ -7,12 +8,13 @@ use crate::Component;
 pub mod invites;
 pub mod password;
 pub mod sessions;
+pub mod shares;
 pub mod totp;
 pub mod users;
 
 use self::{
     invites::InvitesTabContent, password::PasswordTabContent, sessions::SessionsTabContent,
-    totp::TotpTabContent, users::UsersTabContent,
+    shares::SharesTabContent, totp::TotpTabContent, users::UsersTabContent,
 };
 
 pub static SETTINGS_DIALOG_ID: &str = "settings-dialog";
@@ -27,6 +29,9 @@ pub enum SettingsTab {
     Totp(TotpTabContent),
     Users {
         users: Vec<User>,
+    },
+    Shares {
+        shared_paths: Vec<SharedPath>,
     },
     Invites {
         invite_tokens: Vec<InviteToken>,
@@ -87,6 +92,7 @@ impl Renderable for SettingsTabArea {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         let is_password_active = matches!(self.active_tab, SettingsTab::Password);
         let is_sessions_active = matches!(self.active_tab, SettingsTab::Sessions { .. });
+        let is_shares_active = matches!(self.active_tab, SettingsTab::Shares { .. });
         let is_totp_active = matches!(self.active_tab, SettingsTab::Totp(..));
         let is_users_active = matches!(self.active_tab, SettingsTab::Users { .. });
         let is_invites_active = matches!(self.active_tab, SettingsTab::Invites { .. });
@@ -105,6 +111,7 @@ impl Renderable for SettingsTabArea {
 
         let password_tab_class = tab_class(is_password_active);
         let sessions_tab_class = tab_class(is_sessions_active);
+        let shares_tab_class = tab_class(is_shares_active);
         let totp_tab_class = tab_class(is_totp_active);
         let users_tab_class = tab_class(is_users_active);
         let invites_tab_class = tab_class(is_invites_active);
@@ -134,13 +141,16 @@ impl Renderable for SettingsTabArea {
                             div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         }
                         button
-                            class=(
-                                crate::styles::modal::ClassName::TAB, " ",
-                                crate::styles::modal::ClassName::DISABLED,
-                            )
-                            disabled
+                            class=(shares_tab_class)
+                            data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsSharesTab))
+                            data-on-click__throttle.1s="this.fetch.trigger()"
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
                             "Shares"
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         }
                         button
                             class=(password_tab_class)
@@ -209,6 +219,9 @@ impl Renderable for SettingsTabArea {
                     }
                     SettingsTab::Users { users } => {
                         (UsersTabContent { users: users.clone() })
+                    }
+                    SettingsTab::Shares { shared_paths } => {
+                        (SharesTabContent { shared_paths: shared_paths.clone() })
                     }
                     SettingsTab::Invites { invite_tokens } => {
                         (InvitesTabContent { invite_tokens: invite_tokens.clone() })

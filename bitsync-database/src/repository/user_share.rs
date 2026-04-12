@@ -56,6 +56,21 @@ where
     Ok(())
 }
 
+pub async fn find_distinct_item_paths_by_user_id<'e, E>(
+    executor: E,
+    user_id: &Uuid,
+) -> Result<Vec<String>, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_scalar!(
+        r#"SELECT DISTINCT item_path FROM "user_share" WHERE user_id = $1 ORDER BY item_path"#,
+        user_id,
+    )
+    .fetch_all(executor)
+    .await?)
+}
+
 pub async fn delete_all_by_user_id_and_item_path<'e, E>(
     executor: E,
     user_id: &Uuid,

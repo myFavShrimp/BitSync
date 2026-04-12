@@ -1,6 +1,7 @@
 pub mod bolt;
 pub mod check;
 pub mod chevron_left;
+pub mod chevron_right;
 pub mod circle_x;
 pub mod cloudy;
 pub mod ellipsis_vertical;

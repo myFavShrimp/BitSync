@@ -306,6 +306,10 @@ pub struct PostUserFileShareDeleteAll;
 // account
 
 #[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/shares")]
+pub struct GetUserSettingsSharesTab;
+
+#[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/invites")]
 pub struct GetUserSettingsInvitesTab;
 

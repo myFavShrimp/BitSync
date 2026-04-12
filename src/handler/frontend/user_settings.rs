@@ -25,6 +25,7 @@ use bitsync_core::use_case::{
         terminate_session::{TerminateSessionOutcome, terminate_session},
         update_user_password::{UpdateUserPasswordError, update_user_password},
     },
+    user_share::list_shared_paths::list_shared_paths,
 };
 use bitsync_frontend::{
     Component, DIALOG_WRAPPER_SELECTOR, Render,
@@ -61,6 +62,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .typed_get(user_settings_sessions_tab_handler)
                 .typed_post(user_settings_terminate_session_handler)
                 .typed_post(user_settings_terminate_all_other_sessions_handler)
+                .typed_get(user_settings_shares_tab_handler)
                 .typed_get(user_settings_totp_tab_handler)
                 .typed_post(user_settings_totp_initiate_handler)
                 .typed_post(user_settings_totp_setup_handler)
@@ -152,6 +154,35 @@ async fn user_settings_sessions_tab_handler(
                     sessions,
                     current_session_id: auth_data.session.id,
                 },
+                is_admin: auth_data.user.is_admin,
+            };
+
+            Json(HyperStimCommand::HsPatchHtml {
+                html: tab_area.render(),
+                patch_target: tab_area.id_target(),
+                patch_mode: HyperStimPatchMode::Outer,
+            })
+            .into_response()
+        }
+        Err(error) => {
+            emit_error(error);
+
+            internal_server_error_toast_response()
+        }
+    }
+}
+
+async fn user_settings_shares_tab_handler(
+    _: bitsync_routes::GetUserSettingsSharesTab,
+    State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+) -> impl IntoResponse {
+    match list_shared_paths(&state.database, &state.config.fs_storage_root_dir, &auth_data.user)
+        .await
+    {
+        Ok(shared_paths) => {
+            let tab_area = SettingsTabArea {
+                active_tab: SettingsTab::Shares { shared_paths },
                 is_admin: auth_data.user.is_admin,
             };
 
