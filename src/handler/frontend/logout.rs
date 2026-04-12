@@ -7,7 +7,7 @@ use axum_extra::extract::CookieJar;
 use axum_extra::routing::RouterExt;
 use bitsync_core::use_case::auth::logout::logout;
 
-use crate::auth::{AuthData, require_any_login_no_totp_required_middleware};
+use crate::auth::{AuthData, require_any_login_no_totp_required_ignore_suspension_middleware};
 
 use crate::AppState;
 use crate::handler::{RedirectHttp, http_redirect_response};
@@ -17,7 +17,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .typed_get(logout_action_handler)
         .route_layer(from_fn_with_state(
             state.clone(),
-            require_any_login_no_totp_required_middleware::<RedirectHttp>,
+            require_any_login_no_totp_required_ignore_suspension_middleware::<RedirectHttp>,
         ))
         .with_state(state)
 }

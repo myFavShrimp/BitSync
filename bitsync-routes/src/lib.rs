@@ -40,6 +40,10 @@ pub struct PostLoginTotpAuthAction;
 pub struct GetLogoutAction;
 
 #[derive(TypedPath, Deserialize)]
+#[typed_path("/suspended")]
+pub struct GetSuspendedPage;
+
+#[derive(TypedPath, Deserialize)]
 #[typed_path("/register")]
 pub struct GetRegisterPage;
 #[derive(Deserialize, Serialize, Debug)]

@@ -4,4 +4,5 @@ pub mod files;
 pub mod login;
 pub mod register;
 pub mod search;
+pub mod suspended;
 pub mod user_settings;

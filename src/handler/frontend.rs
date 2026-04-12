@@ -9,6 +9,7 @@ mod login;
 mod logout;
 mod register;
 mod search;
+mod suspended;
 mod user_file;
 mod user_settings;
 
@@ -20,5 +21,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(login::create_routes(state.clone()).await)
         .merge(register::create_routes(state.clone()).await)
         .merge(logout::create_routes(state.clone()).await)
+        .merge(suspended::create_routes(state.clone()).await)
         .merge(user_file::create_routes(state).await)
 }

@@ -25,12 +25,7 @@ use bitsync_database::entity::{Session, User};
 pub enum AuthTokenDecodeError {
     ResolveSession(#[from] ResolveSessionError),
     Decode(#[from] bitsync_core::jwt::Error),
-    Suspended(#[from] UserSuspendedError),
 }
-
-#[derive(Debug, thiserror::Error)]
-#[error("user is suspended")]
-pub struct UserSuspendedError;
 
 async fn decode_auth_token(
     app_state: Arc<AppState>,
@@ -38,10 +33,6 @@ async fn decode_auth_token(
 ) -> Result<AuthData, AuthTokenDecodeError> {
     let claims = JwtClaims::decode_and_validate(token, &app_state.config.auth.jwt_secret)?;
     let result = resolve_session(&app_state.database, &claims.sub).await?;
-
-    if result.user.is_suspended {
-        Err(UserSuspendedError)?;
-    }
 
     Ok(AuthData {
         claims,
@@ -100,13 +91,32 @@ pub async fn require_logout_middleware<KIND: Redirection>(
 ) -> Response {
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => next.run(request).await,
+        AuthStatus::User(auth_data) if auth_data.user.is_suspended => {
+            redirect_response::<KIND>(&bitsync_routes::GetSuspendedPage.to_string())
+        }
         AuthStatus::User(..) => {
             redirect_response::<KIND>(&bitsync_routes::GetFilesHomePage.to_string())
         }
     }
 }
 
-pub async fn require_any_login_no_totp_required_middleware<KIND: Redirection>(
+pub async fn require_suspended_middleware<KIND: Redirection>(
+    auth_status: AuthStatus,
+    request: Request,
+    next: Next,
+) -> Response {
+    match auth_status {
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) if auth_data.user.is_suspended => next.run(request).await,
+        AuthStatus::User(..) => {
+            redirect_response::<KIND>(&bitsync_routes::GetFilesHomePage.to_string())
+        }
+    }
+}
+
+pub async fn require_any_login_no_totp_required_ignore_suspension_middleware<KIND: Redirection>(
     auth_status: AuthStatus,
     mut request: Request,
     next: Next,
@@ -132,6 +142,9 @@ pub async fn require_login_and_totp_setup_middleware<KIND: Redirection>(
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => {
             redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) if auth_data.user.is_suspended => {
+            redirect_response::<KIND>(&bitsync_routes::GetSuspendedPage.to_string())
         }
         AuthStatus::User(auth_data) => {
             if auth_data.user.active_totp_secret.is_none() {
@@ -161,6 +174,9 @@ pub async fn require_admin_login_and_totp_setup_middleware<KIND: Redirection>(
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => {
             redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) if auth_data.user.is_suspended => {
+            redirect_response::<KIND>(&bitsync_routes::GetSuspendedPage.to_string())
         }
         AuthStatus::User(auth_data) => {
             if auth_data.user.active_totp_secret.is_none() {
@@ -194,6 +210,9 @@ pub async fn require_basic_login_and_totp_setup_middleware<KIND: Redirection>(
         AuthStatus::Missing | AuthStatus::Invalid => {
             redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
         }
+        AuthStatus::User(auth_data) if auth_data.user.is_suspended => {
+            redirect_response::<KIND>(&bitsync_routes::GetSuspendedPage.to_string())
+        }
         AuthStatus::User(auth_data) => {
             if auth_data.user.active_totp_secret.is_none() {
                 return redirect_response::<KIND>(
@@ -220,6 +239,9 @@ pub async fn require_login_and_no_totp_setup_middleware<KIND: Redirection>(
     match auth_status {
         AuthStatus::Missing | AuthStatus::Invalid => {
             redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) if auth_data.user.is_suspended => {
+            redirect_response::<KIND>(&bitsync_routes::GetSuspendedPage.to_string())
         }
         AuthStatus::User(auth_data) => {
             if auth_data.user.active_totp_secret.is_some()
