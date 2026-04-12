@@ -12,12 +12,16 @@ pub enum MakeAdminError {
     Query(#[from] QueryError),
 }
 
-pub async fn make_admin(database: &Database, user_id: &Uuid) -> Result<Vec<User>, MakeAdminError> {
+pub async fn make_admin(
+    database: &Database,
+    user_id: &Uuid,
+    current_user_id: &Uuid,
+) -> Result<Vec<User>, MakeAdminError> {
     let mut connection = database.acquire_connection().await?;
 
     repository::user::set_admin(&mut *connection, user_id, true).await?;
 
-    let users = repository::user::find_all(&mut *connection).await?;
+    let users = repository::user::find_all_except(&mut *connection, current_user_id).await?;
 
     Ok(users)
 }

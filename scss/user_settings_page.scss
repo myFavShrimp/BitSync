@@ -305,6 +305,16 @@ body {
         gap: 0.5rem;
     }
 
+    .UserEmpty {
+        font-size: 0.8125rem;
+        color: $text-secondary;
+        padding: 1rem;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px dashed $border-color;
+        border-radius: $border-radius-sm;
+    }
+
     .UserItem {
         display: flex;
         align-items: center;

@@ -43,6 +43,11 @@ impl Renderable for UserList {
                 id=(self.id())
                 class=(crate::styles::user_settings_page::ClassName::USER_LIST)
             {
+                @if self.users.is_empty() {
+                    p class=(crate::styles::user_settings_page::ClassName::USER_EMPTY) {
+                        "No other users on this instance."
+                    }
+                }
                 @for user in &self.users {
                     @let popover_id = format!("user-actions-{}", user.id);
 

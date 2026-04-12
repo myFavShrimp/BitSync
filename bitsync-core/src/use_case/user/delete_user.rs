@@ -23,6 +23,7 @@ pub async fn delete_user(
     database: &Database,
     storage_root_dir: &Path,
     user_id: &Uuid,
+    current_user_id: &Uuid,
 ) -> Result<Vec<User>, DeleteUserError> {
     let user_storage = UserStorage {
         user_id: *user_id,
@@ -34,7 +35,7 @@ pub async fn delete_user(
     let mut connection = database.acquire_connection().await?;
     repository::user::delete(&mut *connection, user_id).await?;
 
-    let users = repository::user::find_all(&mut *connection).await?;
+    let users = repository::user::find_all_except(&mut *connection, current_user_id).await?;
 
     Ok(users)
 }

@@ -20,6 +20,7 @@ pub enum ResetUserTotpError {
 pub async fn reset_user_totp(
     database: &Database,
     user_id: &Uuid,
+    current_user_id: &Uuid,
 ) -> Result<Vec<User>, ResetUserTotpError> {
     let mut transaction = database.begin_transaction().await?;
 
@@ -30,7 +31,7 @@ pub async fn reset_user_totp(
     transaction.commit().await?;
 
     let mut connection = database.acquire_connection().await?;
-    let users = repository::user::find_all(&mut *connection).await?;
+    let users = repository::user::find_all_except(&mut *connection, current_user_id).await?;
 
     Ok(users)
 }

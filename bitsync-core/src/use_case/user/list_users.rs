@@ -3,6 +3,7 @@ use bitsync_database::{
     entity::User,
     repository::{self, QueryError},
 };
+use uuid::Uuid;
 
 #[derive(thiserror::Error, Debug)]
 #[error("failed to list users")]
@@ -11,10 +12,13 @@ pub enum ListUsersError {
     Query(#[from] QueryError),
 }
 
-pub async fn list_users(database: &Database) -> Result<Vec<User>, ListUsersError> {
+pub async fn list_users(
+    database: &Database,
+    current_user_id: &Uuid,
+) -> Result<Vec<User>, ListUsersError> {
     let mut connection = database.acquire_connection().await?;
 
-    let users = repository::user::find_all(&mut *connection).await?;
+    let users = repository::user::find_all_except(&mut *connection, current_user_id).await?;
 
     Ok(users)
 }

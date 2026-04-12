@@ -498,7 +498,7 @@ async fn user_settings_users_tab_handler(
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    let users = match list_users(&state.database).await {
+    let users = match list_users(&state.database, &auth_data.user.id).await {
         Ok(users) => users,
         Err(error) => {
             emit_error(error);
@@ -523,8 +523,9 @@ async fn user_settings_users_tab_handler(
 async fn user_settings_make_admin_handler(
     path: bitsync_routes::PostUserSettingsMakeAdmin,
     State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    let users = match make_admin(&state.database, &path.user_id).await {
+    let users = match make_admin(&state.database, &path.user_id, &auth_data.user.id).await {
         Ok(users) => users,
         Err(error) => {
             emit_error(error);
@@ -546,8 +547,9 @@ async fn user_settings_make_admin_handler(
 async fn user_settings_remove_admin_handler(
     path: bitsync_routes::PostUserSettingsRemoveAdmin,
     State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    let users = match revoke_admin(&state.database, &path.user_id).await {
+    let users = match revoke_admin(&state.database, &path.user_id, &auth_data.user.id).await {
         Ok(users) => users,
         Err(error) => {
             emit_error(error);
@@ -569,8 +571,9 @@ async fn user_settings_remove_admin_handler(
 async fn user_settings_reset_user_totp_handler(
     path: bitsync_routes::PostUserSettingsResetUserTotp,
     State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    let users = match reset_user_totp(&state.database, &path.user_id).await {
+    let users = match reset_user_totp(&state.database, &path.user_id, &auth_data.user.id).await {
         Ok(users) => users,
         Err(error) => {
             emit_error(error);
@@ -592,8 +595,9 @@ async fn user_settings_reset_user_totp_handler(
 async fn user_settings_suspend_user_handler(
     path: bitsync_routes::PostUserSettingsSuspendUser,
     State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    let users = match suspend_user(&state.database, &path.user_id).await {
+    let users = match suspend_user(&state.database, &path.user_id, &auth_data.user.id).await {
         Ok(users) => users,
         Err(error) => {
             emit_error(error);
@@ -615,8 +619,9 @@ async fn user_settings_suspend_user_handler(
 async fn user_settings_unsuspend_user_handler(
     path: bitsync_routes::PostUserSettingsUnsuspendUser,
     State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    let users = match unsuspend_user(&state.database, &path.user_id).await {
+    let users = match unsuspend_user(&state.database, &path.user_id, &auth_data.user.id).await {
         Ok(users) => users,
         Err(error) => {
             emit_error(error);
@@ -638,11 +643,13 @@ async fn user_settings_unsuspend_user_handler(
 async fn user_settings_delete_user_handler(
     path: bitsync_routes::PostUserSettingsDeleteUser,
     State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
     let users = match delete_user(
         &state.database,
         &state.config.fs_storage_root_dir,
         &path.user_id,
+        &auth_data.user.id,
     )
     .await
     {

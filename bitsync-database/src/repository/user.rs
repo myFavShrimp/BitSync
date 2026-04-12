@@ -27,6 +27,22 @@ where
     )
 }
 
+pub async fn find_all_except<'e, E>(
+    executor: E,
+    except_user_id: &Uuid,
+) -> Result<Vec<User>, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"SELECT * FROM "user" WHERE id != $1"#,
+        except_user_id
+    )
+    .fetch_all(executor)
+    .await?)
+}
+
 pub async fn find_all<'e, E>(executor: E) -> Result<Vec<User>, QueryError>
 where
     E: PgExecutor<'e>,
