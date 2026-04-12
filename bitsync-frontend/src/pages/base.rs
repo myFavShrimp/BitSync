@@ -105,6 +105,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                 popovertarget=(NAV_MENU_ID)
                                 title="Menu"
                             {
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                                 (crate::icons::menu::Menu)
                             }
                             div
@@ -117,8 +118,12 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             {
                                 button
                                     class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
                                 {
                                     (crate::icons::bolt::Bolt)
                                     span { "Settings" }

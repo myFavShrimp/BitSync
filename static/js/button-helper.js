@@ -1,3 +1,8 @@
+function getPopoverTrigger(element) {
+  var popover = element.closest('[popover]')
+  return document.querySelector('[popovertarget="' + popover.id + '"]')
+}
+
 function handleButtonLoading(button, fetchable, loadingClass, delayMs) {
   if (fetchable.state() === 'pending') {
     button.disabled = true

@@ -73,6 +73,7 @@ impl Renderable for UserList {
                                 popovertarget=(popover_id)
                                 title="User actions"
                             {
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                                 (crate::icons::ellipsis_vertical::EllipsisVertical)
                             }
                         }
@@ -88,24 +89,36 @@ impl Renderable for UserList {
                             @if user.is_admin {
                                 button
                                     class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetRevokeAdminDialog { user_id: user.id }))
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetRevokeAdminDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
                                 {
                                     span { "Revoke Admin" }
                                 }
                             } @else {
                                 button
                                     class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetMakeAdminDialog { user_id: user.id }))
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetMakeAdminDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
                                 {
                                     span { "Make Admin" }
                                 }
                             }
                             button
                                 class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetResetUserTotpDialog { user_id: user.id }))
+                                data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetResetUserTotpDialog { user_id: user.id }))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
                             {
                                 span { "Reset TOTP" }
                             }
@@ -115,8 +128,12 @@ impl Renderable for UserList {
                             @if user.is_suspended {
                                 button
                                     class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUnsuspendUserDialog { user_id: user.id }))
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUnsuspendUserDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
                                 {
                                     span { "Unsuspend User" }
                                 }
@@ -126,8 +143,12 @@ impl Renderable for UserList {
                                         crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
                                         crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                     )
-                                    data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetSuspendUserDialog { user_id: user.id }))
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetSuspendUserDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
                                 {
                                     span { "Suspend User" }
                                 }
@@ -137,8 +158,12 @@ impl Renderable for UserList {
                                     crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
                                     crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                 )
-                                data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetDeleteUserDialog { user_id: user.id }))
+                                data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetDeleteUserDialog { user_id: user.id }))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
                             {
                                 span { "Delete User" }
                             }

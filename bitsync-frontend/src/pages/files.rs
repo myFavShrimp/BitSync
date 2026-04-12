@@ -257,6 +257,7 @@ impl Renderable for FileStorageTable {
                                         class=(crate::styles::files_home_page::ClassName::FILE_ACTION_BUTTON)
                                         popovertarget=(dir_item.actions_popover_id)
                                     {
+                                        div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                                         (crate::icons::ellipsis_vertical::EllipsisVertical)
                                     }
 
@@ -270,8 +271,12 @@ impl Renderable for FileStorageTable {
                                     {
                                         button
                                             class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
-                                            data-init=(format!("this.fetch = fetch('{}')", dir_item.move_dialog_url))
+                                            data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.move_dialog_url))
                                             data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                            data-effect=(format!(
+                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                            ))
                                         {
                                             span { "Move" }
                                         }
@@ -291,8 +296,12 @@ impl Renderable for FileStorageTable {
                                                 crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
                                                 crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                             )
-                                            data-init=(format!("this.fetch = fetch('{}')", (dir_item.delete_url)))
+                                            data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.delete_url))
                                             data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
+                                            data-effect=(format!(
+                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                            ))
                                         {
                                             span { "Delete" }
                                         }
