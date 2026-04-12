@@ -57,8 +57,8 @@ impl Renderable for TotpTabContent {
                         button
                             type="submit"
                             class=(
-                                crate::styles::base::ClassName::BUTTON, " ",
-                                crate::styles::base::ClassName::BUTTON_DANGER,
+                                crate::styles::button::ClassName::BUTTON, " ",
+                                crate::styles::button::ClassName::BUTTON_DANGER,
                             )
                         {
                             "Reset Two-Factor Authentication"
@@ -106,8 +106,8 @@ impl Renderable for TotpTabContent {
                         button
                             type="submit"
                             class=(
-                                crate::styles::base::ClassName::BUTTON, " ",
-                                crate::styles::base::ClassName::BUTTON_PRIMARY,
+                                crate::styles::button::ClassName::BUTTON, " ",
+                                crate::styles::button::ClassName::BUTTON_PRIMARY,
                             )
                         {
                             "Confirm"

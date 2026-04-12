@@ -40,12 +40,27 @@ impl Renderable for InvitesTabContent {
                 div class=(crate::styles::user_settings_page::ClassName::INVITES_ACTIONS) {
                     button
                         class=(
-                            crate::styles::base::ClassName::BUTTON, " ",
-                            crate::styles::base::ClassName::BUTTON_PRIMARY,
+                            crate::styles::button::ClassName::BUTTON, " ",
+                            crate::styles::button::ClassName::BUTTON_PRIMARY,
                         )
                         data-init=(format!("this.fetch = fetch('{}', {{ method: 'POST' }})", bitsync_routes::PostUserSettingsInviteTokenCreate))
-                        data-on-click="this.fetch.trigger()"
+                        data-on-click__throttle.1s="this.fetch.trigger()"
+                        data-effect=(format!(
+                            "
+                                clearTimeout(this._lt),
+                                this.fetch.state() === 'pending'
+                                    ? this._lt = setTimeout(
+                                        () => this.classList.add('{loading}'),
+                                        200,
+                                    ) : (
+                                        this.classList.remove('{loading}'),
+                                        this.disabled = false
+                                    )
+                            ",
+                            loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                        ))
                     {
+                        div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         (crate::icons::plus::Plus)
                         "Add Invite"
                     }

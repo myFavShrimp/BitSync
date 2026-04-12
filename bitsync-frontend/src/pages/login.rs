@@ -121,7 +121,7 @@ impl Renderable for LoginForm {
                 div class=(crate::styles::login_page::ClassName::ACTIONS) {
                     button
                         type="submit"
-                        class=(crate::styles::base::ClassName::BUTTON)
+                        class=(crate::styles::button::ClassName::BUTTON)
                     {
                         "Sign in"
                     }
@@ -190,7 +190,7 @@ impl Renderable for TotpForm {
 
                 button
                     type="submit"
-                    class=(crate::styles::base::ClassName::BUTTON)
+                    class=(crate::styles::button::ClassName::BUTTON)
                 {
                     "Login"
                 }

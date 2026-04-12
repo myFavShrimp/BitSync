@@ -24,7 +24,7 @@ impl Renderable for SuspendedPage {
                             message=("Your data is preserved, but you cannot log in or use any features until an administrator restores your access. If you believe this is a mistake, please contact your administrator.".to_owned());
 
                         a
-                            class=(crate::styles::base::ClassName::BUTTON)
+                            class=(crate::styles::button::ClassName::BUTTON)
                             href=(bitsync_routes::GetLogoutAction.to_string())
                         {
                             "Sign Out"

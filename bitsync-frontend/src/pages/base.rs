@@ -28,6 +28,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     script src="/static/js/drop-upload-helper.js" {}
 
                     style { (crate::styles::base::STYLE_SHEET) }
+                    style { (crate::styles::button::STYLE_SHEET) }
                     style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
@@ -172,6 +173,7 @@ impl<R: Renderable> Renderable for GuestDocument<R> {
                     link type="text/css" href="/static/external/css/Noto Sans.css" rel="stylesheet";
 
                     style { (crate::styles::base::STYLE_SHEET) }
+                    style { (crate::styles::button::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
                     style { (crate::styles::error_card::STYLE_SHEET) }
                     style { (crate::styles::toast::STYLE_SHEET) }

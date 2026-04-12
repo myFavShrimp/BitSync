@@ -62,7 +62,7 @@ impl Renderable for DirectoryCreationForm {
                 div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
                     button
                         type="button"
-                        class=(crate::styles::base::ClassName::BUTTON)
+                        class=(crate::styles::button::ClassName::BUTTON)
                         onclick="closeClosestDialog(this)"
                     {
                         "Cancel"
@@ -70,8 +70,8 @@ impl Renderable for DirectoryCreationForm {
                     button
                         type="submit"
                         class=(
-                            crate::styles::base::ClassName::BUTTON, " ",
-                            crate::styles::base::ClassName::BUTTON_PRIMARY,
+                            crate::styles::button::ClassName::BUTTON, " ",
+                            crate::styles::button::ClassName::BUTTON_PRIMARY,
                         )
                     {
                         "Create"

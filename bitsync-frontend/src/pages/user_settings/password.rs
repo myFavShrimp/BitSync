@@ -81,8 +81,8 @@ impl Renderable for PasswordTabContent {
                     button
                         type="submit"
                         class=(
-                            crate::styles::base::ClassName::BUTTON, " ",
-                            crate::styles::base::ClassName::BUTTON_PRIMARY
+                            crate::styles::button::ClassName::BUTTON, " ",
+                            crate::styles::button::ClassName::BUTTON_PRIMARY
                         )
                     {
                         "Change Password"

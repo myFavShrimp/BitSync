@@ -13,14 +13,14 @@ impl Renderable for ConfirmationDialog {
         let confirm_button_class = if self.is_danger {
             format!(
                 "{} {}",
-                crate::styles::base::ClassName::BUTTON,
-                crate::styles::base::ClassName::BUTTON_DANGER,
+                crate::styles::button::ClassName::BUTTON,
+                crate::styles::button::ClassName::BUTTON_DANGER,
             )
         } else {
             format!(
                 "{} {}",
-                crate::styles::base::ClassName::BUTTON,
-                crate::styles::base::ClassName::BUTTON_PRIMARY,
+                crate::styles::button::ClassName::BUTTON,
+                crate::styles::button::ClassName::BUTTON_PRIMARY,
             )
         };
 
@@ -47,7 +47,7 @@ impl Renderable for ConfirmationDialog {
                 }
                 div class=(crate::styles::modal::ClassName::MODAL_ACTIONS) {
                     button
-                        class=(crate::styles::base::ClassName::BUTTON)
+                        class=(crate::styles::button::ClassName::BUTTON)
                         onclick="closeClosestDialogAndRemoveElement(this)"
                     {
                         "Cancel"

@@ -130,7 +130,7 @@ impl Renderable for InviteTokenForm {
                 div class=(crate::styles::register_page::ClassName::ACTIONS) {
                     button
                         type="submit"
-                        class=(crate::styles::base::ClassName::BUTTON)
+                        class=(crate::styles::button::ClassName::BUTTON)
                     {
                         "Continue"
                     }
@@ -200,7 +200,7 @@ impl Renderable for RegisterForm {
                 div class=(crate::styles::register_page::ClassName::ACTIONS) {
                     button
                         type="submit"
-                        class=(crate::styles::base::ClassName::BUTTON)
+                        class=(crate::styles::button::ClassName::BUTTON)
                     {
                         "Register"
                     }
@@ -291,7 +291,7 @@ impl Renderable for TotpSetupForm {
 
                 button
                     type="submit"
-                    class=(crate::styles::base::ClassName::BUTTON)
+                    class=(crate::styles::button::ClassName::BUTTON)
                 {
                     "send"
                 }
@@ -325,7 +325,7 @@ impl Renderable for TotpAlreadySetUpNotice {
                     message=("Your account is already protected by a two-factor authenticator. If you weren't the one who set it up, contact an administrator right away. Someone else may have access to your account.".to_owned());
 
                 a
-                    class=(crate::styles::base::ClassName::BUTTON)
+                    class=(crate::styles::button::ClassName::BUTTON)
                     href=(bitsync_routes::GetLogoutAction.to_string())
                 {
                     "Sign out"
@@ -398,7 +398,7 @@ impl Renderable for TotpRecoveryCodesPrompt {
                 }
 
                 a
-                    class=(crate::styles::base::ClassName::BUTTON)
+                    class=(crate::styles::button::ClassName::BUTTON)
                     href=(bitsync_routes::GetFilesHomePage.to_string())
                 {
                     "Continue"

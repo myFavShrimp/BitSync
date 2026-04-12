@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+html {
+    background: #111111;
+}
+
 body {
     font-family: Noto Sans;
     background: linear-gradient(135deg, #111111 0%, #1c1c1c 100%);
@@ -190,55 +194,6 @@ body {
         &:hover {
             background: rgba(239, 68, 68, 0.08);
             color: $danger-color;
-        }
-    }
-
-    .Button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.25rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        color: $text-color;
-        font-size: 0.875rem;
-        font-weight: 500;
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-
-        svg {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-    }
-
-    .ButtonPrimary {
-        background: linear-gradient(135deg, $primary-color, $primary-dark);
-        border: 1px solid $primary-dark;
-
-        &:hover {
-            background: linear-gradient(135deg, $primary-light, $primary-color);
-            box-shadow: 0 4px 12px rgba(113, 113, 122, 0.3);
-        }
-    }
-
-    .ButtonDanger {
-        background: $danger-light-color;
-        border-color: rgba(239, 68, 68, 0.2);
-        color: $danger-color;
-
-        &:hover {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
         }
     }
 

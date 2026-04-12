@@ -89,8 +89,8 @@ impl Renderable for SessionsTabContent {
                         button
                             type="submit"
                             class=(
-                                crate::styles::base::ClassName::BUTTON, " ",
-                                crate::styles::base::ClassName::BUTTON_DANGER,
+                                crate::styles::button::ClassName::BUTTON, " ",
+                                crate::styles::button::ClassName::BUTTON_DANGER,
                             )
                         {
                             "Revoke All Other Sessions"

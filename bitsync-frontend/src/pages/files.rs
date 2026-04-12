@@ -101,7 +101,10 @@ impl Renderable for FilesHomePage {
                         FileUploadForm file_upload_url=(self.file_upload_url.clone());
 
                         button
-                            class=(crate::styles::base::ClassName::BUTTON, " ", crate::styles::files_home_page::ClassName::ACTION_BUTTON)
+                            class=(
+                                crate::styles::button::ClassName::BUTTON, " ",
+                                crate::styles::files_home_page::ClassName::ACTION_BUTTON,
+                            )
                             title="New Folder"
                             data-init=(format!("this.fetch = fetch('{}')", self.directory_creation_dialog_url))
                             data-on-click="this.fetch.trigger()"
@@ -147,8 +150,8 @@ impl Renderable for FileUploadForm {
                 button
                     type="button"
                     class=(
-                        crate::styles::base::ClassName::BUTTON, " ",
-                        crate::styles::base::ClassName::BUTTON_PRIMARY, " ",
+                        crate::styles::button::ClassName::BUTTON, " ",
+                        crate::styles::button::ClassName::BUTTON_PRIMARY, " ",
                         crate::styles::files_home_page::ClassName::ACTION_BUTTON,
                     )
                     title="Upload Files"
