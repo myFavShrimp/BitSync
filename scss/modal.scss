@@ -97,6 +97,9 @@ body {
         padding: 0.625rem 1.5rem;
 
         .Tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
             padding: 0.4rem 0.75rem;
             background: none;
             border: 1px solid transparent;

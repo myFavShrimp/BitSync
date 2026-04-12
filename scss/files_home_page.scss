@@ -60,34 +60,6 @@ body {
 
         .ActionButton {
             padding: 0.75rem;
-
-            svg {
-                width: 1rem;
-                height: 1rem;
-            }
-
-            .Spinner {
-                width: 1rem;
-                height: 1rem;
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                border-top-color: $text-color;
-                border-radius: 50%;
-                animation: spin 0.6s linear infinite;
-                display: none;
-            }
-
-            &:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-
-                svg {
-                    display: none;
-                }
-
-                .Spinner {
-                    display: block;
-                }
-            }
         }
 
         .FileBrowser {
@@ -242,11 +214,5 @@ body {
                 color: $primary-light;
             }
         }
-    }
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
     }
 }

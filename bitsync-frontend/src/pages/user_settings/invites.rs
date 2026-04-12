@@ -43,20 +43,13 @@ impl Renderable for InvitesTabContent {
                             crate::styles::button::ClassName::BUTTON, " ",
                             crate::styles::button::ClassName::BUTTON_PRIMARY,
                         )
-                        data-init=(format!("this.fetch = fetch('{}', {{ method: 'POST' }})", bitsync_routes::PostUserSettingsInviteTokenCreate))
+                        data-init=(format!(
+                            "this.fetch = fetch('{}', {{ method: 'POST' }})",
+                            bitsync_routes::PostUserSettingsInviteTokenCreate,
+                        ))
                         data-on-click__throttle.1s="this.fetch.trigger()"
                         data-effect=(format!(
-                            "
-                                clearTimeout(this._lt),
-                                this.fetch.state() === 'pending'
-                                    ? this._lt = setTimeout(
-                                        () => this.classList.add('{loading}'),
-                                        200,
-                                    ) : (
-                                        this.classList.remove('{loading}'),
-                                        this.disabled = false
-                                    )
-                            ",
+                            "handleButtonLoading(this, this.fetch, '{loading}', 200)",
                             loading = crate::styles::button::ClassName::BUTTON_LOADING,
                         ))
                     {
@@ -177,7 +170,12 @@ impl Renderable for InviteItem {
                             type="submit"
                             class=(crate::styles::user_settings_page::ClassName::INVITE_REVOKE)
                             title="Revoke invite"
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             (crate::icons::circle_x::CircleX)
                         }
                     }

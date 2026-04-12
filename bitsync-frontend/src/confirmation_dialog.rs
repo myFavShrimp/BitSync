@@ -58,8 +58,13 @@ impl Renderable for ConfirmationDialog {
                             "this.fetch = fetch('{}', {{ method: 'POST' }})",
                             self.action_url,
                         ))
-                        data-on-click="closeClosestDialogAndRemoveElement(this), this.fetch.trigger()"
+                        data-on-click__throttle.1s="closeClosestDialogAndRemoveElement(this), this.fetch.trigger()"
+                        data-effect=(format!(
+                            "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                            loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                        ))
                     {
+                        div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         (self.confirm_label)
                     }
                 }

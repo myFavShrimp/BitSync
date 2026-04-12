@@ -92,7 +92,12 @@ impl Renderable for SessionsTabContent {
                                 crate::styles::button::ClassName::BUTTON, " ",
                                 crate::styles::button::ClassName::BUTTON_DANGER,
                             )
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             "Revoke All Other Sessions"
                         }
                     }
@@ -166,7 +171,12 @@ impl Renderable for SessionList {
                                     type="submit"
                                     class=(crate::styles::user_settings_page::ClassName::SESSION_REVOKE)
                                     title="Revoke session"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
                                 {
+                                    div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                                     (crate::icons::circle_x::CircleX)
                                 }
                             }

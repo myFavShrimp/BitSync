@@ -25,6 +25,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                     link href="/static/external/css/Noto Sans.css" rel="stylesheet" type="text/css";
                     script src="/static/js/dialog-helper.js" defer {}
                     script src="/static/js/overflow-helper.js" defer {}
+                    script src="/static/js/button-helper.js" {}
                     script src="/static/js/drop-upload-helper.js" {}
 
                     style { (crate::styles::base::STYLE_SHEET) }

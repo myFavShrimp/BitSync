@@ -107,8 +107,13 @@ impl Renderable for FilesHomePage {
                             )
                             title="New Folder"
                             data-init=(format!("this.fetch = fetch('{}')", self.directory_creation_dialog_url))
-                            data-on-click="this.fetch.trigger()"
+                            data-on-click__throttle.1s="this.fetch.trigger()"
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             (crate::icons::folder_plus::FolderPlus)
                         }
                     }
@@ -156,9 +161,12 @@ impl Renderable for FileUploadForm {
                     )
                     title="Upload Files"
                     onclick="this.previousElementSibling.click()"
-                    data-effect=("this.disabled = this.form.hsFetch.state() === 'pending'")
+                    data-effect=(format!(
+                        "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                    ))
                 {
-                    div class=(crate::styles::files_home_page::ClassName::SPINNER) {}
+                    div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                     (crate::icons::upload::Upload)
                 }
             }

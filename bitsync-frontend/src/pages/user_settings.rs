@@ -124,9 +124,14 @@ impl Renderable for SettingsTabArea {
                         button
                             class=(sessions_tab_class)
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsSessionsTab))
-                            data-on-click="this.fetch.trigger()"
+                            data-on-click__throttle.1s="this.fetch.trigger()"
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
                             "Sessions"
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         }
                         button
                             class=(
@@ -140,31 +145,51 @@ impl Renderable for SettingsTabArea {
                         button
                             class=(password_tab_class)
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPasswordTab))
-                            data-on-click="this.fetch.trigger()"
+                            data-on-click__throttle.1s="this.fetch.trigger()"
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
                             "Password"
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         }
                         button
                             class=(totp_tab_class)
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsTotpTab))
-                            data-on-click="this.fetch.trigger()"
+                            data-on-click__throttle.1s="this.fetch.trigger()"
+                            data-effect=(format!(
+                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                            ))
                         {
                             "TOTP"
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         }
                         @if self.is_admin {
                             button
                                 class=(users_tab_class)
                                 data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsUsersTab))
-                                data-on-click="this.fetch.trigger()"
+                                data-on-click__throttle.1s="this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
                             {
                                 "Users"
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             }
                             button
                                 class=(invites_tab_class)
                                 data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsInvitesTab))
-                                data-on-click="this.fetch.trigger()"
+                                data-on-click__throttle.1s="this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
                             {
                                 "Invites"
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             }
                         }
                     }

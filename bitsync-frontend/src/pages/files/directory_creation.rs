@@ -73,7 +73,12 @@ impl Renderable for DirectoryCreationForm {
                             crate::styles::button::ClassName::BUTTON, " ",
                             crate::styles::button::ClassName::BUTTON_PRIMARY,
                         )
+                        data-effect=(format!(
+                            "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                            loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                        ))
                     {
+                        div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                         "Create"
                     }
                 }
