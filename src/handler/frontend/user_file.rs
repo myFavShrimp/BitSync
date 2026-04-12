@@ -34,6 +34,7 @@ use bitsync_frontend::{
             UserFileDeletionDisplayError, UserFileDownloadDisplayError, UserFileMoveDisplayError,
             UserFileUploadDisplayError,
         },
+        file_share::{FileShareDialog, ShareDialogBody},
     },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
@@ -44,7 +45,10 @@ use crate::{
     AppState,
     auth::{AuthData, require_login_and_totp_setup_middleware},
     error_report::emit_error,
-    handler::{RedirectHttp, RedirectHyperStim, user_error_toast_response},
+    handler::{
+        RedirectHttp, RedirectHyperStim, internal_server_error_toast_response,
+        user_error_toast_response,
+    },
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
@@ -78,6 +82,10 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .typed_get(user_file_move_dialog_handler)
                 .typed_post(user_file_directory_creation_handler)
                 .typed_get(user_file_directory_creation_dialog_handler)
+                .typed_get(user_file_share_dialog_handler)
+                .typed_post(user_file_share_create_handler)
+                .typed_post(user_file_share_delete_handler)
+                .typed_post(user_file_share_delete_all_handler)
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -418,6 +426,202 @@ async fn user_file_move_dialog_handler(
         html: dialog.render(),
         patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
         patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn user_file_share_dialog_handler(
+    _: bitsync_routes::GetUserFileShareDialog,
+    State(app_state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+    query_parameters: Query<bitsync_routes::GetUserFileShareDialogQueryParameters>,
+) -> impl IntoResponse {
+    let user_shares = match use_case::user_share::list_user_shares::list_user_shares(
+        &app_state.database,
+        &auth_data.user.id,
+        &query_parameters.path,
+    )
+    .await
+    {
+        Ok(user_shares) => user_shares,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let create_user_share_url = bitsync_routes::PostUserFileShareCreate
+        .with_query_params(bitsync_routes::PostUserFileShareCreateQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let delete_all_user_shares_url = bitsync_routes::PostUserFileShareDeleteAll
+        .with_query_params(bitsync_routes::PostUserFileShareDeleteAllQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let dialog = FileShareDialog {
+        user_shares,
+        item_path: query_parameters.path.clone(),
+        create_user_share_url,
+        delete_all_user_shares_url,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn user_file_share_create_handler(
+    _: bitsync_routes::PostUserFileShareCreate,
+    State(app_state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+    query_parameters: Query<bitsync_routes::PostUserFileShareCreateQueryParameters>,
+) -> impl IntoResponse {
+    let user_shares = match use_case::user_share::create_user_share::create_user_share(
+        &app_state.database,
+        &auth_data.user.id,
+        &query_parameters.path,
+    )
+    .await
+    {
+        Ok(user_shares) => user_shares,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let create_user_share_url = bitsync_routes::PostUserFileShareCreate
+        .with_query_params(bitsync_routes::PostUserFileShareCreateQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let delete_all_user_shares_url = bitsync_routes::PostUserFileShareDeleteAll
+        .with_query_params(bitsync_routes::PostUserFileShareDeleteAllQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let share_dialog_body = ShareDialogBody {
+        user_shares,
+        item_path: query_parameters.path.clone(),
+        create_user_share_url,
+        delete_all_user_shares_url,
+        error: None,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: share_dialog_body.render(),
+        patch_target: share_dialog_body.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_file_share_delete_handler(
+    path: bitsync_routes::PostUserFileShareDelete,
+    State(app_state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+    query_parameters: Query<bitsync_routes::PostUserFileShareDeleteQueryParameters>,
+) -> impl IntoResponse {
+    let user_shares = match use_case::user_share::delete_user_share::delete_user_share(
+        &app_state.database,
+        &auth_data.user.id,
+        &path.user_share_id,
+        &query_parameters.path,
+    )
+    .await
+    {
+        Ok(user_shares) => user_shares,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let create_user_share_url = bitsync_routes::PostUserFileShareCreate
+        .with_query_params(bitsync_routes::PostUserFileShareCreateQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let delete_all_user_shares_url = bitsync_routes::PostUserFileShareDeleteAll
+        .with_query_params(bitsync_routes::PostUserFileShareDeleteAllQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let share_dialog_body = ShareDialogBody {
+        user_shares,
+        item_path: query_parameters.path.clone(),
+        create_user_share_url,
+        delete_all_user_shares_url,
+        error: None,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: share_dialog_body.render(),
+        patch_target: share_dialog_body.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_file_share_delete_all_handler(
+    _: bitsync_routes::PostUserFileShareDeleteAll,
+    State(app_state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+    query_parameters: Query<bitsync_routes::PostUserFileShareDeleteAllQueryParameters>,
+) -> impl IntoResponse {
+    let user_shares = match use_case::user_share::delete_all_user_shares::delete_all_user_shares(
+        &app_state.database,
+        &auth_data.user.id,
+        &query_parameters.path,
+    )
+    .await
+    {
+        Ok(user_shares) => user_shares,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let create_user_share_url = bitsync_routes::PostUserFileShareCreate
+        .with_query_params(bitsync_routes::PostUserFileShareCreateQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let delete_all_user_shares_url = bitsync_routes::PostUserFileShareDeleteAll
+        .with_query_params(bitsync_routes::PostUserFileShareDeleteAllQueryParameters {
+            path: query_parameters.path.clone(),
+        })
+        .to_string();
+
+    let share_dialog_body = ShareDialogBody {
+        user_shares,
+        item_path: query_parameters.path.clone(),
+        create_user_share_url,
+        delete_all_user_shares_url,
+        error: None,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: share_dialog_body.render(),
+        patch_target: share_dialog_body.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
     })
     .into_response()
 }

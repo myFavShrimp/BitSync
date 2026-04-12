@@ -2,6 +2,7 @@ pub mod invite_token;
 pub mod session;
 pub mod totp_recovery_code;
 pub mod user;
+pub mod user_share;
 
 #[derive(thiserror::Error, Debug)]
 #[error("a database query resulted in an error")]

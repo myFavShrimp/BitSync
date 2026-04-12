@@ -1,6 +1,7 @@
 pub mod directory_creation;
 pub mod file_move;
 pub mod file_operations;
+pub mod file_share;
 
 use bitsync_core::use_case::user_files::{
     create_directory::DirectoryCreationResult, delete_user_file::UserFileDeletionResult,
@@ -20,6 +21,7 @@ pub enum FilesHomePageElementId {
     FileUploadForm,
     DirectoryCreationDialog,
     FileMoveDialog,
+    FileShareDialog,
 }
 
 impl FilesHomePageElementId {
@@ -28,6 +30,7 @@ impl FilesHomePageElementId {
             FilesHomePageElementId::FileUploadForm => "file-upload-form",
             FilesHomePageElementId::DirectoryCreationDialog => "directory-creation-dialog",
             FilesHomePageElementId::FileMoveDialog => "file-move-dialog",
+            FilesHomePageElementId::FileShareDialog => "file-share-dialog",
         }
     }
 }
@@ -269,6 +272,18 @@ impl Renderable for FileStorageTable {
                                         )
                                         popover
                                     {
+                                        button
+                                            class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                            data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.share_dialog_url))
+                                            data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                            data-effect=(format!(
+                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                            ))
+                                        {
+                                            span { "Share" }
+                                        }
+
                                         button
                                             class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.move_dialog_url))

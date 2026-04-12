@@ -24,6 +24,13 @@ pub struct InviteToken {
     pub is_admin: bool,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct UserShare {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub item_path: String,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, sqlx::Type)]
 #[sqlx(type_name = "session_platform", rename_all = "lowercase")]
 pub enum SessionPlatform {

@@ -267,6 +267,44 @@ pub struct PostUserSettingsDeleteUser {
     pub user_id: Uuid,
 }
 
+// shares
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GetUserFileShareDialogQueryParameters {
+    pub path: String,
+}
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-file/share/dialog")]
+pub struct GetUserFileShareDialog;
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PostUserFileShareCreateQueryParameters {
+    pub path: String,
+}
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-file/share/create")]
+pub struct PostUserFileShareCreate;
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PostUserFileShareDeleteQueryParameters {
+    pub path: String,
+}
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-file/share/delete/{user_share_id}")]
+pub struct PostUserFileShareDelete {
+    pub user_share_id: Uuid,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PostUserFileShareDeleteAllQueryParameters {
+    pub path: String,
+}
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-file/share/delete-all")]
+pub struct PostUserFileShareDeleteAll;
+
+// account
+
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/invites")]
 pub struct GetUserSettingsInvitesTab;

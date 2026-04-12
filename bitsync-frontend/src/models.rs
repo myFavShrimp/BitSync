@@ -14,6 +14,7 @@ pub struct StorageItemPresentation {
     pub actions_popover_id: String,
     pub download_url: String,
     pub move_dialog_url: String,
+    pub share_dialog_url: String,
     pub delete_url: String,
 }
 
@@ -58,6 +59,12 @@ impl From<StorageItem> for StorageItemPresentation {
             })
             .to_string();
 
+        let share_dialog_url = bitsync_routes::GetUserFileShareDialog
+            .with_query_params(bitsync_routes::GetUserFileShareDialogQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
         let delete_url = bitsync_routes::GetUserFileDelete
             .with_query_params(bitsync_routes::GetUserFileDeleteQueryParameters {
                 path: value.path.path(),
@@ -74,6 +81,7 @@ impl From<StorageItem> for StorageItemPresentation {
             actions_popover_id,
             download_url,
             move_dialog_url,
+            share_dialog_url,
             delete_url,
         }
     }
