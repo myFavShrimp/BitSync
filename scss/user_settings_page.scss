@@ -314,11 +314,54 @@ body {
         background: rgba(255, 255, 255, 0.02);
         border: 1px solid $border-color;
         border-radius: $border-radius-sm;
+        position: relative;
+
+        .UserInfo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            min-width: 0;
+            flex: 1;
+        }
 
         .UserName {
             font-size: 0.875rem;
             font-weight: 500;
             color: $text-color;
+        }
+
+        .UserSettingsButton {
+            background: none;
+            border: none;
+            color: $text-secondary;
+            cursor: pointer;
+            padding: 0.375rem;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                color: $text-color;
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            svg {
+                width: 1.125rem;
+                height: 1.125rem;
+                stroke: currentColor;
+                display: block;
+            }
+        }
+
+        .UserContextMenu {
+            inset: unset;
+            margin-top: 0.25rem;
+            top: anchor(bottom);
+            right: anchor(right);
+            background: rgba(30, 30, 30, 0.98);
         }
 
         .UserAdminBadge {
