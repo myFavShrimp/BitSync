@@ -1,5 +1,13 @@
 // dialog elements
 
+function openDialogModalById(id) {
+  const dialog = document.getElementById(id)
+
+  if (dialog == null || dialog.nodeName != 'DIALOG') return
+
+  dialog.showModal()
+}
+
 function closeClosestDialog(element) {
   const dialog = element.closest('dialog')
 
