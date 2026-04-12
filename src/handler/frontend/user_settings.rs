@@ -14,6 +14,7 @@ use bitsync_core::use_case::{
         create_invite_token::create_invite_token, delete_invite_token::delete_invite_token,
         list_invite_tokens::list_invite_tokens,
     },
+    user::list_users::list_users,
     user_settings::{
         list_sessions::list_sessions,
         terminate_all_other_sessions::terminate_all_other_sessions,
@@ -65,6 +66,7 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         )
         .merge(
             Router::new()
+                .typed_get(user_settings_users_tab_handler)
                 .typed_get(user_settings_invites_tab_handler)
                 .typed_post(user_settings_invite_token_create_handler)
                 .typed_post(user_settings_invite_token_delete_handler)
@@ -468,6 +470,33 @@ async fn user_settings_invite_token_delete_handler(
     Json(HyperStimCommand::HsPatchHtml {
         html: invite_list.render(),
         patch_target: invite_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_users_tab_handler(
+    _: bitsync_routes::GetUserSettingsUsersTab,
+    State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+) -> impl IntoResponse {
+    let users = match list_users(&state.database).await {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let tab_area = SettingsTabArea {
+        active_tab: SettingsTab::Users { users },
+        is_admin: auth_data.user.is_admin,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: tab_area.render(),
+        patch_target: tab_area.id_target(),
         patch_mode: HyperStimPatchMode::Outer,
     })
     .into_response()

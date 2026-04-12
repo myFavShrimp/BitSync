@@ -188,6 +188,10 @@ pub struct PostUserSettingsTotpInitiateReset;
 pub struct PostUserSettingsTotpReset;
 
 #[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users")]
+pub struct GetUserSettingsUsersTab;
+
+#[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/invites")]
 pub struct GetUserSettingsInvitesTab;
 
