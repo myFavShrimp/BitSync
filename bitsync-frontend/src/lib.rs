@@ -1,3 +1,4 @@
+pub mod confirmation_dialog;
 pub mod error_banner;
 pub mod error_card;
 pub mod error_modal;

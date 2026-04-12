@@ -97,6 +97,17 @@ where
     Ok(())
 }
 
+pub async fn delete_all_by_user_id<'e, E>(executor: E, user_id: &Uuid) -> Result<(), QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query!(r#"DELETE FROM "session" WHERE user_id = $1"#, user_id)
+        .execute(executor)
+        .await?;
+
+    Ok(())
+}
+
 pub async fn delete_all_by_user_id_except<'e, E>(
     executor: E,
     user_id: &Uuid,

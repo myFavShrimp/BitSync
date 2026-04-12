@@ -14,7 +14,11 @@ use bitsync_core::use_case::{
         create_invite_token::create_invite_token, delete_invite_token::delete_invite_token,
         list_invite_tokens::list_invite_tokens,
     },
-    user::list_users::list_users,
+    user::{
+        delete_user::delete_user, get_user::get_user, list_users::list_users,
+        make_admin::make_admin, reset_user_totp::reset_user_totp, revoke_admin::revoke_admin,
+        suspend_user::suspend_user, unsuspend_user::unsuspend_user,
+    },
     user_settings::{
         list_sessions::list_sessions,
         terminate_all_other_sessions::terminate_all_other_sessions,
@@ -24,12 +28,14 @@ use bitsync_core::use_case::{
 };
 use bitsync_frontend::{
     Component, DIALOG_WRAPPER_SELECTOR, Render,
+    confirmation_dialog::ConfirmationDialog,
     pages::user_settings::{
         SettingsDialog, SettingsTab, SettingsTabArea,
         invites::InviteList,
         password::{PasswordDisplayError, PasswordTabContent},
         sessions::{SessionList, SessionsDisplayError},
         totp::{TotpDisplayError, TotpTabContent},
+        users::UserList,
     },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
@@ -67,6 +73,18 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_get(user_settings_users_tab_handler)
+                .typed_get(confirm_make_admin_handler)
+                .typed_post(user_settings_make_admin_handler)
+                .typed_get(confirm_revoke_admin_handler)
+                .typed_post(user_settings_remove_admin_handler)
+                .typed_get(confirm_reset_user_totp_handler)
+                .typed_post(user_settings_reset_user_totp_handler)
+                .typed_get(confirm_suspend_user_handler)
+                .typed_post(user_settings_suspend_user_handler)
+                .typed_get(confirm_unsuspend_user_handler)
+                .typed_post(user_settings_unsuspend_user_handler)
+                .typed_get(confirm_delete_user_handler)
+                .typed_post(user_settings_delete_user_handler)
                 .typed_get(user_settings_invites_tab_handler)
                 .typed_post(user_settings_invite_token_create_handler)
                 .typed_post(user_settings_invite_token_delete_handler)
@@ -498,6 +516,369 @@ async fn user_settings_users_tab_handler(
         html: tab_area.render(),
         patch_target: tab_area.id_target(),
         patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_make_admin_handler(
+    path: bitsync_routes::PostUserSettingsMakeAdmin,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let users = match make_admin(&state.database, &path.user_id).await {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let user_list = UserList { users };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: user_list.render(),
+        patch_target: user_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_remove_admin_handler(
+    path: bitsync_routes::PostUserSettingsRemoveAdmin,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let users = match revoke_admin(&state.database, &path.user_id).await {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let user_list = UserList { users };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: user_list.render(),
+        patch_target: user_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_reset_user_totp_handler(
+    path: bitsync_routes::PostUserSettingsResetUserTotp,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let users = match reset_user_totp(&state.database, &path.user_id).await {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let user_list = UserList { users };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: user_list.render(),
+        patch_target: user_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_suspend_user_handler(
+    path: bitsync_routes::PostUserSettingsSuspendUser,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let users = match suspend_user(&state.database, &path.user_id).await {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let user_list = UserList { users };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: user_list.render(),
+        patch_target: user_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_unsuspend_user_handler(
+    path: bitsync_routes::PostUserSettingsUnsuspendUser,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let users = match unsuspend_user(&state.database, &path.user_id).await {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let user_list = UserList { users };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: user_list.render(),
+        patch_target: user_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_delete_user_handler(
+    path: bitsync_routes::PostUserSettingsDeleteUser,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let users = match delete_user(
+        &state.database,
+        &state.config.fs_storage_root_dir,
+        &path.user_id,
+    )
+    .await
+    {
+        Ok(users) => users,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let user_list = UserList { users };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: user_list.render(),
+        patch_target: user_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn confirm_make_admin_handler(
+    path: bitsync_routes::GetMakeAdminDialog,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let user = match get_user(&state.database, &path.user_id).await {
+        Ok(user) => user,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let action_url = bitsync_routes::PostUserSettingsMakeAdmin {
+        user_id: path.user_id,
+    }
+    .to_string();
+
+    let dialog = ConfirmationDialog {
+        title: format!("Make {} Admin", user.username),
+        message: format!(
+            "This will grant admin privileges to {}. They will be able to manage users, invites, and other BitSync settings.",
+            user.username
+        ),
+        confirm_label: "Make Admin".to_owned(),
+        action_url,
+        is_danger: false,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn confirm_revoke_admin_handler(
+    path: bitsync_routes::GetRevokeAdminDialog,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let user = match get_user(&state.database, &path.user_id).await {
+        Ok(user) => user,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let action_url = bitsync_routes::PostUserSettingsRemoveAdmin {
+        user_id: path.user_id,
+    }
+    .to_string();
+
+    let dialog = ConfirmationDialog {
+        title: format!("Revoke Admin for {}", user.username),
+        message: format!(
+            "This will remove admin privileges from {}. They will no longer be able to manage users, invites, and other BitSync settings.",
+            user.username
+        ),
+        confirm_label: "Revoke Admin".to_owned(),
+        action_url,
+        is_danger: true,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn confirm_reset_user_totp_handler(
+    path: bitsync_routes::GetResetUserTotpDialog,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let user = match get_user(&state.database, &path.user_id).await {
+        Ok(user) => user,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let action_url = bitsync_routes::PostUserSettingsResetUserTotp {
+        user_id: path.user_id,
+    }
+    .to_string();
+
+    let dialog = ConfirmationDialog {
+        title: format!("Reset TOTP for {}", user.username),
+        message: format!(
+            "This will reset two-factor authentication for {} and sign them out. They will need to log in again and set it up.",
+            user.username
+        ),
+        confirm_label: "Reset TOTP".to_owned(),
+        action_url,
+        is_danger: true,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn confirm_suspend_user_handler(
+    path: bitsync_routes::GetSuspendUserDialog,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let user = match get_user(&state.database, &path.user_id).await {
+        Ok(user) => user,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let action_url = bitsync_routes::PostUserSettingsSuspendUser {
+        user_id: path.user_id,
+    }
+    .to_string();
+
+    let dialog = ConfirmationDialog {
+        title: format!("Suspend {}", user.username),
+        message: format!(
+            "This will prevent {} from using BitSync. Their data will be preserved.",
+            user.username
+        ),
+        confirm_label: "Suspend".to_owned(),
+        action_url,
+        is_danger: true,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn confirm_unsuspend_user_handler(
+    path: bitsync_routes::GetUnsuspendUserDialog,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let user = match get_user(&state.database, &path.user_id).await {
+        Ok(user) => user,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let action_url = bitsync_routes::PostUserSettingsUnsuspendUser {
+        user_id: path.user_id,
+    }
+    .to_string();
+
+    let dialog = ConfirmationDialog {
+        title: format!("Unsuspend {}", user.username),
+        message: format!("This will allow {} to use BitSync again.", user.username),
+        confirm_label: "Unsuspend".to_owned(),
+        action_url,
+        is_danger: false,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
+    })
+    .into_response()
+}
+
+async fn confirm_delete_user_handler(
+    path: bitsync_routes::GetDeleteUserDialog,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let user = match get_user(&state.database, &path.user_id).await {
+        Ok(user) => user,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let action_url = bitsync_routes::PostUserSettingsDeleteUser {
+        user_id: path.user_id,
+    }
+    .to_string();
+
+    let dialog = ConfirmationDialog {
+        title: format!("Delete {}", user.username),
+        message: format!(
+            "This will permanently delete {} and all their data. This action cannot be undone.",
+            user.username
+        ),
+        confirm_label: "Delete".to_owned(),
+        action_url,
+        is_danger: true,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: dialog.render(),
+        patch_target: DIALOG_WRAPPER_SELECTOR.to_owned(),
+        patch_mode: HyperStimPatchMode::Append,
     })
     .into_response()
 }

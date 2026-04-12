@@ -9,6 +9,7 @@ pub struct User {
     pub is_admin: bool,
     pub active_totp_secret: Option<Vec<u8>>,
     pub dangling_totp_secret: Option<Vec<u8>>,
+    pub is_suspended: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]

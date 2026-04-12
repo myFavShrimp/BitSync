@@ -192,6 +192,78 @@ pub struct PostUserSettingsTotpReset;
 pub struct GetUserSettingsUsersTab;
 
 #[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/make-admin/dialog")]
+pub struct GetMakeAdminDialog {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/make-admin")]
+pub struct PostUserSettingsMakeAdmin {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/remove-admin/dialog")]
+pub struct GetRevokeAdminDialog {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/remove-admin")]
+pub struct PostUserSettingsRemoveAdmin {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/reset-totp/dialog")]
+pub struct GetResetUserTotpDialog {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/reset-totp")]
+pub struct PostUserSettingsResetUserTotp {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/suspend/dialog")]
+pub struct GetSuspendUserDialog {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/suspend")]
+pub struct PostUserSettingsSuspendUser {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/unsuspend/dialog")]
+pub struct GetUnsuspendUserDialog {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/unsuspend")]
+pub struct PostUserSettingsUnsuspendUser {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/delete/dialog")]
+pub struct GetDeleteUserDialog {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/users/{user_id}/delete")]
+pub struct PostUserSettingsDeleteUser {
+    pub user_id: Uuid,
+}
+
+#[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/invites")]
 pub struct GetUserSettingsInvitesTab;
 

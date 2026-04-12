@@ -75,6 +75,28 @@ pub struct DeleteDirectoryError {
     pub path: PathBuf,
 }
 
+#[derive(thiserror::Error, Debug)]
+#[error("failed to delete user storage")]
+pub struct DeleteUserStorageError {
+    pub source: IoError,
+    pub path: PathBuf,
+}
+
+pub async fn delete_user_storage(storage: &UserStorage) -> Result<(), DeleteUserStorageError> {
+    let data_directory = storage.data_directory();
+
+    if data_directory.exists() {
+        tokio::fs::remove_dir_all(&data_directory)
+            .await
+            .map_err(|error| DeleteUserStorageError {
+                source: error,
+                path: data_directory,
+            })?;
+    }
+
+    Ok(())
+}
+
 pub async fn delete_directory(path: &StoragePath) -> Result<(), DeleteDirectoryError> {
     tokio::fs::remove_dir_all(path.local_directory())
         .await

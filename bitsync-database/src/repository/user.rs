@@ -119,6 +119,66 @@ where
     .await?)
 }
 
+pub async fn set_admin<'e, E>(
+    executor: E,
+    user_id: &Uuid,
+    is_admin: bool,
+) -> Result<User, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"UPDATE "user" SET is_admin = $2 WHERE id = $1 RETURNING *"#,
+        user_id,
+        is_admin,
+    )
+    .fetch_one(executor)
+    .await?)
+}
+
+pub async fn clear_totp_secret<'e, E>(executor: E, user_id: &Uuid) -> Result<User, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"UPDATE "user" SET active_totp_secret = NULL WHERE id = $1 RETURNING *"#,
+        user_id,
+    )
+    .fetch_one(executor)
+    .await?)
+}
+
+pub async fn set_suspended<'e, E>(
+    executor: E,
+    user_id: &Uuid,
+    is_suspended: bool,
+) -> Result<User, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        User,
+        r#"UPDATE "user" SET is_suspended = $2 WHERE id = $1 RETURNING *"#,
+        user_id,
+        is_suspended,
+    )
+    .fetch_one(executor)
+    .await?)
+}
+
+pub async fn delete<'e, E>(executor: E, user_id: &Uuid) -> Result<(), QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query!(r#"DELETE FROM "user" WHERE id = $1"#, user_id)
+        .execute(executor)
+        .await?;
+
+    Ok(())
+}
+
 pub async fn set_dangling_totp_secret<'e, E>(
     executor: E,
     user_id: &Uuid,

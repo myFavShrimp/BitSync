@@ -316,18 +316,22 @@ body {
         border-radius: $border-radius-sm;
         position: relative;
 
-        .UserInfo {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            min-width: 0;
-            flex: 1;
-        }
-
         .UserName {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             font-size: 0.875rem;
             font-weight: 500;
             color: $text-color;
+        }
+
+        .UserActionsGroup {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
         }
 
         .UserSettingsButton {
@@ -362,6 +366,17 @@ body {
             top: anchor(bottom);
             right: anchor(right);
             background: rgba(30, 30, 30, 0.98);
+        }
+
+        .UserSuspendedBadge {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            background: rgba(245, 158, 11, 0.12);
+            color: #f59e0b;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .UserAdminBadge {

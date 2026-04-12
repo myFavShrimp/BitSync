@@ -25,7 +25,12 @@ use bitsync_database::entity::{Session, User};
 pub enum AuthTokenDecodeError {
     ResolveSession(#[from] ResolveSessionError),
     Decode(#[from] bitsync_core::jwt::Error),
+    Suspended(#[from] UserSuspendedError),
 }
+
+#[derive(Debug, thiserror::Error)]
+#[error("user is suspended")]
+pub struct UserSuspendedError;
 
 async fn decode_auth_token(
     app_state: Arc<AppState>,
@@ -33,6 +38,10 @@ async fn decode_auth_token(
 ) -> Result<AuthData, AuthTokenDecodeError> {
     let claims = JwtClaims::decode_and_validate(token, &app_state.config.auth.jwt_secret)?;
     let result = resolve_session(&app_state.database, &claims.sub).await?;
+
+    if result.user.is_suspended {
+        Err(UserSuspendedError)?;
+    }
 
     Ok(AuthData {
         claims,
