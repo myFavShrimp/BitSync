@@ -1,4 +1,5 @@
 pub mod bolt;
+pub mod check;
 pub mod chevron_left;
 pub mod circle_x;
 pub mod cloudy;
@@ -6,9 +7,11 @@ pub mod ellipsis_vertical;
 pub mod file_text;
 pub mod folder;
 pub mod folder_plus;
+pub mod link;
 pub mod log_out;
 pub mod logo;
 pub mod menu;
+pub mod plus;
 pub mod search;
 pub mod upload;
 pub mod x;

@@ -31,7 +31,7 @@ pub async fn ensure_admin_bootstrap(
 
     let token = match admin_token {
         Some(existing) => existing,
-        None => repository::invite_token::create(&mut *connection, true).await?,
+        None => repository::invite_token::create_admin(&mut *connection).await?,
     };
 
     Ok(AdminBootstrapStatus::RegistrationRequired(token))

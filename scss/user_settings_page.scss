@@ -140,4 +140,162 @@ body {
         text-align: center;
         user-select: all;
     }
+
+    .InviteList {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .InviteEmpty {
+            font-size: 0.8125rem;
+            color: $text-secondary;
+            padding: 1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed $border-color;
+            border-radius: $border-radius-sm;
+        }
+
+        .InviteItem {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.625rem 0.875rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid $border-color;
+            border-radius: $border-radius-sm;
+            gap: 0.625rem;
+
+            .InviteAdminBadge {
+                font-size: 0.6875rem;
+                font-weight: 600;
+                padding: 0.2rem 0.5rem;
+                border-radius: 9999px;
+                background: rgba(239, 68, 68, 0.12);
+                color: $danger-color;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+                flex-shrink: 0;
+            }
+
+            .InviteTokenWrapper {
+                position: relative;
+                flex: 1;
+                min-width: 0;
+
+                &::before, &::after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    width: 2rem;
+                    z-index: 1;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                }
+
+                &::before {
+                    left: 0;
+                    background: linear-gradient(to right, rgba(30, 30, 30, 0.98), transparent);
+                }
+
+                &::after {
+                    right: 0;
+                    background: linear-gradient(to left, rgba(30, 30, 30, 0.98), transparent);
+                }
+
+                &.OverflowLeft::before {
+                    opacity: 1;
+                }
+
+                &.OverflowRight::after {
+                    opacity: 1;
+                }
+            }
+
+            .InviteId {
+                margin: 0;
+                padding: 0;
+                background: none;
+                border: none;
+                font-family: monospace;
+                font-size: 0.8125rem;
+                color: $text-secondary;
+                overflow-x: auto;
+                scrollbar-width: none;
+                user-select: all;
+                white-space: nowrap;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+            }
+
+            .InviteActionsGroup {
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+                flex-shrink: 0;
+
+                .InviteCopy,
+                .InviteRevoke {
+                    background: none;
+                    border: none;
+                    color: $text-secondary;
+                    cursor: pointer;
+                    padding: 0.375rem;
+                    border-radius: 0.375rem;
+                    transition: all 0.15s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    svg {
+                        width: 1.125rem;
+                        height: 1.125rem;
+                        stroke: currentColor;
+                        display: block;
+                    }
+                }
+
+                .InviteCopy {
+                    &:hover {
+                        color: $text-color;
+                        background: rgba(255, 255, 255, 0.06);
+                    }
+
+                    .InviteCopyIconCopied {
+                        display: none;
+                        color: $success-color;
+                    }
+
+                    &.Copied {
+                        color: $success-color;
+
+                        .InviteCopyIconDefault {
+                            display: none;
+                        }
+
+                        .InviteCopyIconCopied {
+                            display: flex;
+                        }
+                    }
+                }
+
+                .InviteRevoke {
+                    &:hover {
+                        color: $danger-color;
+                        background: rgba(239, 68, 68, 0.08);
+                    }
+                }
+            }
+        }
+    }
+
+    .InvitesActions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
 }

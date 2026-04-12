@@ -5,14 +5,25 @@ use crate::entity::InviteToken;
 
 use super::QueryError;
 
-pub async fn create<'e, E>(connection: E, is_admin: bool) -> Result<InviteToken, QueryError>
+pub async fn create<'e, E>(connection: E) -> Result<InviteToken, QueryError>
 where
     E: PgExecutor<'e>,
 {
     Ok(sqlx::query_as!(
         InviteToken,
-        r#"INSERT INTO "invite_token" (is_admin) VALUES ($1) RETURNING *"#,
-        is_admin,
+        r#"INSERT INTO "invite_token" (is_admin) VALUES (false) RETURNING *"#,
+    )
+    .fetch_one(connection)
+    .await?)
+}
+
+pub async fn create_admin<'e, E>(connection: E) -> Result<InviteToken, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(sqlx::query_as!(
+        InviteToken,
+        r#"INSERT INTO "invite_token" (is_admin) VALUES (true) RETURNING *"#,
     )
     .fetch_one(connection)
     .await?)
@@ -41,6 +52,17 @@ where
     )
     .fetch_optional(executor)
     .await?)
+}
+
+pub async fn find_all<'e, E>(executor: E) -> Result<Vec<InviteToken>, QueryError>
+where
+    E: PgExecutor<'e>,
+{
+    Ok(
+        sqlx::query_as!(InviteToken, r#"SELECT * FROM "invite_token" ORDER BY id"#,)
+            .fetch_all(executor)
+            .await?,
+    )
 }
 
 pub async fn delete_by_id<'e, E>(executor: E, id: &Uuid) -> Result<(), QueryError>

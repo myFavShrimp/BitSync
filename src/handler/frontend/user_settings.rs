@@ -10,6 +10,10 @@ use bitsync_core::use_case::{
         initiate_totp_setup::initiate_totp_setup,
         reset_totp::{ResetTotpError, reset_totp},
     },
+    invite_token::{
+        create_invite_token::create_invite_token, delete_invite_token::delete_invite_token,
+        list_invite_tokens::list_invite_tokens,
+    },
     user_settings::{
         list_sessions::list_sessions,
         terminate_all_other_sessions::terminate_all_other_sessions,
@@ -21,6 +25,7 @@ use bitsync_frontend::{
     Component, DIALOG_WRAPPER_SELECTOR, Render,
     pages::user_settings::{
         SettingsDialog, SettingsTab, SettingsTabArea,
+        invites::InviteList,
         password::{PasswordDisplayError, PasswordTabContent},
         sessions::{SessionList, SessionsDisplayError},
         totp::{TotpDisplayError, TotpTabContent},
@@ -31,29 +36,44 @@ use serde::Deserialize;
 
 use crate::{
     AppState,
-    auth::{AuthData, require_login_and_totp_setup_middleware},
+    auth::{
+        AuthData, require_admin_login_and_totp_setup_middleware,
+        require_login_and_totp_setup_middleware,
+    },
     error_report::emit_error,
     handler::{RedirectHyperStim, internal_server_error_toast_response},
 };
 
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
-    Router::new().merge(
-        Router::new()
-            .typed_get(user_settings_dialog_handler)
-            .typed_get(user_settings_password_tab_handler)
-            .typed_post(user_settings_password_change_handler)
-            .typed_get(user_settings_sessions_tab_handler)
-            .typed_post(user_settings_terminate_session_handler)
-            .typed_post(user_settings_terminate_all_other_sessions_handler)
-            .typed_get(user_settings_totp_tab_handler)
-            .typed_post(user_settings_totp_initiate_handler)
-            .typed_post(user_settings_totp_setup_handler)
-            .route_layer(from_fn_with_state(
-                state.clone(),
-                require_login_and_totp_setup_middleware::<RedirectHyperStim>,
-            ))
-            .with_state(state.clone()),
-    )
+    Router::new()
+        .merge(
+            Router::new()
+                .typed_get(user_settings_dialog_handler)
+                .typed_get(user_settings_password_tab_handler)
+                .typed_post(user_settings_password_change_handler)
+                .typed_get(user_settings_sessions_tab_handler)
+                .typed_post(user_settings_terminate_session_handler)
+                .typed_post(user_settings_terminate_all_other_sessions_handler)
+                .typed_get(user_settings_totp_tab_handler)
+                .typed_post(user_settings_totp_initiate_handler)
+                .typed_post(user_settings_totp_setup_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_login_and_totp_setup_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
+        .merge(
+            Router::new()
+                .typed_get(user_settings_invites_tab_handler)
+                .typed_post(user_settings_invite_token_create_handler)
+                .typed_post(user_settings_invite_token_delete_handler)
+                .route_layer(from_fn_with_state(
+                    state.clone(),
+                    require_admin_login_and_totp_setup_middleware::<RedirectHyperStim>,
+                ))
+                .with_state(state.clone()),
+        )
 }
 
 async fn user_settings_dialog_handler(
@@ -66,6 +86,7 @@ async fn user_settings_dialog_handler(
             let dialog = SettingsDialog {
                 sessions,
                 current_session_id: auth_data.session.id,
+                is_admin: auth_data.user.is_admin,
             };
 
             Json(HyperStimCommand::HsPatchHtml {
@@ -85,10 +106,11 @@ async fn user_settings_dialog_handler(
 
 async fn user_settings_password_tab_handler(
     _: bitsync_routes::GetUserSettingsPasswordTab,
-    Extension(_auth_data): Extension<AuthData>,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
     let tab_area = SettingsTabArea {
         active_tab: SettingsTab::Password,
+        is_admin: auth_data.user.is_admin,
     };
 
     Json(HyperStimCommand::HsPatchHtml {
@@ -110,6 +132,7 @@ async fn user_settings_sessions_tab_handler(
                     sessions,
                     current_session_id: auth_data.session.id,
                 },
+                is_admin: auth_data.user.is_admin,
             };
 
             Json(HyperStimCommand::HsPatchHtml {
@@ -268,9 +291,11 @@ async fn user_settings_terminate_all_other_sessions_handler(
 
 async fn user_settings_totp_tab_handler(
     _: bitsync_routes::GetUserSettingsTotpTab,
+    Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
     let tab_area = SettingsTabArea {
         active_tab: SettingsTab::Totp(TotpTabContent::Prompt),
+        is_admin: auth_data.user.is_admin,
     };
 
     Json(HyperStimCommand::HsPatchHtml {
@@ -367,4 +392,83 @@ async fn user_settings_totp_setup_handler(
             internal_server_error_toast_response()
         }
     }
+}
+
+async fn user_settings_invites_tab_handler(
+    _: bitsync_routes::GetUserSettingsInvitesTab,
+    State(state): State<Arc<AppState>>,
+    Extension(auth_data): Extension<AuthData>,
+) -> impl IntoResponse {
+    let invite_tokens = match list_invite_tokens(&state.database).await {
+        Ok(invite_tokens) => invite_tokens,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let tab_area = SettingsTabArea {
+        active_tab: SettingsTab::Invites { invite_tokens },
+        is_admin: auth_data.user.is_admin,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: tab_area.render(),
+        patch_target: tab_area.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_invite_token_create_handler(
+    _: bitsync_routes::PostUserSettingsInviteTokenCreate,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let invite_tokens = match create_invite_token(&state.database).await {
+        Ok(invite_tokens) => invite_tokens,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let invite_list = InviteList {
+        invite_tokens,
+        error: None,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: invite_list.render(),
+        patch_target: invite_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
+}
+
+async fn user_settings_invite_token_delete_handler(
+    path: bitsync_routes::PostUserSettingsInviteTokenDelete,
+    State(state): State<Arc<AppState>>,
+) -> impl IntoResponse {
+    let invite_tokens = match delete_invite_token(&state.database, &path.invite_token_id).await {
+        Ok(invite_tokens) => invite_tokens,
+        Err(error) => {
+            emit_error(error);
+
+            return internal_server_error_toast_response();
+        }
+    };
+
+    let invite_list = InviteList {
+        invite_tokens,
+        error: None,
+    };
+
+    Json(HyperStimCommand::HsPatchHtml {
+        html: invite_list.render(),
+        patch_target: invite_list.id_target(),
+        patch_mode: HyperStimPatchMode::Outer,
+    })
+    .into_response()
 }

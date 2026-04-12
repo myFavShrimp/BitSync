@@ -144,6 +144,38 @@ pub async fn require_login_and_totp_setup_middleware<KIND: Redirection>(
     }
 }
 
+pub async fn require_admin_login_and_totp_setup_middleware<KIND: Redirection>(
+    auth_status: AuthStatus,
+    mut request: Request,
+    next: Next,
+) -> Response {
+    match auth_status {
+        AuthStatus::Missing | AuthStatus::Invalid => {
+            redirect_response::<KIND>(&bitsync_routes::GetLoginPage.to_string())
+        }
+        AuthStatus::User(auth_data) => {
+            if auth_data.user.active_totp_secret.is_none() {
+                return redirect_response::<KIND>(
+                    &bitsync_routes::GetRegisterTotpSetupPage.to_string(),
+                );
+            }
+            if auth_data.claims.login_state == LoginState::Basic {
+                return redirect_response::<KIND>(
+                    &bitsync_routes::GetLoginTotpAuthPage.to_string(),
+                );
+            }
+            if !auth_data.user.is_admin {
+                return redirect_response::<KIND>(&bitsync_routes::GetFilesHomePage.to_string());
+            }
+
+            let extensions = request.extensions_mut();
+            extensions.insert(auth_data);
+
+            next.run(request).await
+        }
+    }
+}
+
 pub async fn require_basic_login_and_totp_setup_middleware<KIND: Redirection>(
     auth_status: AuthStatus,
     mut request: Request,

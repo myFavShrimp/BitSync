@@ -1,14 +1,18 @@
-use bitsync_database::entity::Session;
+use bitsync_database::entity::{InviteToken, Session};
 use hypertext::prelude::*;
 use uuid::Uuid;
 
 use crate::Component;
 
+pub mod invites;
 pub mod password;
 pub mod sessions;
 pub mod totp;
 
-use self::{password::PasswordTabContent, sessions::SessionsTabContent, totp::TotpTabContent};
+use self::{
+    invites::InvitesTabContent, password::PasswordTabContent, sessions::SessionsTabContent,
+    totp::TotpTabContent,
+};
 
 pub static SETTINGS_DIALOG_ID: &str = "settings-dialog";
 static SETTINGS_TAB_AREA_ID: &str = "settings-tab-area";
@@ -20,11 +24,15 @@ pub enum SettingsTab {
         current_session_id: Uuid,
     },
     Totp(TotpTabContent),
+    Invites {
+        invite_tokens: Vec<InviteToken>,
+    },
 }
 
 pub struct SettingsDialog {
     pub sessions: Vec<Session>,
     pub current_session_id: Uuid,
+    pub is_admin: bool,
 }
 
 impl Renderable for SettingsDialog {
@@ -51,6 +59,7 @@ impl Renderable for SettingsDialog {
                         sessions: self.sessions.clone(),
                         current_session_id: self.current_session_id,
                     },
+                    is_admin: self.is_admin,
                 })
             }
         }
@@ -60,6 +69,7 @@ impl Renderable for SettingsDialog {
 
 pub struct SettingsTabArea {
     pub active_tab: SettingsTab,
+    pub is_admin: bool,
 }
 
 impl Component for SettingsTabArea {
@@ -73,6 +83,7 @@ impl Renderable for SettingsTabArea {
         let is_password_active = matches!(self.active_tab, SettingsTab::Password);
         let is_sessions_active = matches!(self.active_tab, SettingsTab::Sessions { .. });
         let is_totp_active = matches!(self.active_tab, SettingsTab::Totp(..));
+        let is_invites_active = matches!(self.active_tab, SettingsTab::Invites { .. });
 
         fn tab_class(active: bool) -> String {
             if active {
@@ -89,6 +100,7 @@ impl Renderable for SettingsTabArea {
         let password_tab_class = tab_class(is_password_active);
         let sessions_tab_class = tab_class(is_sessions_active);
         let totp_tab_class = tab_class(is_totp_active);
+        let invites_tab_class = tab_class(is_invites_active);
 
         maud! {
             div id=(self.id()) {
@@ -132,6 +144,15 @@ impl Renderable for SettingsTabArea {
                         {
                             "TOTP"
                         }
+                        @if self.is_admin {
+                            button
+                                class=(invites_tab_class)
+                                data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsInvitesTab))
+                                data-on-click="this.fetch.trigger()"
+                            {
+                                "Invites"
+                            }
+                        }
                     }
                 }
                 @match &self.active_tab {
@@ -146,6 +167,9 @@ impl Renderable for SettingsTabArea {
                     }
                     SettingsTab::Totp(content) => {
                         (content.clone())
+                    }
+                    SettingsTab::Invites { invite_tokens } => {
+                        (InvitesTabContent { invite_tokens: invite_tokens.clone() })
                     }
                 }
             }

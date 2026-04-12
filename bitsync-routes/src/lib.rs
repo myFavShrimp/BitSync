@@ -186,3 +186,17 @@ pub struct PostUserSettingsTotpInitiateReset;
 #[derive(TypedPath, Deserialize)]
 #[typed_path("/user-settings/totp/reset")]
 pub struct PostUserSettingsTotpReset;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/invites")]
+pub struct GetUserSettingsInvitesTab;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/invites/create")]
+pub struct PostUserSettingsInviteTokenCreate;
+
+#[derive(TypedPath, Deserialize)]
+#[typed_path("/user-settings/invites/delete/{invite_token_id}")]
+pub struct PostUserSettingsInviteTokenDelete {
+    pub invite_token_id: Uuid,
+}
