@@ -56,7 +56,7 @@ impl Renderable for SharedPathItem {
                 ))
                 data-on-click__throttle.1s="this.fetch.trigger()"
                 data-effect=(format!(
-                    "handleButtonLoading(this.chevronButton, this.fetch, '{loading}', 200)",
+                    "handleButtonLoading(this.chevronButton, this.fetch, '{loading}')",
                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                 ))
             {

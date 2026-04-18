@@ -112,7 +112,7 @@ impl Renderable for FilesHomePage {
                             data-init=(format!("this.fetch = fetch('{}')", self.directory_creation_dialog_url))
                             data-on-click__throttle.1s="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -165,7 +165,7 @@ impl Renderable for FileUploadForm {
                     title="Upload Files"
                     onclick="this.previousElementSibling.click()"
                     data-effect=(format!(
-                        "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                        "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                     ))
                 {
@@ -277,7 +277,7 @@ impl Renderable for FileStorageTable {
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.share_dialog_url))
                                             data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                             data-effect=(format!(
-                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {
@@ -289,7 +289,7 @@ impl Renderable for FileStorageTable {
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.move_dialog_url))
                                             data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                             data-effect=(format!(
-                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {
@@ -314,7 +314,7 @@ impl Renderable for FileStorageTable {
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.delete_url))
                                             data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
                                             data-effect=(format!(
-                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                                "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {

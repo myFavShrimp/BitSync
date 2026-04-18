@@ -49,7 +49,7 @@ impl Renderable for InvitesTabContent {
                         ))
                         data-on-click__throttle.1s="this.fetch.trigger()"
                         data-effect=(format!(
-                            "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                            "handleButtonLoading(this, this.fetch, '{loading}')",
                             loading = crate::styles::button::ClassName::BUTTON_LOADING,
                         ))
                     {
@@ -170,7 +170,7 @@ impl Renderable for InviteItem {
                             class=(crate::styles::user_settings_page::ClassName::INVITE_REVOKE)
                             title="Revoke invite"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {

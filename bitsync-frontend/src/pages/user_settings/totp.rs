@@ -61,7 +61,7 @@ impl Renderable for TotpTabContent {
                                 crate::styles::button::ClassName::BUTTON_DANGER,
                             )
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -115,7 +115,7 @@ impl Renderable for TotpTabContent {
                                 crate::styles::button::ClassName::BUTTON_PRIMARY,
                             )
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {

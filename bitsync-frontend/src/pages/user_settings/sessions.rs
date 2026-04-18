@@ -93,7 +93,7 @@ impl Renderable for SessionsTabContent {
                                 crate::styles::button::ClassName::BUTTON_DANGER,
                             )
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -172,7 +172,7 @@ impl Renderable for SessionList {
                                     class=(crate::styles::user_settings_page::ClassName::SESSION_REVOKE)
                                     title="Revoke session"
                                     data-effect=(format!(
-                                        "handleButtonLoading(this, this.form.hsFetch, '{loading}', 200)",
+                                        "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {

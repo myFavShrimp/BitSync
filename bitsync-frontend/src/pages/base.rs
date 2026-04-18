@@ -121,7 +121,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
-                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {

@@ -60,7 +60,7 @@ impl Renderable for ConfirmationDialog {
                         ))
                         data-on-click__throttle.1s="this.fetch.trigger()"
                         data-effect=(format!(
-                            "handleButtonLoading(this, this.fetch, '{loading}', 200), this.fetch.state() === 'success' && closeClosestDialogAndRemoveElement(this)",
+                            "handleButtonLoading(this, this.fetch, '{loading}'), this.fetch.state() === 'success' && closeClosestDialogAndRemoveElement(this)",
                             loading = crate::styles::button::ClassName::BUTTON_LOADING,
                         ))
                     {

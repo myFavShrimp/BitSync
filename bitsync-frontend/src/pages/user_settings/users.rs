@@ -93,7 +93,7 @@ impl Renderable for UserList {
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetRevokeAdminDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
-                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {
@@ -105,7 +105,7 @@ impl Renderable for UserList {
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetMakeAdminDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
-                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {
@@ -117,7 +117,7 @@ impl Renderable for UserList {
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetResetUserTotpDialog { user_id: user.id }))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 data-effect=(format!(
-                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                 ))
                             {
@@ -132,7 +132,7 @@ impl Renderable for UserList {
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUnsuspendUserDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
-                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {
@@ -147,7 +147,7 @@ impl Renderable for UserList {
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetSuspendUserDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
-                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {
@@ -162,7 +162,7 @@ impl Renderable for UserList {
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetDeleteUserDialog { user_id: user.id }))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 data-effect=(format!(
-                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}', 200)",
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
                                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                 ))
                             {

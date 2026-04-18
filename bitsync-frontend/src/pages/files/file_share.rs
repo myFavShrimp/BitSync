@@ -107,7 +107,7 @@ impl Renderable for ShareDialogBody {
                             ))
                             data-on-click__throttle.1s="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -128,7 +128,7 @@ impl Renderable for ShareDialogBody {
                                 ))
                                 data-on-click__throttle.1s="this.fetch.trigger()"
                                 data-effect=(format!(
-                                    "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                    "handleButtonLoading(this, this.fetch, '{loading}')",
                                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                 ))
                             {
@@ -232,7 +232,7 @@ impl Renderable for ShareItem {
                         ))
                         data-on-click__throttle.1s="this.fetch.trigger()"
                         data-effect=(format!(
-                            "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                            "handleButtonLoading(this, this.fetch, '{loading}')",
                             loading = crate::styles::button::ClassName::BUTTON_LOADING,
                         ))
                     {

@@ -133,7 +133,7 @@ impl Renderable for SettingsTabArea {
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsSessionsTab))
                             data-on-click__throttle.1s="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -145,7 +145,7 @@ impl Renderable for SettingsTabArea {
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsSharesTab))
                             data-on-click__throttle.1s="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -157,7 +157,7 @@ impl Renderable for SettingsTabArea {
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsPasswordTab))
                             data-on-click__throttle.1s="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -169,7 +169,7 @@ impl Renderable for SettingsTabArea {
                             data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsTotpTab))
                             data-on-click__throttle.1s="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {
@@ -182,7 +182,7 @@ impl Renderable for SettingsTabArea {
                                 data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsUsersTab))
                                 data-on-click__throttle.1s="this.fetch.trigger()"
                                 data-effect=(format!(
-                                    "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                    "handleButtonLoading(this, this.fetch, '{loading}')",
                                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                 ))
                             {
@@ -194,7 +194,7 @@ impl Renderable for SettingsTabArea {
                                 data-init=(format!("this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsInvitesTab))
                                 data-on-click__throttle.1s="this.fetch.trigger()"
                                 data-effect=(format!(
-                                    "handleButtonLoading(this, this.fetch, '{loading}', 200)",
+                                    "handleButtonLoading(this, this.fetch, '{loading}')",
                                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                 ))
                             {
