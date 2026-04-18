@@ -1,6 +1,6 @@
 use hypertext::prelude::*;
 
-use crate::{Component, error_banner::OptionalErrorBanner, pages::base::GuestDocument};
+use crate::{Component, error_banner::OptionalErrorBanner, pages::base::AuthDocument};
 
 pub enum LoginDisplayError {
     InvalidCredentials,
@@ -46,7 +46,7 @@ impl Default for LoginPage {
 impl Renderable for LoginPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            GuestDocument {
+            AuthDocument {
                 style { (crate::styles::login_page::STYLE_SHEET) }
 
                 (crate::icons::Logo::with_class(crate::styles::login_page::ClassName::LOGO))

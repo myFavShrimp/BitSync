@@ -177,8 +177,12 @@ async fn user_settings_shares_tab_handler(
     State(state): State<Arc<AppState>>,
     Extension(auth_data): Extension<AuthData>,
 ) -> impl IntoResponse {
-    match list_shared_paths(&state.database, &state.config.fs_storage_root_dir, &auth_data.user)
-        .await
+    match list_shared_paths(
+        &state.database,
+        &state.config.fs_storage_root_dir,
+        &auth_data.user,
+    )
+    .await
     {
         Ok(shared_paths) => {
             let tab_area = SettingsTabArea {

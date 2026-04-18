@@ -1,13 +1,13 @@
 use hypertext::prelude::*;
 
-use crate::{error_card::ErrorCard, pages::base::GuestDocument};
+use crate::{error_card::ErrorCard, pages::base::AuthDocument};
 
 pub struct SuspendedPage;
 
 impl Renderable for SuspendedPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
-            GuestDocument {
+            AuthDocument {
                 style { (crate::styles::register_page::STYLE_SHEET) }
 
                 (crate::icons::Logo::with_class(crate::styles::register_page::ClassName::LOGO))

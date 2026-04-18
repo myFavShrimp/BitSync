@@ -6,9 +6,7 @@ use bitsync_database::{
     repository::{self, QueryError},
 };
 use bitsync_storage::{
-    operation::read::read_storage_item,
-    storage_item::StorageItemKind,
-    storage_path::StoragePath,
+    operation::read::read_storage_item, storage_item::StorageItemKind, storage_path::StoragePath,
     user_storage::UserStorage,
 };
 
