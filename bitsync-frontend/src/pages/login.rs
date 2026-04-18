@@ -49,7 +49,7 @@ impl Renderable for LoginPage {
             GuestDocument {
                 style { (crate::styles::login_page::STYLE_SHEET) }
 
-                (crate::icons::logo::Logo::with_class(crate::styles::login_page::ClassName::LOGO))
+                (crate::icons::Logo::with_class(crate::styles::login_page::ClassName::LOGO))
 
                 p
                     class=(crate::styles::login_page::ClassName::PAGE_HINT)

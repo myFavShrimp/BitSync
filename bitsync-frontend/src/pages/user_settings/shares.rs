@@ -60,14 +60,12 @@ impl Renderable for SharedPathItem {
                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                 ))
             {
-                span class=(crate::styles::user_settings_page::ClassName::SHARED_PATH_ICON) {
-                    @match self.kind {
-                        StorageItemKind::Directory => {
-                            (crate::icons::folder::Folder)
-                        }
-                        StorageItemKind::File => {
-                            (crate::icons::file_text::FileText)
-                        }
+                @match self.kind {
+                    StorageItemKind::Directory => {
+                        (crate::icons::Folder::with_class(crate::styles::user_settings_page::ClassName::SHARED_PATH_ICON))
+                    }
+                    StorageItemKind::File => {
+                        (crate::icons::FileText::with_class(crate::styles::user_settings_page::ClassName::SHARED_PATH_ICON))
                     }
                 }
 
@@ -77,7 +75,7 @@ impl Renderable for SharedPathItem {
 
                 span class=(crate::styles::user_settings_page::ClassName::SHARED_PATH_CHEVRON) {
                     div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                    (crate::icons::chevron_right::ChevronRight)
+                    (crate::icons::ChevronRight::default())
                 }
             }
         }

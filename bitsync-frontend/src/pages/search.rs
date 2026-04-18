@@ -58,14 +58,11 @@ impl Renderable for SearchResultList<'_> {
                     href=(item.url)
                 {
                     @if item.is_directory {
-                        span class=(crate::styles::search_launcher::ClassName::RESULT_ICON) {
-                            (crate::icons::folder::Folder)
-                        }
+                        (crate::icons::Folder::with_class(crate::styles::search_launcher::ClassName::RESULT_ICON))
                     } @else {
-                        span class=(crate::styles::search_launcher::ClassName::RESULT_ICON_SECONDARY) {
-                            (crate::icons::file_text::FileText)
-                        }
+                        (crate::icons::FileText::with_class(crate::styles::search_launcher::ClassName::RESULT_ICON_SECONDARY))
                     }
+
                     div class=(crate::styles::search_launcher::ClassName::RESULT_INFO) {
                         span class=(crate::styles::search_launcher::ClassName::RESULT_NAME) { (item.name) }
                         span class=(crate::styles::search_launcher::ClassName::RESULT_PATH) { (item.path) }

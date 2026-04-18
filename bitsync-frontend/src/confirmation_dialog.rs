@@ -37,7 +37,7 @@ impl Renderable for ConfirmationDialog {
                         class=(crate::styles::modal::ClassName::MODAL_CLOSE)
                         onclick="closeClosestDialogAndRemoveElement(this)"
                     {
-                        (crate::icons::x::X)
+                        (crate::icons::X::default())
                     }
                 }
                 div class=(crate::styles::modal::ClassName::MODAL_BODY) {

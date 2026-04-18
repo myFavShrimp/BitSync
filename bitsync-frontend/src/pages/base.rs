@@ -45,7 +45,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             class=(crate::styles::base::ClassName::HEADER_LOGO)
                             href=(bitsync_routes::GetFilesHomePage.to_string())
                         {
-                            (crate::icons::logo::Logo::default())
+                            (crate::icons::Logo::default())
                         }
 
                         nav {
@@ -54,7 +54,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                 title="Search"
                                 onclick="openDialogModalById('search-launcher')"
                             {
-                                (crate::icons::search::Search)
+                                (crate::icons::Search::default())
                                 span { "Search files and folders..." }
                             }
 
@@ -67,7 +67,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     class=(crate::styles::search_launcher::ClassName::CLOSE_BUTTON)
                                     onclick="closeClosestDialog(this)"
                                 {
-                                    (crate::icons::x::X)
+                                    (crate::icons::X::default())
                                 }
 
                                 form
@@ -76,7 +76,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     method="GET"
                                 {
                                     div class=(crate::styles::search_launcher::ClassName::INPUT_WRAPPER) {
-                                        (crate::icons::search::Search)
+                                        (crate::icons::Search::default())
                                         @if let Some(path) = &self.current_path {
                                             input
                                                 type="hidden"
@@ -106,7 +106,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                 title="Menu"
                             {
                                 div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                                (crate::icons::menu::Menu)
+                                (crate::icons::Menu::default())
                             }
                             div
                                 id=(NAV_MENU_ID)
@@ -125,7 +125,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                         loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                     ))
                                 {
-                                    (crate::icons::bolt::Bolt)
+                                    (crate::icons::Bolt::default())
                                     span { "Settings" }
                                 }
                                 div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
@@ -136,7 +136,7 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     )
                                     href=(bitsync_routes::GetLogoutAction.to_string())
                                 {
-                                    (crate::icons::log_out::LogOut)
+                                    (crate::icons::LogOut::default())
                                     span { "Sign Out" }
                                 }
                             }

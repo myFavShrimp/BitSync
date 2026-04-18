@@ -177,7 +177,8 @@ impl Renderable for SessionList {
                                     ))
                                 {
                                     div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                                    (crate::icons::circle_x::CircleX)
+
+                                    (crate::icons::CircleX::default())
                                 }
                             }
                         }

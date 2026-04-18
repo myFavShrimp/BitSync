@@ -54,7 +54,9 @@ impl Renderable for InvitesTabContent {
                         ))
                     {
                         div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                        (crate::icons::plus::Plus)
+
+                        (crate::icons::Plus::default())
+
                         "Add Invite"
                     }
                 }
@@ -153,12 +155,9 @@ impl Renderable for InviteItem {
                             copied = crate::styles::user_settings_page::ClassName::COPIED,
                         ))
                     {
-                        span class=(crate::styles::user_settings_page::ClassName::INVITE_COPY_ICON_DEFAULT) {
-                            (crate::icons::link::Link)
-                        }
-                        span class=(crate::styles::user_settings_page::ClassName::INVITE_COPY_ICON_COPIED) {
-                            (crate::icons::check::Check)
-                        }
+                        (crate::icons::Link::with_class(crate::styles::user_settings_page::ClassName::INVITE_COPY_ICON_DEFAULT))
+
+                        (crate::icons::Check::with_class(crate::styles::user_settings_page::ClassName::INVITE_COPY_ICON_COPIED))
                     }
 
                     form
@@ -176,7 +175,8 @@ impl Renderable for InviteItem {
                             ))
                         {
                             div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                            (crate::icons::circle_x::CircleX)
+
+                            (crate::icons::CircleX::default())
                         }
                     }
                 }

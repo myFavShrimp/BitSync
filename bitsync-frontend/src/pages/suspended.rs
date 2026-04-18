@@ -10,7 +10,7 @@ impl Renderable for SuspendedPage {
             GuestDocument {
                 style { (crate::styles::register_page::STYLE_SHEET) }
 
-                (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
+                (crate::icons::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
 
                 main {
                     div class=(crate::styles::register_page::ClassName::FORM) {

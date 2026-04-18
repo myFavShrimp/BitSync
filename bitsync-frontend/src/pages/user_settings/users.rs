@@ -74,7 +74,8 @@ impl Renderable for UserList {
                                 title="User actions"
                             {
                                 div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                                (crate::icons::ellipsis_vertical::EllipsisVertical)
+
+                                (crate::icons::EllipsisVertical::default())
                             }
                         }
 

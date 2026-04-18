@@ -93,7 +93,7 @@ impl Renderable for FilesHomePage {
                                 class=(crate::styles::files_home_page::ClassName::BREADCRUMB)
                                 href=(link_data.parent_directory_url)
                             {
-                                (crate::icons::chevron_left::ChevronLeft)
+                                (crate::icons::ChevronLeft::default())
                                 (link_data.current_directory_name)
                             }
                         }
@@ -117,7 +117,7 @@ impl Renderable for FilesHomePage {
                             ))
                         {
                             div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                            (crate::icons::folder_plus::FolderPlus)
+                            (crate::icons::FolderPlus::default())
                         }
                     }
 
@@ -170,7 +170,7 @@ impl Renderable for FileUploadForm {
                     ))
                 {
                     div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                    (crate::icons::upload::Upload)
+                    (crate::icons::Upload::default())
                 }
             }
         }
@@ -204,7 +204,7 @@ impl Renderable for FileStorageTable {
                                 class=(crate::styles::files_home_page::ClassName::EMPTY_STATE)
                                 colspan="4"
                             {
-                                (crate::icons::cloudy::Cloudy)
+                                (crate::icons::Cloudy::default())
                                 p { "This folder is empty" }
                             }
                         }
@@ -224,7 +224,7 @@ impl Renderable for FileStorageTable {
                                 @match &dir_item.kind {
                                     StorageItemPresentationKind::Directory { url } => {
                                         td class=(crate::styles::files_home_page::ClassName::FILE_ICON) {
-                                            (crate::icons::folder::Folder)
+                                            (crate::icons::Folder::default())
                                         }
 
                                         td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
@@ -238,7 +238,7 @@ impl Renderable for FileStorageTable {
                                                 crate::styles::files_home_page::ClassName::FILE_ICON_SECONDARY,
                                             )
                                         {
-                                            (crate::icons::file_text::FileText)
+                                            (crate::icons::FileText::default())
                                         }
 
                                         td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
@@ -261,7 +261,7 @@ impl Renderable for FileStorageTable {
                                         popovertarget=(dir_item.actions_popover_id)
                                     {
                                         div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                                        (crate::icons::ellipsis_vertical::EllipsisVertical)
+                                        (crate::icons::EllipsisVertical::default())
                                     }
 
                                     dialog

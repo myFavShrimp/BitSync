@@ -31,7 +31,7 @@ impl Renderable for FileMoveDialog {
                         class=(crate::styles::modal::ClassName::MODAL_CLOSE)
                         onclick="closeClosestDialogAndRemoveElement(this)"
                     {
-                        (crate::icons::x::X)
+                        (crate::icons::X::default())
                     }
                 }
                 form

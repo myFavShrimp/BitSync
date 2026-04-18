@@ -57,7 +57,8 @@ impl Renderable for RegisterPage {
             GuestDocument {
                 style { (crate::styles::register_page::STYLE_SHEET) }
 
-                (crate::icons::logo::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
+                (crate::icons::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
+
                 p class=(crate::styles::register_page::ClassName::PAGE_HINT) {
                     @match &self {
                         Self::InviteTokenInput(..) => ("Enter your invite token to register"),

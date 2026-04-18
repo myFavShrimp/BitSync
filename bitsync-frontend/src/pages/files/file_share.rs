@@ -49,7 +49,7 @@ impl Renderable for FileShareDialog {
                         class=(crate::styles::modal::ClassName::MODAL_CLOSE)
                         onclick="closeClosestDialogAndRemoveElement(this)"
                     {
-                        (crate::icons::x::X)
+                        (crate::icons::X::default())
                     }
                 }
                 (ShareDialogBody {
@@ -112,7 +112,7 @@ impl Renderable for ShareDialogBody {
                             ))
                         {
                             div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                            (crate::icons::plus::Plus)
+                            (crate::icons::Plus::default())
                             "Add Share"
                         }
 
@@ -217,12 +217,9 @@ impl Renderable for ShareItem {
                             copied = crate::styles::files_home_page::ClassName::COPIED,
                         ))
                     {
-                        span class=(crate::styles::files_home_page::ClassName::SHARE_COPY_ICON_DEFAULT) {
-                            (crate::icons::link::Link)
-                        }
-                        span class=(crate::styles::files_home_page::ClassName::SHARE_COPY_ICON_COPIED) {
-                            (crate::icons::check::Check)
-                        }
+                        (crate::icons::Link::with_class(crate::styles::files_home_page::ClassName::SHARE_COPY_ICON_DEFAULT))
+
+                        (crate::icons::Check::with_class(crate::styles::files_home_page::ClassName::SHARE_COPY_ICON_COPIED))
                     }
 
                     button
@@ -240,7 +237,7 @@ impl Renderable for ShareItem {
                         ))
                     {
                         div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                        (crate::icons::circle_x::CircleX)
+                        (crate::icons::CircleX::default())
                     }
                 }
             }
