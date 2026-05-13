@@ -97,20 +97,79 @@ body {
         .Breadcrumb {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 1rem;
-            color: $text-secondary;
             font-size: 0.875rem;
-            text-decoration: none;
-            width: max-content;
+            min-width: 0;
 
-            svg {
-                width: 1rem;
-                height: 1rem;
+            .BreadcrumbLink {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: $text-secondary;
+                text-decoration: none;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+                svg {
+                    width: 1rem;
+                    height: 1rem;
+                    flex-shrink: 0;
+                }
+
+                &:hover {
+                    color: $text-color;
+                }
             }
 
-            &:hover {
+            .BreadcrumbCurrent {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
                 color: $text-color;
+                font-weight: 600;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+                svg {
+                    width: 1rem;
+                    height: 1rem;
+                    flex-shrink: 0;
+                }
+            }
+
+            .BreadcrumbSeparator {
+                color: $text-secondary;
+                user-select: none;
+            }
+
+            .BreadcrumbEllipsis {
+                background: none;
+                border: none;
+                padding: 0 0.25rem;
+                color: $text-secondary;
+                font-size: inherit;
+                font-family: inherit;
+                line-height: 1;
+                cursor: pointer;
+                user-select: none;
+
+                &:hover {
+                    color: $text-color;
+                }
+            }
+
+            .BreadcrumbCollapsedMenu {
+                inset: unset;
+                margin-top: 0.25rem;
+                top: anchor(bottom);
+                left: anchor(left);
+                background: rgba(30, 30, 30, 0.98);
             }
         }
 

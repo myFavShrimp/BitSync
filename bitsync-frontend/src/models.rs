@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use bitsync_routes::TypedPath;
 use bitsync_storage::storage_item::{StorageItem, StorageItemKind};
 
@@ -87,30 +85,3 @@ impl From<StorageItem> for StorageItemPresentation {
     }
 }
 
-pub struct ParentDirectoryLink {
-    pub parent_directory_url: String,
-    pub current_directory_name: String,
-}
-
-impl ParentDirectoryLink {
-    pub fn from_child(value: PathBuf) -> Option<Self> {
-        match value.parent() {
-            Some(parent_directory) => {
-                let current_directory_name = value.to_string_lossy().to_string();
-                let parent_directory_string = parent_directory.to_string_lossy().to_string();
-
-                let parent_directory_url = bitsync_routes::GetFilesHomePage
-                    .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
-                        path: parent_directory_string,
-                    })
-                    .to_string();
-
-                Some(Self {
-                    parent_directory_url,
-                    current_directory_name,
-                })
-            }
-            None => None,
-        }
-    }
-}

@@ -11,10 +11,16 @@ use bitsync_storage::{
     user_storage::UserStorage,
 };
 
+pub struct DirectoryBreadcrumbSegment {
+    pub name: String,
+    pub path: String,
+}
+
 pub struct UserDirectoryContentsResult {
     pub dir_contents: Vec<StorageItem>,
     pub path: StoragePath,
     pub directory_name: String,
+    pub breadcrumb_segments: Vec<DirectoryBreadcrumbSegment>,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -43,16 +49,19 @@ pub async fn read_user_directory_contents(
     dir_contents.sort_by_key(|item| item.path.path());
     dir_contents.sort_by_key(|item| item.kind.clone());
 
+    let breadcrumb_segments = build_breadcrumb_segments(&path.scoped_path);
+
     let directory_name = path
         .scoped_path
         .file_name()
         .map(|directory_name| directory_name.to_string_lossy().to_string())
-        .unwrap_or(user_root_directory_name(&user.username));
+        .unwrap_or_else(|| user_root_directory_name(&user.username));
 
     Ok(UserDirectoryContentsResult {
         dir_contents,
         path,
         directory_name,
+        breadcrumb_segments,
     })
 }
 
@@ -62,4 +71,26 @@ fn user_root_directory_name(user_name: &str) -> String {
     } else {
         format!("{user_name}'s Storage")
     }
+}
+
+fn build_breadcrumb_segments(scoped_path: &Path) -> Vec<DirectoryBreadcrumbSegment> {
+    let mut segments = vec![DirectoryBreadcrumbSegment {
+        name: "Root".to_owned(),
+        path: "/".to_owned(),
+    }];
+
+    let mut cumulative_path = PathBuf::from("/");
+
+    for component in scoped_path.components() {
+        if let std::path::Component::Normal(component_name) = component {
+            cumulative_path.push(component_name);
+
+            segments.push(DirectoryBreadcrumbSegment {
+                name: component_name.to_string_lossy().to_string(),
+                path: cumulative_path.to_string_lossy().to_string(),
+            });
+        }
+    }
+
+    segments
 }

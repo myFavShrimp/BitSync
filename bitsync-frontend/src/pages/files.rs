@@ -4,8 +4,10 @@ pub mod file_operations;
 pub mod file_share;
 
 use bitsync_core::use_case::user_files::{
-    create_directory::DirectoryCreationResult, delete_user_file::UserFileDeletionResult,
-    move_user_file::UserFileMoveResult, read_user_directory_contents::UserDirectoryContentsResult,
+    create_directory::DirectoryCreationResult,
+    delete_user_file::UserFileDeletionResult,
+    move_user_file::UserFileMoveResult,
+    read_user_directory_contents::{DirectoryBreadcrumbSegment, UserDirectoryContentsResult},
     upload_user_file::UserFileResult,
 };
 use bitsync_routes::TypedPath;
@@ -13,7 +15,7 @@ use hypertext::prelude::*;
 
 use crate::{
     Component,
-    models::{ParentDirectoryLink, StorageItemPresentation, StorageItemPresentationKind},
+    models::{StorageItemPresentation, StorageItemPresentationKind},
     pages::base::LoggedInDocument,
 };
 
@@ -40,10 +42,71 @@ pub struct DirectoryHeader {
     pub download_zip_url: String,
 }
 
+pub struct BreadcrumbLink {
+    pub name: String,
+    pub url: String,
+}
+
+pub enum BreadcrumbCrumb {
+    Link(BreadcrumbLink),
+    CollapsedGroup { hidden_links: Vec<BreadcrumbLink> },
+}
+
+const BREADCRUMB_MAX_VISIBLE: usize = 3;
+const BREADCRUMB_COLLAPSED_POPOVER_ID: &str = "breadcrumb-collapsed-popover";
+
+const _: () = assert!(BREADCRUMB_MAX_VISIBLE > 2);
+
+fn to_breadcrumb_link(segment: DirectoryBreadcrumbSegment) -> BreadcrumbLink {
+    let url = bitsync_routes::GetFilesHomePage
+        .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters { path: segment.path })
+        .to_string();
+
+    BreadcrumbLink {
+        name: segment.name,
+        url,
+    }
+}
+
+fn build_breadcrumb(segments: Vec<DirectoryBreadcrumbSegment>) -> Vec<BreadcrumbCrumb> {
+    let total = segments.len();
+
+    if total <= BREADCRUMB_MAX_VISIBLE {
+        return segments
+            .into_iter()
+            .map(to_breadcrumb_link)
+            .map(BreadcrumbCrumb::Link)
+            .collect();
+    }
+
+    let mut segments = segments;
+    let tail_start = total - (BREADCRUMB_MAX_VISIBLE - 2);
+    let tail: Vec<DirectoryBreadcrumbSegment> = segments.drain(tail_start..).collect();
+    let middle: Vec<DirectoryBreadcrumbSegment> = segments.drain(1..).collect();
+    let root = segments
+        .into_iter()
+        .next()
+        .expect("root segment always present");
+
+    let mut crumbs = vec![
+        BreadcrumbCrumb::Link(to_breadcrumb_link(root)),
+        BreadcrumbCrumb::CollapsedGroup {
+            hidden_links: middle.into_iter().map(to_breadcrumb_link).collect(),
+        },
+    ];
+    crumbs.extend(
+        tail.into_iter()
+            .map(to_breadcrumb_link)
+            .map(BreadcrumbCrumb::Link),
+    );
+
+    crumbs
+}
+
 pub struct FilesHomePage {
     current_path: String,
     dir_content: Vec<StorageItemPresentation>,
-    parent_directory_url: Option<ParentDirectoryLink>,
+    breadcrumb: Vec<BreadcrumbCrumb>,
     directory_header: DirectoryHeader,
     file_upload_url: String,
     directory_creation_dialog_url: String,
@@ -80,10 +143,12 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
                 .to_string(),
         };
 
+        let breadcrumb = build_breadcrumb(value.breadcrumb_segments);
+
         FilesHomePage {
             current_path: value.path.path(),
             dir_content: displayable_dir_content,
-            parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
+            breadcrumb,
             directory_header,
             file_upload_url,
             directory_creation_dialog_url,
@@ -125,19 +190,6 @@ impl Renderable for FilesHomePage {
                         }
                     }
 
-                    @match &self.parent_directory_url {
-                        Some(link_data) => {
-                            a
-                                class=(crate::styles::files_home_page::ClassName::BREADCRUMB)
-                                href=(link_data.parent_directory_url)
-                            {
-                                (crate::icons::ChevronLeft::default())
-                                (link_data.current_directory_name)
-                            }
-                        }
-                        None => {}
-                    }
-
                     div class=(crate::styles::files_home_page::ClassName::ACTIONS) {
                         FileUploadForm file_upload_url=(self.file_upload_url.clone());
 
@@ -156,6 +208,59 @@ impl Renderable for FilesHomePage {
                         {
                             div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             (crate::icons::FolderPlus::default())
+                        }
+                    }
+
+                    nav class=(crate::styles::files_home_page::ClassName::BREADCRUMB) {
+                        @let last_index = self.breadcrumb.len() - 1;
+
+                        @for (index, crumb) in self.breadcrumb.iter().enumerate() {
+                            @match crumb {
+                                BreadcrumbCrumb::Link(link) if index == last_index => {
+                                    span class=(crate::styles::files_home_page::ClassName::BREADCRUMB_CURRENT) {
+                                        (link.name)
+                                    }
+                                }
+                                BreadcrumbCrumb::Link(link) => {
+                                    a
+                                        class=(crate::styles::files_home_page::ClassName::BREADCRUMB_LINK)
+                                        href=(link.url)
+                                    {
+                                        (link.name)
+                                    }
+                                }
+                                BreadcrumbCrumb::CollapsedGroup { hidden_links } => {
+                                    button
+                                        class=(crate::styles::files_home_page::ClassName::BREADCRUMB_ELLIPSIS)
+                                        popovertarget=(BREADCRUMB_COLLAPSED_POPOVER_ID)
+                                        title="Show hidden folders"
+                                    {
+                                        "..."
+                                    }
+                                    div
+                                        id=(BREADCRUMB_COLLAPSED_POPOVER_ID)
+                                        class=(
+                                            crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                            crate::styles::files_home_page::ClassName::BREADCRUMB_COLLAPSED_MENU,
+                                        )
+                                        popover
+                                    {
+                                        @for link in hidden_links {
+                                            a
+                                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                                href=(link.url)
+                                                onclick="closeClosestPopover(this)"
+                                            {
+                                                span { (link.name) }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            span class=(crate::styles::files_home_page::ClassName::BREADCRUMB_SEPARATOR) {
+                                "/"
+                            }
                         }
                     }
 
