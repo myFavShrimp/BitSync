@@ -35,10 +35,16 @@ impl FilesHomePageElementId {
     }
 }
 
+pub struct DirectoryHeader {
+    pub directory_name: String,
+    pub download_zip_url: String,
+}
+
 pub struct FilesHomePage {
     current_path: String,
     dir_content: Vec<StorageItemPresentation>,
     parent_directory_url: Option<ParentDirectoryLink>,
+    directory_header: DirectoryHeader,
     file_upload_url: String,
     directory_creation_dialog_url: String,
 }
@@ -65,10 +71,20 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
             )
             .to_string();
 
+        let directory_header = DirectoryHeader {
+            directory_name: value.directory_name,
+            download_zip_url: bitsync_routes::GetUserFileDownload
+                .with_query_params(bitsync_routes::GetUserFileDownloadQueryParameters {
+                    path: value.path.path(),
+                })
+                .to_string(),
+        };
+
         FilesHomePage {
             current_path: value.path.path(),
             dir_content: displayable_dir_content,
             parent_directory_url: ParentDirectoryLink::from_child(value.path.scoped_path),
+            directory_header,
             file_upload_url,
             directory_creation_dialog_url,
         }
@@ -87,6 +103,28 @@ impl Renderable for FilesHomePage {
                         active_class = crate::styles::files_home_page::ClassName::DROP_ZONE_ACTIVE,
                     ))
                 {
+                    div class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER) {
+                        div class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_ICON) {
+                            (crate::icons::Folder::default())
+                        }
+                        h1 class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_TITLE) {
+                            (self.directory_header.directory_name)
+                        }
+                        @if !self.dir_content.is_empty() {
+                            a
+                                class=(
+                                    crate::styles::button::ClassName::BUTTON, " ",
+                                    crate::styles::button::ClassName::BUTTON_PRIMARY, " ",
+                                    crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_DOWNLOAD,
+                                )
+                                href=(self.directory_header.download_zip_url)
+                            {
+                                (crate::icons::Download::default())
+                                span { "Download as ZIP" }
+                            }
+                        }
+                    }
+
                     @match &self.parent_directory_url {
                         Some(link_data) => {
                             a
@@ -159,7 +197,6 @@ impl Renderable for FileUploadForm {
                     type="button"
                     class=(
                         crate::styles::button::ClassName::BUTTON, " ",
-                        crate::styles::button::ClassName::BUTTON_PRIMARY, " ",
                         crate::styles::files_home_page::ClassName::ACTION_BUTTON,
                     )
                     title="Upload Files"

@@ -65,6 +65,7 @@ icons! {
     ChevronRight: "../../static/svg/chevron-right.svg",
     CircleX: "../../static/svg/circle-x.svg",
     Cloudy: "../../static/svg/cloudy.svg",
+    Download: "../../static/svg/download.svg",
     EllipsisVertical: "../../static/svg/ellipsis-vertical.svg",
     FileText: "../../static/svg/file-text.svg",
     Folder: "../../static/svg/folder.svg",

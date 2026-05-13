@@ -14,6 +14,7 @@ use bitsync_storage::{
 pub struct UserDirectoryContentsResult {
     pub dir_contents: Vec<StorageItem>,
     pub path: StoragePath,
+    pub directory_name: String,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -42,5 +43,23 @@ pub async fn read_user_directory_contents(
     dir_contents.sort_by_key(|item| item.path.path());
     dir_contents.sort_by_key(|item| item.kind.clone());
 
-    Ok(UserDirectoryContentsResult { dir_contents, path })
+    let directory_name = path
+        .scoped_path
+        .file_name()
+        .map(|directory_name| directory_name.to_string_lossy().to_string())
+        .unwrap_or(user_root_directory_name(&user.username));
+
+    Ok(UserDirectoryContentsResult {
+        dir_contents,
+        path,
+        directory_name,
+    })
+}
+
+fn user_root_directory_name(user_name: &str) -> String {
+    if user_name.ends_with('s') {
+        format!("{user_name}' Storage")
+    } else {
+        format!("{user_name}'s Storage")
+    }
 }
