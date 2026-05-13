@@ -43,25 +43,27 @@ impl Renderable for TotpTabContent {
         maud! {
             @match self {
                 TotpTabContent::Prompt => {
-                    form
+                    div
                         id=(self.id())
                         class=(crate::styles::modal::ClassName::MODAL_BODY)
-                        data-hijack
-                        action=(bitsync_routes::PostUserSettingsTotpInitiateReset.to_string())
-                        method="POST"
                     {
                         p class=(crate::styles::modal::ClassName::MODAL_DESCRIPTION) {
                             "Two-factor authentication is active on your account. Resetting will generate a new TOTP secret and new recovery codes. Your old authenticator entry and recovery codes will stop working when you confirm the new TOTP code."
                         }
 
                         button
-                            type="submit"
+                            type="button"
                             class=(
                                 crate::styles::button::ClassName::BUTTON, " ",
                                 crate::styles::button::ClassName::BUTTON_DANGER,
                             )
+                            data-init=(format!(
+                                "this.fetch = fetch('{}', {{ method: 'POST' }})",
+                                bitsync_routes::PostUserSettingsTotpInitiateReset,
+                            ))
+                            data-on-click="this.fetch.trigger()"
                             data-effect=(format!(
-                                "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
+                                "handleButtonLoading(this, this.fetch, '{loading}')",
                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                             ))
                         {

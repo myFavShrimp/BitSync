@@ -7,7 +7,7 @@ use bitsync_database::{
 use crate::hash::{hash_password, PasswordHashCreationError};
 
 #[derive(thiserror::Error, Debug)]
-#[error("")]
+#[error("failed to read user settings")]
 pub enum ReadUserSettingsError {
     PasswordHash(#[from] PasswordHashCreationError),
     Database(#[from] repository::QueryError),

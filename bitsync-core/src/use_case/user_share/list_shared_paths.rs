@@ -6,7 +6,9 @@ use bitsync_database::{
     repository::{self, QueryError},
 };
 use bitsync_storage::{
-    operation::read::read_storage_item, storage_item::StorageItemKind, storage_path::StoragePath,
+    operation::read::{ReadStorageItemError, read_storage_item},
+    storage_item::StorageItemKind,
+    storage_path::{StoragePath, StoragePathError},
     user_storage::UserStorage,
 };
 
@@ -21,6 +23,8 @@ pub struct SharedPath {
 pub enum ListSharedPathsError {
     DatabaseConnectionAcquisition(#[from] ConnectionAcquisitionError),
     Query(#[from] QueryError),
+    ReadStorageItem(#[from] ReadStorageItemError),
+    StoragePath(#[from] StoragePathError),
 }
 
 pub async fn list_shared_paths(
@@ -42,17 +46,12 @@ pub async fn list_shared_paths(
     let mut shared_paths = Vec::with_capacity(item_paths.len());
 
     for item_path in item_paths {
-        let kind = match StoragePath::new(user_storage.clone(), PathBuf::from(&item_path)) {
-            Ok(storage_path) => match read_storage_item(&storage_path).await {
-                Ok(storage_item) => storage_item.kind,
-                Err(_) => StorageItemKind::File,
-            },
-            Err(_) => StorageItemKind::File,
-        };
+        let storage_path = StoragePath::new(user_storage.clone(), PathBuf::from(&item_path))?;
+        let storage_item = read_storage_item(&storage_path).await?;
 
         shared_paths.push(SharedPath {
             path: item_path,
-            kind,
+            kind: storage_item.kind,
         });
     }
 

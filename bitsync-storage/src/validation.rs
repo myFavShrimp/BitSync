@@ -21,11 +21,22 @@ pub(crate) fn validate_scoped_path<P: AsRef<Path>>(
 }
 
 #[derive(Debug, thiserror::Error)]
+#[error("the path '{path}' was expected to be just a file name.")]
+pub struct PathTooManyComponentsError {
+    pub path: String,
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("the path '{path}' was expected to be a file name.")]
+pub struct PathNotAFileNameError {
+    pub path: String,
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("path is not a valid file name")]
 pub enum PathIsJustFileNameValidationError {
-    #[error("the path '{0}' was expected to be just a file name.")]
-    TooManyComponents(String),
-    #[error("the path '{0}' was expected to be a file name.")]
-    NotAFileName(String),
+    TooManyComponents(#[from] PathTooManyComponentsError),
+    NotAFileName(#[from] PathNotAFileNameError),
 }
 
 pub fn validate_path_is_just_file_name<P: AsRef<Path>>(
@@ -36,18 +47,18 @@ pub fn validate_path_is_just_file_name<P: AsRef<Path>>(
     let mut directory_components = path.components();
 
     if directory_components.clone().count() > 1 {
-        return Err(PathIsJustFileNameValidationError::TooManyComponents(
-            path.to_string_lossy().to_string(),
-        ));
+        Err(PathTooManyComponentsError {
+            path: path.to_string_lossy().to_string(),
+        })?
     }
 
     match directory_components.next().unwrap() {
         std::path::Component::Prefix(..)
         | std::path::Component::RootDir
         | std::path::Component::CurDir
-        | std::path::Component::ParentDir => Err(PathIsJustFileNameValidationError::NotAFileName(
-            path.to_string_lossy().to_string(),
-        )),
+        | std::path::Component::ParentDir => Err(PathNotAFileNameError {
+            path: path.to_string_lossy().to_string(),
+        })?,
         std::path::Component::Normal(..) => Ok(()),
     }
 }

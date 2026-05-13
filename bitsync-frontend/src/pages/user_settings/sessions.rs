@@ -81,25 +81,24 @@ impl Renderable for SessionsTabContent {
                     error: None,
                 })
                 @if has_other_sessions {
-                    form
-                        data-hijack
-                        action=(bitsync_routes::PostTerminateAllOtherSessions.to_string())
-                        method="POST"
+                    button
+                        type="button"
+                        class=(
+                            crate::styles::button::ClassName::BUTTON, " ",
+                            crate::styles::button::ClassName::BUTTON_DANGER,
+                        )
+                        data-init=(format!(
+                            "this.fetch = fetch('{}', {{ method: 'POST' }})",
+                            bitsync_routes::PostTerminateAllOtherSessions,
+                        ))
+                        data-on-click="this.fetch.trigger()"
+                        data-effect=(format!(
+                            "handleButtonLoading(this, this.fetch, '{loading}')",
+                            loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                        ))
                     {
-                        button
-                            type="submit"
-                            class=(
-                                crate::styles::button::ClassName::BUTTON, " ",
-                                crate::styles::button::ClassName::BUTTON_DANGER,
-                            )
-                            data-effect=(format!(
-                                "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
-                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
-                            ))
-                        {
-                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                            "Revoke All Other Sessions"
-                        }
+                        div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
+                        "Revoke All Other Sessions"
                     }
                 }
             }
@@ -159,27 +158,23 @@ impl Renderable for SessionList {
                             }
                         }
                         @if !is_current {
-                            form
-                                data-hijack
-                                action=({
-                                    let route = bitsync_routes::PostTerminateSession { session_id: session.id };
-                                    route.to_string()
-                                })
-                                method="POST"
+                            button
+                                type="button"
+                                class=(crate::styles::user_settings_page::ClassName::SESSION_REVOKE)
+                                title="Revoke session"
+                                data-init=(format!(
+                                    "this.fetch = fetch('{}', {{ method: 'POST' }})",
+                                    bitsync_routes::PostTerminateSession { session_id: session.id },
+                                ))
+                                data-on-click="this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this, this.fetch, '{loading}')",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
                             {
-                                button
-                                    type="submit"
-                                    class=(crate::styles::user_settings_page::ClassName::SESSION_REVOKE)
-                                    title="Revoke session"
-                                    data-effect=(format!(
-                                        "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
-                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
-                                    ))
-                                {
-                                    div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
 
-                                    (crate::icons::CircleX::default())
-                                }
+                                (crate::icons::CircleX::default())
                             }
                         }
                     }

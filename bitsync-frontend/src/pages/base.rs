@@ -3,12 +3,12 @@ use hypertext::prelude::*;
 pub static DIALOG_WRAPPER_ID: &str = "dialog-wrapper";
 pub static DIALOG_WRAPPER_SELECTOR: &str = "#dialog-wrapper";
 
+const NAV_MENU_ID: &str = "nav-menu";
+
 pub struct LoggedInDocument<R: Renderable> {
     pub current_path: Option<String>,
     pub children: R,
 }
-
-const NAV_MENU_ID: &str = "nav-menu";
 
 impl<R: Renderable> Renderable for LoggedInDocument<R> {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
@@ -100,7 +100,6 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     id="search-results"
                                 {}
                             }
-
 
                             button
                                 class=(crate::styles::base::ClassName::NAV_MENU_BUTTON)
@@ -201,5 +200,162 @@ impl<R: Renderable> Renderable for AuthDocument<R> {
             }
         }
         .render_to(buffer);
+    }
+}
+
+pub struct PublicShareDocument<R: Renderable> {
+    pub current_path: Option<String>,
+    pub is_user_logged_in: bool,
+    pub children: R,
+}
+
+impl<R: Renderable> Renderable for PublicShareDocument<R> {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            !DOCTYPE
+            html lang="en"  {
+                head {
+                    meta content="text/html; charset=UTF-8" http-equiv="Content-Type";
+                    meta content="width=device-width,initial-scale=1.0" name="viewport";
+
+                    script src="/static/external/hyperstim.js" type="module" {}
+
+                    link href="/static/external/css/reset.css" rel="stylesheet" type="text/css";
+                    link href="/static/external/css/Noto Sans.css" rel="stylesheet" type="text/css";
+
+                    script src="/static/js/dialog-helper.js" defer {}
+                    script src="/static/js/overflow-helper.js" defer {}
+
+                    script src="/static/js/button-helper.js" {}
+                    // script src="/static/js/drop-upload-helper.js" {}
+
+                    style { (crate::styles::base::STYLE_SHEET) }
+                    style { (crate::styles::button::STYLE_SHEET) }
+                    style { (crate::styles::modal::STYLE_SHEET) }
+                    style { (crate::styles::error_modal::STYLE_SHEET) }
+                    style { (crate::styles::error_banner::STYLE_SHEET) }
+                    style { (crate::styles::error_card::STYLE_SHEET) }
+                    style { (crate::styles::search_launcher::STYLE_SHEET) }
+                    style { (crate::styles::toast::STYLE_SHEET) }
+                    style { (crate::styles::user_settings_page::STYLE_SHEET) }
+                }
+
+                body {
+                    header {
+                        a
+                            class=(crate::styles::base::ClassName::HEADER_LOGO)
+                            href=(bitsync_routes::GetFilesHomePage.to_string())
+                        {
+                            (crate::icons::Logo::default())
+                        }
+
+                        nav {
+                            button
+                                class=(crate::styles::base::ClassName::SEARCH_BUTTON)
+                                title="Search"
+                                onclick="openDialogModalById('search-launcher')"
+                            {
+                                (crate::icons::Search::default())
+                                span { "Search files and folders..." }
+                            }
+
+                            dialog
+                                class=(crate::styles::search_launcher::ClassName::SEARCH_LAUNCHER)
+                                id="search-launcher"
+                                onclick="if (event.target === this) this.close()"
+                            {
+                                button
+                                    class=(crate::styles::search_launcher::ClassName::CLOSE_BUTTON)
+                                    onclick="closeClosestDialog(this)"
+                                {
+                                    (crate::icons::X::default())
+                                }
+
+                                form
+                                    data-hijack
+                                    action=(bitsync_routes::GetSearch.to_string())
+                                    method="GET"
+                                {
+                                    div class=(crate::styles::search_launcher::ClassName::INPUT_WRAPPER) {
+                                        (crate::icons::Search::default())
+                                        @if let Some(path) = &self.current_path {
+                                            input
+                                                type="hidden"
+                                                name="path"
+                                                value=(path);
+                                        }
+                                        input
+                                            class=(crate::styles::search_launcher::ClassName::INPUT)
+                                            type="text"
+                                            name="query"
+                                            placeholder="Search files and folders..."
+                                            autocomplete="off"
+                                            autofocus
+                                            data-on-input__debounce.300ms="this.form.requestSubmit()";
+                                    }
+                                }
+                                div
+                                    class=(crate::styles::search_launcher::ClassName::RESULTS)
+                                    id="search-results"
+                                {}
+                            }
+
+                            button
+                                class=(crate::styles::base::ClassName::NAV_MENU_BUTTON)
+                                popovertarget=(NAV_MENU_ID)
+                                title="Menu"
+                            {
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
+                                (crate::icons::Menu::default())
+                            }
+                            div
+                                id=(NAV_MENU_ID)
+                                class=(
+                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                    crate::styles::base::ClassName::NAV_CONTEXT_MENU,
+                                )
+                                popover
+                            {
+                                button
+                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
+                                    data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
+                                {
+                                    (crate::icons::Bolt::default())
+                                    span { "Settings" }
+                                }
+                                div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                                a
+                                    class=(
+                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                    )
+                                    href=(bitsync_routes::GetLogoutAction.to_string())
+                                {
+                                    (crate::icons::LogOut::default())
+                                    span { "Sign Out" }
+                                }
+                            }
+                        }
+                    }
+
+                    (self.children)
+
+                    div id=(DIALOG_WRAPPER_ID) {}
+
+                    div
+                        id=(crate::toast::TOAST_CONTAINER_ID)
+                        class=(crate::styles::toast::ClassName::TOAST_CONTAINER)
+                        role="status"
+                        aria-live="polite"
+                        popover="manual"
+                    {}
+                }
+            }
+        }.render_to(buffer);
     }
 }
