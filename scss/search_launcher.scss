@@ -136,12 +136,9 @@ body {
 
                     .ResultIconSecondary {
                         flex-shrink: 0;
-
-                        svg {
-                            width: 1.125rem;
-                            height: 1.125rem;
-                            color: $text-secondary;
-                        }
+                        width: 1.125rem;
+                        height: 1.125rem;
+                        color: $text-secondary;
                     }
 
                     .ResultInfo {
