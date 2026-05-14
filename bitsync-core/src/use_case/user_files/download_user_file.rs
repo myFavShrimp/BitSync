@@ -12,7 +12,7 @@ use bitsync_storage::{
 };
 use tracing::Level;
 
-use super::shared::AsyncStorageItemRead;
+use super::shared::{AsyncStorageItemRead, user_root_directory_name};
 
 mod directory_zipping;
 
@@ -79,9 +79,14 @@ pub async fn download_user_file(
             });
 
             let mut dir_path = path.scoped_path.clone();
+
+            if dir_path.file_stem().is_none() {
+                dir_path.set_file_name(user_root_directory_name(&user.username));
+            }
+
             dir_path.set_extension("zip");
 
-            let fake_zip_path = StoragePath::new(user_storage.clone(), dir_path)?;
+            let fake_zip_path = StoragePath::new(user_storage.clone(), dbg!(dir_path))?;
 
             let mime = mime_guess::from_path(&fake_zip_path.scoped_path).first_or_octet_stream();
 

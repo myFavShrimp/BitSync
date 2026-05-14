@@ -11,6 +11,8 @@ use bitsync_storage::{
     user_storage::UserStorage,
 };
 
+use super::shared::user_root_directory_name;
+
 pub struct DirectoryBreadcrumbSegment {
     pub name: String,
     pub path: String,
@@ -67,14 +69,6 @@ pub async fn read_user_directory_contents(
         is_root_directory,
         breadcrumb_segments,
     })
-}
-
-fn user_root_directory_name(user_name: &str) -> String {
-    if user_name.ends_with('s') {
-        format!("{user_name}' Storage")
-    } else {
-        format!("{user_name}'s Storage")
-    }
 }
 
 fn build_breadcrumb_segments(scoped_path: &Path) -> Vec<DirectoryBreadcrumbSegment> {

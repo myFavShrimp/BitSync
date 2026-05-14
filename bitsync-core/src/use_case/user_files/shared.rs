@@ -3,6 +3,14 @@ use std::pin::Pin;
 use bitsync_storage::async_file_read::AsyncFileRead;
 use tokio::io::DuplexStream;
 
+pub fn user_root_directory_name(user_name: &str) -> String {
+    if user_name.ends_with('s') {
+        format!("{user_name}' Storage")
+    } else {
+        format!("{user_name}'s Storage")
+    }
+}
+
 pub enum AsyncStorageItemRead {
     File(AsyncFileRead),
     Directory(DuplexStream),
