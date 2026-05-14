@@ -56,10 +56,6 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_post(user_file_upload_handler)
-                // .route_layer(axum::middleware::from_fn_with_state(
-                //     state.clone(),
-                //     crate::body_limit::dynamic_body_size_limit,
-                // ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -69,6 +65,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_get(user_file_download_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHttp>,
@@ -86,6 +85,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .typed_post(user_file_share_create_handler)
                 .typed_post(user_file_share_delete_handler)
                 .typed_post(user_file_share_delete_all_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,

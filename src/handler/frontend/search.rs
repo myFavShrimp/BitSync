@@ -28,6 +28,9 @@ static SEARCH_RESULTS_SELECTOR: &str = "#search-results";
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(search_handler)
+        .route_layer(axum::middleware::from_fn(
+            crate::body_limit::request_body_size_limit,
+        ))
         .route_layer(from_fn_with_state(
             state.clone(),
             require_login_and_totp_setup_middleware::<RedirectHyperStim>,

@@ -15,6 +15,9 @@ use crate::handler::{RedirectHttp, http_redirect_response};
 pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .typed_get(logout_action_handler)
+        .route_layer(axum::middleware::from_fn(
+            crate::body_limit::request_body_size_limit,
+        ))
         .route_layer(from_fn_with_state(
             state.clone(),
             require_any_login_no_totp_required_ignore_suspension_middleware::<RedirectHttp>,

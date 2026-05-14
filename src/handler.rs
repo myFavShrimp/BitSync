@@ -13,7 +13,7 @@ use bitsync_frontend::{
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use headers::Header;
-use tower_http::{limit::RequestBodyLimitLayer, trace::TraceLayer};
+use tower_http::trace::TraceLayer;
 
 mod frontend;
 mod static_assets;
@@ -22,10 +22,8 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
     Router::new()
         .merge(static_assets::create_routes().await)
         .merge(frontend::create_routes(state.clone()).await)
-        .fallback(handler_404)
         .layer(DefaultBodyLimit::disable())
-        .layer(DefaultBodyLimit::max(10_240_000))
-        .layer(RequestBodyLimitLayer::new(10_240_000))
+        .fallback(handler_404)
         .layer(TraceLayer::new_for_http())
 }
 

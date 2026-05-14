@@ -66,6 +66,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .typed_get(user_settings_totp_tab_handler)
                 .typed_post(user_settings_totp_initiate_handler)
                 .typed_post(user_settings_totp_setup_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -90,6 +93,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
                 .typed_get(user_settings_invites_tab_handler)
                 .typed_post(user_settings_invite_token_create_handler)
                 .typed_post(user_settings_invite_token_delete_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_admin_login_and_totp_setup_middleware::<RedirectHyperStim>,

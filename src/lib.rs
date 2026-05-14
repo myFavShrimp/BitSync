@@ -1,4 +1,4 @@
-use std::sync::{Arc, atomic::AtomicU64};
+use std::sync::Arc;
 
 use axum::{Router, routing::IntoMakeService};
 use bitsync_core::{
@@ -19,7 +19,6 @@ mod handler;
 pub struct AppState {
     pub(crate) config: Config,
     pub(crate) database: Database,
-    pub(crate) current_file_upload_limit: AtomicU64,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -34,7 +33,6 @@ impl AppState {
         let state = Self {
             database: Database::connect_and_migrate(&config.database_url).await?,
             config,
-            current_file_upload_limit: AtomicU64::new(10_240_000),
         };
 
         Ok(state)

@@ -41,6 +41,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_get(login_totp_auth_page_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_basic_login_and_totp_setup_middleware::<RedirectHttp>,
@@ -49,6 +52,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_post(login_totp_auth_submit_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_basic_login_and_totp_setup_middleware::<RedirectHyperStim>,
@@ -58,6 +64,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_get(login_page_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_logout_middleware::<RedirectHttp>,
@@ -66,6 +75,9 @@ pub(crate) async fn create_routes(state: Arc<AppState>) -> Router {
         .merge(
             Router::new()
                 .typed_post(login_action_handler)
+                .route_layer(axum::middleware::from_fn(
+                    crate::body_limit::request_body_size_limit,
+                ))
                 .route_layer(from_fn_with_state(
                     state.clone(),
                     require_logout_middleware::<RedirectHyperStim>,
