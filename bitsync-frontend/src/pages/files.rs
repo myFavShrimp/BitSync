@@ -493,6 +493,7 @@ impl Renderable for FileStorageTable {
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {
+                                            (crate::icons::Share::default())
                                             span { "Share" }
                                         }
 
@@ -505,6 +506,7 @@ impl Renderable for FileStorageTable {
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {
+                                            (crate::icons::Move::default())
                                             span { "Move" }
                                         }
 
@@ -513,6 +515,7 @@ impl Renderable for FileStorageTable {
                                             href=(dir_item.download_url)
                                             onclick="closeClosestDialog(this)"
                                         {
+                                            (crate::icons::Download::default())
                                             span { "Download" }
                                         }
 
@@ -530,6 +533,7 @@ impl Renderable for FileStorageTable {
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {
+                                            (crate::icons::Trash2::default())
                                             span { "Delete" }
                                         }
                                     }
