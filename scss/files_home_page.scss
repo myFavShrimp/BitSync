@@ -34,29 +34,10 @@ body {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem 1.25rem;
+            padding-bottom: 1rem;
             margin-bottom: 1rem;
             background: rgba(20, 20, 20, 0.5);
-            border: 1px solid $border-color;
-            border-radius: $border-radius;
-
-            .DirectoryHeaderIcon {
-                flex-shrink: 0;
-                width: 2.5rem;
-                height: 2.5rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.04);
-                border: 1px solid $border-color;
-                border-radius: $border-radius-sm;
-                color: $primary-light;
-
-                svg {
-                    width: 1.25rem;
-                    height: 1.25rem;
-                }
-            }
+            border-bottom: 1px solid $border-color;
 
             .DirectoryHeaderTitle {
                 flex: 1;
@@ -69,6 +50,14 @@ body {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+            }
+
+            .DirectoryHeaderContextMenu {
+                inset: unset;
+                margin-top: 0.25rem;
+                top: anchor(bottom);
+                left: anchor(left);
+                background: rgba(30, 30, 30, 0.98);
             }
 
             .DirectoryHeaderDownload {
@@ -99,7 +88,6 @@ body {
             align-items: center;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-bottom: 1rem;
             font-size: 0.875rem;
             min-width: 0;
 

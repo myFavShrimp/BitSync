@@ -40,6 +40,11 @@ impl FilesHomePageElementId {
 pub struct DirectoryHeader {
     pub directory_name: String,
     pub download_zip_url: String,
+    pub share_dialog_url: String,
+    pub move_dialog_url: String,
+    pub delete_url: String,
+    pub actions_popover_id: String,
+    pub is_root_directory: bool,
 }
 
 pub struct BreadcrumbLink {
@@ -141,6 +146,23 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
                     path: value.path.path(),
                 })
                 .to_string(),
+            share_dialog_url: bitsync_routes::GetUserFileShareDialog
+                .with_query_params(bitsync_routes::GetUserFileShareDialogQueryParameters {
+                    path: value.path.path(),
+                })
+                .to_string(),
+            move_dialog_url: bitsync_routes::GetUserFileMoveDialog
+                .with_query_params(bitsync_routes::GetUserFileMoveDialogQueryParameters {
+                    path: value.path.path(),
+                })
+                .to_string(),
+            delete_url: bitsync_routes::GetUserFileDelete
+                .with_query_params(bitsync_routes::GetUserFileDeleteQueryParameters {
+                    path: value.path.path(),
+                })
+                .to_string(),
+            actions_popover_id: "directory-header-actions-popover".to_owned(),
+            is_root_directory: value.is_root_directory,
         };
 
         let breadcrumb = build_breadcrumb(value.breadcrumb_segments);
@@ -169,100 +191,165 @@ impl Renderable for FilesHomePage {
                     ))
                 {
                     div class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER) {
-                        div class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_ICON) {
-                            (crate::icons::Folder::default())
-                        }
-                        h1 class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_TITLE) {
-                            (self.directory_header.directory_name)
-                        }
-                        @if !self.dir_content.is_empty() {
-                            a
-                                class=(
-                                    crate::styles::button::ClassName::BUTTON, " ",
-                                    crate::styles::button::ClassName::BUTTON_PRIMARY, " ",
-                                    crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_DOWNLOAD,
-                                )
-                                href=(self.directory_header.download_zip_url)
-                            {
-                                (crate::icons::Download::default())
-                                span { "Download as ZIP" }
-                            }
-                        }
-                    }
-
-                    div class=(crate::styles::files_home_page::ClassName::ACTIONS) {
-                        FileUploadForm file_upload_url=(self.file_upload_url.clone());
-
                         button
+                            title="More"
                             class=(
                                 crate::styles::button::ClassName::BUTTON, " ",
                                 crate::styles::files_home_page::ClassName::ACTION_BUTTON,
                             )
-                            title="New Folder"
-                            data-init=(format!("this.fetch = fetch('{}')", self.directory_creation_dialog_url))
-                            data-on-click__throttle.1s="this.fetch.trigger()"
-                            data-effect=(format!(
-                                "handleButtonLoading(this, this.fetch, '{loading}')",
-                                loading = crate::styles::button::ClassName::BUTTON_LOADING,
-                            ))
+                            popovertarget=(self.directory_header.actions_popover_id)
                         {
-                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                            (crate::icons::FolderPlus::default())
+                            (crate::icons::FolderOpen::default())
                         }
-                    }
 
-                    nav class=(crate::styles::files_home_page::ClassName::BREADCRUMB) {
-                        @let last_index = self.breadcrumb.len() - 1;
+                        div style="display: flex; flex-direction: column; gap: 0.2em;" {
+                            h1 class=(crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_TITLE) {
+                                (self.directory_header.directory_name)
+                            }
 
-                        @for (index, crumb) in self.breadcrumb.iter().enumerate() {
-                            @match crumb {
-                                BreadcrumbCrumb::Link(link) if index == last_index => {
-                                    span class=(crate::styles::files_home_page::ClassName::BREADCRUMB_CURRENT) {
-                                        (link.name)
-                                    }
-                                }
-                                BreadcrumbCrumb::Link(link) => {
-                                    a
-                                        class=(crate::styles::files_home_page::ClassName::BREADCRUMB_LINK)
-                                        href=(link.url)
-                                    {
-                                        (link.name)
-                                    }
-                                }
-                                BreadcrumbCrumb::CollapsedGroup { hidden_links } => {
-                                    button
-                                        class=(crate::styles::files_home_page::ClassName::BREADCRUMB_ELLIPSIS)
-                                        popovertarget=(BREADCRUMB_COLLAPSED_POPOVER_ID)
-                                        title="Show hidden folders"
-                                    {
-                                        "..."
-                                    }
-                                    div
-                                        id=(BREADCRUMB_COLLAPSED_POPOVER_ID)
-                                        class=(
-                                            crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                            crate::styles::files_home_page::ClassName::BREADCRUMB_COLLAPSED_MENU,
-                                        )
-                                        popover
-                                    {
-                                        @for link in hidden_links {
+                            nav class=(crate::styles::files_home_page::ClassName::BREADCRUMB) {
+                                @for crumb in self.breadcrumb.iter() {
+                                    @match crumb {
+                                        BreadcrumbCrumb::Link(link) => {
                                             a
-                                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                                class=(crate::styles::files_home_page::ClassName::BREADCRUMB_LINK)
                                                 href=(link.url)
-                                                onclick="closeClosestPopover(this)"
                                             {
-                                                span { (link.name) }
+                                                (link.name)
+                                            }
+                                        }
+                                        BreadcrumbCrumb::CollapsedGroup { hidden_links } => {
+                                            button
+                                                class=(crate::styles::files_home_page::ClassName::BREADCRUMB_ELLIPSIS)
+                                                popovertarget=(BREADCRUMB_COLLAPSED_POPOVER_ID)
+                                                title="Show hidden folders"
+                                            {
+                                                "..."
+                                            }
+                                            div
+                                                id=(BREADCRUMB_COLLAPSED_POPOVER_ID)
+                                                class=(
+                                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                                    crate::styles::files_home_page::ClassName::BREADCRUMB_COLLAPSED_MENU,
+                                                )
+                                                popover
+                                            {
+                                                @for link in hidden_links {
+                                                    a
+                                                        class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                                        href=(link.url)
+                                                        onclick="closeClosestPopover(this)"
+                                                    {
+                                                        span { (link.name) }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
+
+                                    span class=(crate::styles::files_home_page::ClassName::BREADCRUMB_SEPARATOR) {
+                                        "/"
+                                    }
+                                }
+                            }
+                        }
+
+                        dialog
+                            id=(self.directory_header.actions_popover_id)
+                            class=(
+                                crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_CONTEXT_MENU,
+                            )
+                            popover
+                        {
+                            button
+                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                data-init=(format!(
+                                    "this.uploadInput = document.getElementById('{form_id}').querySelector('input[type=file]')",
+                                    form_id = FilesHomePageElementId::FileUploadForm.to_str(),
+                                ))
+                                data-on-click="closeClosestPopover(this), this.uploadInput.click()"
+                            {
+                                (crate::icons::Upload::default())
+                                span { "Upload" }
+                            }
+
+                            button
+                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_creation_dialog_url))
+                                data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
+                            {
+                                (crate::icons::FolderPlus::default())
+                                span { "New Folder" }
+                            }
+
+                            div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+
+                            @if !self.dir_content.is_empty() {
+                                a
+                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    href=(self.directory_header.download_zip_url)
+                                {
+                                    (crate::icons::Download::default())
+                                    span { "Download" }
                                 }
                             }
 
-                            span class=(crate::styles::files_home_page::ClassName::BREADCRUMB_SEPARATOR) {
-                                "/"
+                            @if !self.directory_header.is_root_directory {
+                                button
+                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_header.move_dialog_url))
+                                    data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
+                                {
+                                    (crate::icons::Move::default())
+                                    span { "Move" }
+                                }
+                            }
+
+                            button
+                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_header.share_dialog_url))
+                                data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
+                            {
+                                (crate::icons::Share::default())
+                                span { "Share" }
+                            }
+
+                            @if !self.directory_header.is_root_directory {
+                                div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+
+                                button
+                                    class=(
+                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                    )
+                                    data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_header.delete_url))
+                                    data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
+                                    data-effect=(format!(
+                                        "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                    ))
+                                {
+                                    (crate::icons::Trash2::default())
+                                    span { "Delete" }
+                                }
                             }
                         }
                     }
+
+                    FileUploadForm file_upload_url=(self.file_upload_url.clone());
 
                     (FileStorageTable { dir_content: self.dir_content.clone() })
                 }
@@ -297,23 +384,6 @@ impl Renderable for FileUploadForm {
                     hidden
                     onchange="this.form.requestSubmit()"
                 ;
-
-                button
-                    type="button"
-                    class=(
-                        crate::styles::button::ClassName::BUTTON, " ",
-                        crate::styles::files_home_page::ClassName::ACTION_BUTTON,
-                    )
-                    title="Upload Files"
-                    onclick="this.previousElementSibling.click()"
-                    data-effect=(format!(
-                        "handleButtonLoading(this, this.form.hsFetch, '{loading}')",
-                        loading = crate::styles::button::ClassName::BUTTON_LOADING,
-                    ))
-                {
-                    div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
-                    (crate::icons::Upload::default())
-                }
             }
         }
         .render_to(buffer);

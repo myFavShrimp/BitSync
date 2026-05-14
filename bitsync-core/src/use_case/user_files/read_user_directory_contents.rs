@@ -20,6 +20,7 @@ pub struct UserDirectoryContentsResult {
     pub dir_contents: Vec<StorageItem>,
     pub path: StoragePath,
     pub directory_name: String,
+    pub is_root_directory: bool,
     pub breadcrumb_segments: Vec<DirectoryBreadcrumbSegment>,
 }
 
@@ -51,6 +52,8 @@ pub async fn read_user_directory_contents(
 
     let breadcrumb_segments = build_breadcrumb_segments(&path.scoped_path);
 
+    let is_root_directory = path.scoped_path.file_name().is_none();
+
     let directory_name = path
         .scoped_path
         .file_name()
@@ -61,6 +64,7 @@ pub async fn read_user_directory_contents(
         dir_contents,
         path,
         directory_name,
+        is_root_directory,
         breadcrumb_segments,
     })
 }
@@ -91,6 +95,8 @@ fn build_breadcrumb_segments(scoped_path: &Path) -> Vec<DirectoryBreadcrumbSegme
             });
         }
     }
+
+    segments.pop();
 
     segments
 }
