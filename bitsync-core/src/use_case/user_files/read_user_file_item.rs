@@ -61,7 +61,7 @@ pub async fn read_user_file_item(
 
     let path = StoragePath::new(user_storage.clone(), PathBuf::from(path))?;
     let storage_item = read_storage_item(&path).await?;
-    let breadcrumb_segments = build_breadcrumb_segments(&path.scoped_path);
+    let breadcrumb_segments = build_breadcrumb_segments(&user.username, &path.scoped_path);
 
     match storage_item.kind {
         StorageItemKind::Directory => {
@@ -104,9 +104,12 @@ pub async fn read_user_file_item(
     }
 }
 
-fn build_breadcrumb_segments(scoped_path: &Path) -> Vec<DirectoryBreadcrumbSegment> {
+fn build_breadcrumb_segments(
+    user_name: &str,
+    scoped_path: &Path,
+) -> Vec<DirectoryBreadcrumbSegment> {
     let mut segments = vec![DirectoryBreadcrumbSegment {
-        name: "Root".to_owned(),
+        name: user_root_directory_name(user_name),
         path: "/".to_owned(),
     }];
 
