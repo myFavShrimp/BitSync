@@ -16,19 +16,11 @@ impl SearchResultItem {
     pub fn new(item: StorageItem, parent_path: String) -> Self {
         let is_directory = matches!(item.kind, StorageItemKind::Directory);
 
-        let url = if is_directory {
-            bitsync_routes::GetFilesHomePage
-                .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
-                    path: item.path.path(),
-                })
-                .to_string()
-        } else {
-            bitsync_routes::GetUserFileDownload
-                .with_query_params(bitsync_routes::GetUserFileDownloadQueryParameters {
-                    path: item.path.path(),
-                })
-                .to_string()
-        };
+        let url = bitsync_routes::GetFilesHomePage
+            .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
+                path: item.path.path(),
+            })
+            .to_string();
 
         Self {
             name: item.path.file_name(),
