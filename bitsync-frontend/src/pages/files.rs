@@ -227,6 +227,7 @@ impl Renderable for FilesHomeDirectoryPage {
                             )
                             popovertarget=(self.directory_header.actions_popover_id)
                         {
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             (crate::icons::FolderOpen::default())
                         }
 
@@ -450,6 +451,7 @@ impl Renderable for FilesHomeFilePage {
                             class=(crate::styles::files_home_page::ClassName::FILE_HEADER_ICON)
                             popovertarget=(self.actions_popover_id)
                         {
+                            div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
                             (crate::icons::FileInput::default())
                         }
 
