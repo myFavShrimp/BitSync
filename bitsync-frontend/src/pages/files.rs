@@ -7,7 +7,10 @@ use bitsync_core::use_case::user_files::{
     create_directory::DirectoryCreationResult,
     delete_user_file::UserFileDeletionResult,
     move_user_file::UserFileMoveResult,
-    read_user_directory_contents::{DirectoryBreadcrumbSegment, UserDirectoryContentsResult},
+    read_user_file_item::{
+        DirectoryBreadcrumbSegment, UserDirectoryContentsResult, UserFileItemResult,
+        UserFilesHomeResult,
+    },
     upload_user_file::UserFileResult,
 };
 use bitsync_routes::TypedPath;
@@ -108,7 +111,32 @@ fn build_breadcrumb(segments: Vec<DirectoryBreadcrumbSegment>) -> Vec<Breadcrumb
     crumbs
 }
 
-pub struct FilesHomePage {
+pub enum FilesHomePage {
+    Directory(FilesHomeDirectoryPage),
+    File(FilesHomeFilePage),
+}
+
+impl From<UserFilesHomeResult> for FilesHomePage {
+    fn from(value: UserFilesHomeResult) -> Self {
+        match value {
+            UserFilesHomeResult::Directory(directory_result) => {
+                FilesHomePage::Directory(directory_result.into())
+            }
+            UserFilesHomeResult::File(file_result) => FilesHomePage::File(file_result.into()),
+        }
+    }
+}
+
+impl Renderable for FilesHomePage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        match self {
+            FilesHomePage::Directory(page) => page.render_to(buffer),
+            FilesHomePage::File(page) => page.render_to(buffer),
+        }
+    }
+}
+
+pub struct FilesHomeDirectoryPage {
     current_path: String,
     dir_content: Vec<StorageItemPresentation>,
     breadcrumb: Vec<BreadcrumbCrumb>,
@@ -117,7 +145,7 @@ pub struct FilesHomePage {
     directory_creation_dialog_url: String,
 }
 
-impl From<UserDirectoryContentsResult> for FilesHomePage {
+impl From<UserDirectoryContentsResult> for FilesHomeDirectoryPage {
     fn from(value: UserDirectoryContentsResult) -> Self {
         let displayable_dir_content = value
             .dir_contents
@@ -167,7 +195,7 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
 
         let breadcrumb = build_breadcrumb(value.breadcrumb_segments);
 
-        FilesHomePage {
+        FilesHomeDirectoryPage {
             current_path: value.path.path(),
             dir_content: displayable_dir_content,
             breadcrumb,
@@ -178,7 +206,7 @@ impl From<UserDirectoryContentsResult> for FilesHomePage {
     }
 }
 
-impl Renderable for FilesHomePage {
+impl Renderable for FilesHomeDirectoryPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             LoggedInDocument current_path=(Some(self.current_path.clone())) {
@@ -323,7 +351,7 @@ impl Renderable for FilesHomePage {
                                     loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                 ))
                             {
-                                (crate::icons::Share::default())
+                                (crate::icons::Share2::default())
                                 span { "Share" }
                             }
 
@@ -352,6 +380,204 @@ impl Renderable for FilesHomePage {
                     FileUploadForm file_upload_url=(self.file_upload_url.clone());
 
                     (FileStorageTable { dir_content: self.dir_content.clone() })
+                }
+            }
+        }.render_to(buffer);
+    }
+}
+
+pub struct FilesHomeFilePage {
+    current_path: String,
+    file_name: String,
+    download_url: String,
+    share_dialog_url: String,
+    move_dialog_url: String,
+    delete_url: String,
+    actions_popover_id: String,
+    breadcrumb: Vec<BreadcrumbCrumb>,
+}
+
+impl From<UserFileItemResult> for FilesHomeFilePage {
+    fn from(value: UserFileItemResult) -> Self {
+        let download_url = bitsync_routes::GetUserFileDownload
+            .with_query_params(bitsync_routes::GetUserFileDownloadQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
+        let share_dialog_url = bitsync_routes::GetUserFileShareDialog
+            .with_query_params(bitsync_routes::GetUserFileShareDialogQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
+        let move_dialog_url = bitsync_routes::GetUserFileMoveDialog
+            .with_query_params(bitsync_routes::GetUserFileMoveDialogQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
+        let delete_url = bitsync_routes::GetUserFileDelete
+            .with_query_params(bitsync_routes::GetUserFileDeleteQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
+
+        let breadcrumb = build_breadcrumb(value.breadcrumb_segments);
+
+        FilesHomeFilePage {
+            current_path: value.path.path(),
+            file_name: value.file_name,
+            download_url,
+            share_dialog_url,
+            move_dialog_url,
+            delete_url,
+            actions_popover_id: "file-header-actions-popover".to_owned(),
+            breadcrumb,
+        }
+    }
+}
+
+impl Renderable for FilesHomeFilePage {
+    fn render_to(&self, buffer: &mut hypertext::Buffer) {
+        maud! {
+            LoggedInDocument current_path=(Some(self.current_path.clone())) {
+                style { (crate::styles::files_home_page::STYLE_SHEET) }
+                main {
+                    div class=(crate::styles::files_home_page::ClassName::FILE_HEADER_BANNER) {
+                        button
+                            title="More"
+                            class=(crate::styles::files_home_page::ClassName::FILE_HEADER_ICON)
+                            popovertarget=(self.actions_popover_id)
+                        {
+                            (crate::icons::FileInput::default())
+                        }
+
+                        dialog
+                            id=(self.actions_popover_id)
+                            class=(
+                                crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                crate::styles::files_home_page::ClassName::FILE_HEADER_CONTEXT_MENU,
+                            )
+                            popover
+                        {
+                            button
+                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.move_dialog_url))
+                                data-on-click="closeClosestPopover(this), this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
+                            {
+                                (crate::icons::Move::default())
+                                span { "Move" }
+                            }
+
+                            div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+
+                            button
+                                class=(
+                                    crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
+                                    crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                )
+                                data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.delete_url))
+                                data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this.triggerButton, this.fetch, '{loading}')",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
+                            {
+                                (crate::icons::Trash2::default())
+                                span { "Delete" }
+                            }
+                        }
+
+                        div class=(crate::styles::files_home_page::ClassName::FILE_HEADER_TEXT) {
+                            h1 class=(crate::styles::files_home_page::ClassName::FILE_HEADER_TITLE) {
+                                (self.file_name)
+                            }
+
+                            nav class=(crate::styles::files_home_page::ClassName::BREADCRUMB) {
+                                @for crumb in self.breadcrumb.iter() {
+                                    @match crumb {
+                                        BreadcrumbCrumb::Link(link) => {
+                                            a
+                                                class=(crate::styles::files_home_page::ClassName::BREADCRUMB_LINK)
+                                                href=(link.url)
+                                            {
+                                                (link.name)
+                                            }
+                                        }
+                                        BreadcrumbCrumb::CollapsedGroup { hidden_links } => {
+                                            button
+                                                class=(crate::styles::files_home_page::ClassName::BREADCRUMB_ELLIPSIS)
+                                                popovertarget=(BREADCRUMB_COLLAPSED_POPOVER_ID)
+                                                title="Show hidden folders"
+                                            {
+                                                "..."
+                                            }
+                                            div
+                                                id=(BREADCRUMB_COLLAPSED_POPOVER_ID)
+                                                class=(
+                                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                                    crate::styles::files_home_page::ClassName::BREADCRUMB_COLLAPSED_MENU,
+                                                )
+                                                popover
+                                            {
+                                                @for link in hidden_links {
+                                                    a
+                                                        class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                                        href=(link.url)
+                                                        onclick="closeClosestPopover(this)"
+                                                    {
+                                                        span { (link.name) }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    span class=(crate::styles::files_home_page::ClassName::BREADCRUMB_SEPARATOR) {
+                                        "/"
+                                    }
+                                }
+                            }
+                        }
+
+                        div class=(crate::styles::files_home_page::ClassName::FILE_HEADER_ACTIONS) {
+                            button
+                                title="Share"
+                                class=(
+                                    crate::styles::button::ClassName::BUTTON, " ",
+                                    crate::styles::files_home_page::ClassName::FILE_HEADER_SHARE,
+                                )
+                                data-init=(format!("this.fetch = fetch('{}')", self.share_dialog_url))
+                                data-on-click__throttle.1s="this.fetch.trigger()"
+                                data-effect=(format!(
+                                    "handleButtonLoading(this, this.fetch, '{loading}')",
+                                    loading = crate::styles::button::ClassName::BUTTON_LOADING,
+                                ))
+                            {
+                                div class=(crate::styles::button::ClassName::BUTTON_SPINNER) {}
+                                (crate::icons::Share2::default())
+                                span { "Share" }
+                            }
+
+                            a
+                                title="Download"
+                                class=(
+                                    crate::styles::button::ClassName::BUTTON, " ",
+                                    crate::styles::button::ClassName::BUTTON_PRIMARY, " ",
+                                    crate::styles::files_home_page::ClassName::FILE_HEADER_DOWNLOAD,
+                                )
+                                href=(self.download_url)
+                            {
+                                (crate::icons::Download::default())
+                                span { "Download" }
+                            }
+                        }
+                    }
                 }
             }
         }.render_to(buffer);
@@ -443,7 +669,7 @@ impl Renderable for FileStorageTable {
                                             a href=(url) { (dir_item.name) }
                                         }
                                     }
-                                    StorageItemPresentationKind::File => {
+                                    StorageItemPresentationKind::File { url } => {
                                         td
                                             class=(
                                                 crate::styles::files_home_page::ClassName::FILE_ICON, " ",
@@ -454,7 +680,7 @@ impl Renderable for FileStorageTable {
                                         }
 
                                         td class=(crate::styles::files_home_page::ClassName::FILE_NAME) {
-                                            (dir_item.name)
+                                            a href=(url) { (dir_item.name) }
                                         }
                                     }
                                 }
@@ -462,7 +688,7 @@ impl Renderable for FileStorageTable {
                                 td class=(crate::styles::files_home_page::ClassName::FILE_SIZE) {
                                     @match &dir_item.kind {
                                         StorageItemPresentationKind::Directory { .. } => { "\u{2014}" }
-                                        StorageItemPresentationKind::File => { (dir_item.size) }
+                                        StorageItemPresentationKind::File { .. } => { (dir_item.size) }
                                     }
                                 }
 
@@ -493,7 +719,7 @@ impl Renderable for FileStorageTable {
                                                 loading = crate::styles::button::ClassName::BUTTON_LOADING,
                                             ))
                                         {
-                                            (crate::icons::Share::default())
+                                            (crate::icons::Share2::default())
                                             span { "Share" }
                                         }
 

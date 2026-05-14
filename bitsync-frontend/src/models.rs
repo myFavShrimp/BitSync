@@ -18,23 +18,21 @@ pub struct StorageItemPresentation {
 
 #[derive(Clone)]
 pub enum StorageItemPresentationKind {
-    File,
+    File { url: String },
     Directory { url: String },
 }
 
 impl From<StorageItem> for StorageItemPresentationKind {
     fn from(value: StorageItem) -> Self {
-        match value.kind {
-            StorageItemKind::Directory => {
-                let directory_url = bitsync_routes::GetFilesHomePage
-                    .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
-                        path: value.path.path(),
-                    })
-                    .to_string();
+        let item_url = bitsync_routes::GetFilesHomePage
+            .with_query_params(bitsync_routes::GetFilesHomePageQueryParameters {
+                path: value.path.path(),
+            })
+            .to_string();
 
-                StorageItemPresentationKind::Directory { url: directory_url }
-            }
-            StorageItemKind::File => StorageItemPresentationKind::File,
+        match value.kind {
+            StorageItemKind::Directory => StorageItemPresentationKind::Directory { url: item_url },
+            StorageItemKind::File => StorageItemPresentationKind::File { url: item_url },
         }
     }
 }

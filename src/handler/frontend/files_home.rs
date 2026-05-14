@@ -7,7 +7,7 @@ use axum::{
     response::{Html, IntoResponse},
 };
 use axum_extra::routing::RouterExt;
-use bitsync_core::use_case::user_files::read_user_directory_contents::read_user_directory_contents;
+use bitsync_core::use_case::user_files::read_user_file_item::read_user_file_item;
 use bitsync_frontend::{
     Render,
     pages::{error::ErrorPage, files::FilesHomePage},
@@ -38,7 +38,7 @@ async fn files_home_page_handler(
     Extension(auth_data): Extension<AuthData>,
     query_parameters: Query<bitsync_routes::GetFilesHomePageQueryParameters>,
 ) -> impl IntoResponse {
-    match read_user_directory_contents(
+    match read_user_file_item(
         &app_state.config.fs_storage_root_dir,
         &query_parameters.path,
         &auth_data.user,
