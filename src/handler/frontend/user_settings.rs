@@ -29,8 +29,7 @@ use bitsync_core::use_case::{
 };
 use bitsync_frontend::{
     Component, DIALOG_WRAPPER_SELECTOR, Render,
-    confirmation_dialog::ConfirmationDialog,
-    pages::user_settings::{
+    components::user_settings::{
         SettingsDialog, SettingsTab, SettingsTabArea,
         invites::InviteList,
         password::{PasswordDisplayError, PasswordTabContent},
@@ -38,6 +37,7 @@ use bitsync_frontend::{
         totp::{TotpDisplayError, TotpTabContent},
         users::UserList,
     },
+    confirmation_dialog::ConfirmationDialog,
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
 use serde::Deserialize;

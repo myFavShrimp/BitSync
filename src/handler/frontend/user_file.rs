@@ -24,19 +24,17 @@ use bitsync_core::use_case::{
 };
 use bitsync_frontend::{
     Component, DIALOG_WRAPPER_SELECTOR, Render,
-    pages::{
-        files::{
-            FilesHomePageChangeResult,
-            directory_creation::{
-                DirectoryCreationDialog, DirectoryCreationDisplayError, DirectoryCreationForm,
-            },
-            file_move::FileMoveDialog,
-            file_operations::{
-                UserFileDeletionDisplayError, UserFileDownloadDisplayError,
-                UserFileMoveDisplayError, UserFileUploadDisplayError,
-            },
+    components::user_settings::shares::file_share::{FileShareDialog, ShareDialogBody},
+    pages::files::{
+        FilesHomePageChangeResult,
+        directory_creation::{
+            DirectoryCreationDialog, DirectoryCreationDisplayError, DirectoryCreationForm,
         },
-        user_settings::shares::file_share::{FileShareDialog, ShareDialogBody},
+        file_move::FileMoveDialog,
+        file_operations::{
+            UserFileDeletionDisplayError, UserFileDownloadDisplayError, UserFileMoveDisplayError,
+            UserFileUploadDisplayError,
+        },
     },
 };
 use bitsync_hyperstim::{HyperStimCommand, HyperStimPatchMode};
