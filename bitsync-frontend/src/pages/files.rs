@@ -1,7 +1,6 @@
 pub mod directory_creation;
 pub mod file_move;
 pub mod file_operations;
-pub mod file_share;
 
 use bitsync_core::use_case::user_files::{
     create_directory::DirectoryCreationResult,

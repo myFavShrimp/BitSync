@@ -4,7 +4,7 @@ use hypertext::prelude::*;
 
 use crate::{Component, error_banner::OptionalErrorBanner};
 
-use super::FilesHomePageElementId;
+use crate::pages::files::FilesHomePageElementId;
 
 pub enum ShareDisplayError {
     InternalServerError,

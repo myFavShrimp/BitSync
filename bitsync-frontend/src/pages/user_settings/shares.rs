@@ -3,6 +3,8 @@ use bitsync_routes::TypedPath;
 use bitsync_storage::storage_item::StorageItemKind;
 use hypertext::prelude::*;
 
+pub mod file_share;
+
 pub struct SharesTabContent {
     pub shared_paths: Vec<SharedPath>,
 }
