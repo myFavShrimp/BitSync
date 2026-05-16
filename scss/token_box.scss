@@ -1,0 +1,36 @@
+@import "vars";
+
+.TokenId {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: monospace;
+    font-size: 0.8125rem;
+    color: $text-secondary;
+    overflow-x: auto;
+    scrollbar-width: none;
+    user-select: all;
+    white-space: nowrap;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.CopyIconCopied {
+    display: none;
+    color: $success-color;
+}
+
+.Copied {
+    color: $success-color;
+
+    .CopyIconDefault {
+        display: none;
+    }
+
+    .CopyIconCopied {
+        display: flex;
+    }
+}

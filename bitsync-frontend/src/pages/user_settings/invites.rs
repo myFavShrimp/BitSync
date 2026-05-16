@@ -87,7 +87,7 @@ impl Renderable for InviteList {
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
                 @if self.invite_tokens.is_empty() {
-                    p class=(crate::styles::user_settings_page::ClassName::INVITE_EMPTY) {
+                    p class=(crate::styles::empty_state::ClassName::EMPTY_STATE) {
                         "No invite codes yet. Generate one to invite a new user."
                     }
                 } @else {
@@ -124,7 +124,7 @@ impl Renderable for InviteItem {
             div class=(crate::styles::user_settings_page::ClassName::INVITE_ITEM) {
                 div class=(crate::styles::user_settings_page::ClassName::INVITE_TOKEN_WRAPPER) {
                     pre
-                        class=(crate::styles::user_settings_page::ClassName::INVITE_ID)
+                        class=(crate::styles::token_box::ClassName::TOKEN_ID)
                         data-init=(format!(
                             "this.updateOverflow = createHorizontalOverflowHandler(this, '{overflow_left}', '{overflow_right}'), this.updateOverflow()",
                             overflow_left = crate::styles::user_settings_page::ClassName::OVERFLOW_LEFT,
@@ -137,7 +137,10 @@ impl Renderable for InviteItem {
                 }
 
                 @if self.invite_token.is_admin {
-                    span class=(crate::styles::user_settings_page::ClassName::INVITE_ADMIN_BADGE) {
+                    span class=(
+                        crate::styles::badge::ClassName::BADGE, " ",
+                        crate::styles::badge::ClassName::BADGE_DANGER,
+                    ) {
                         "Admin"
                     }
                 }
@@ -145,19 +148,19 @@ impl Renderable for InviteItem {
                 div class=(crate::styles::user_settings_page::ClassName::INVITE_ACTIONS_GROUP) {
                     button
                         type="button"
-                        class=(crate::styles::user_settings_page::ClassName::INVITE_COPY)
+                        class=(crate::styles::button::ClassName::ICON_BUTTON)
                         title="Copy invite link"
                         data-init=(format!(
                             "this.inviteLink = window.location.origin + '{invite_path}'"
                         ))
                         data-on-click=(format!(
                             "navigator.clipboard.writeText(this.inviteLink), this.classList.add('{copied}'), setTimeout(() => this.classList.remove('{copied}'), 1200)",
-                            copied = crate::styles::user_settings_page::ClassName::COPIED,
+                            copied = crate::styles::token_box::ClassName::COPIED,
                         ))
                     {
-                        (crate::icons::Link::with_class(crate::styles::user_settings_page::ClassName::INVITE_COPY_ICON_DEFAULT))
+                        (crate::icons::Link::with_class(crate::styles::token_box::ClassName::COPY_ICON_DEFAULT))
 
-                        (crate::icons::Check::with_class(crate::styles::user_settings_page::ClassName::INVITE_COPY_ICON_COPIED))
+                        (crate::icons::Check::with_class(crate::styles::token_box::ClassName::COPY_ICON_COPIED))
                     }
 
                     form
@@ -167,7 +170,10 @@ impl Renderable for InviteItem {
                     {
                         button
                             type="submit"
-                            class=(crate::styles::user_settings_page::ClassName::INVITE_REVOKE)
+                            class=(
+                                crate::styles::button::ClassName::ICON_BUTTON, " ",
+                                crate::styles::button::ClassName::ICON_BUTTON_DANGER,
+                            )
                             title="Revoke invite"
                             data-effect=(format!(
                                 "handleButtonLoading(this, this.form.hsFetch, '{loading}')",

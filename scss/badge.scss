@@ -1,0 +1,26 @@
+@import "vars";
+
+.Badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+}
+
+.BadgeSuccess {
+    background: rgba(16, 185, 129, 0.1);
+    color: $success-color;
+}
+
+.BadgeDanger {
+    background: rgba(239, 68, 68, 0.12);
+    color: $danger-color;
+}
+
+.BadgeWarning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}

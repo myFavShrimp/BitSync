@@ -17,7 +17,7 @@ impl Renderable for SharesTabContent {
 
                 div class=(crate::styles::user_settings_page::ClassName::SHARED_PATH_LIST) {
                     @if self.shared_paths.is_empty() {
-                        p class=(crate::styles::user_settings_page::ClassName::SHARED_PATH_EMPTY) {
+                        p class=(crate::styles::empty_state::ClassName::EMPTY_STATE) {
                             "No shared items yet. Share a file or directory from the file browser."
                         }
                     } @else {

@@ -154,7 +154,7 @@ impl Renderable for ShareList {
         maud! {
             div class=(crate::styles::files_home_page::ClassName::SHARE_LIST) {
                 @if self.user_shares.is_empty() {
-                    p class=(crate::styles::files_home_page::ClassName::SHARE_EMPTY) {
+                    p class=(crate::styles::empty_state::ClassName::EMPTY_STATE) {
                         "No shares yet. Add one to create a share link."
                     }
                 } @else {
@@ -192,7 +192,7 @@ impl Renderable for ShareItem {
             div class=(crate::styles::files_home_page::ClassName::SHARE_ITEM) {
                 div class=(crate::styles::files_home_page::ClassName::SHARE_TOKEN_WRAPPER) {
                     pre
-                        class=(crate::styles::files_home_page::ClassName::SHARE_ID)
+                        class=(crate::styles::token_box::ClassName::TOKEN_ID)
                         data-init=(format!(
                             "this.updateOverflow = createHorizontalOverflowHandler(this, '{overflow_left}', '{overflow_right}'), this.updateOverflow()",
                             overflow_left = crate::styles::files_home_page::ClassName::OVERFLOW_LEFT,
@@ -207,24 +207,27 @@ impl Renderable for ShareItem {
                 div class=(crate::styles::files_home_page::ClassName::SHARE_ACTIONS_GROUP) {
                     button
                         type="button"
-                        class=(crate::styles::files_home_page::ClassName::SHARE_COPY)
+                        class=(crate::styles::button::ClassName::ICON_BUTTON)
                         title="Copy share id"
                         data-init=(format!(
                             "this.shareId = '{token}'"
                         ))
                         data-on-click=(format!(
                             "navigator.clipboard.writeText(this.shareId), this.classList.add('{copied}'), setTimeout(() => this.classList.remove('{copied}'), 1200)",
-                            copied = crate::styles::files_home_page::ClassName::COPIED,
+                            copied = crate::styles::token_box::ClassName::COPIED,
                         ))
                     {
-                        (crate::icons::Link::with_class(crate::styles::files_home_page::ClassName::SHARE_COPY_ICON_DEFAULT))
+                        (crate::icons::Link::with_class(crate::styles::token_box::ClassName::COPY_ICON_DEFAULT))
 
-                        (crate::icons::Check::with_class(crate::styles::files_home_page::ClassName::SHARE_COPY_ICON_COPIED))
+                        (crate::icons::Check::with_class(crate::styles::token_box::ClassName::COPY_ICON_COPIED))
                     }
 
                     button
                         type="button"
-                        class=(crate::styles::files_home_page::ClassName::SHARE_REVOKE)
+                        class=(
+                            crate::styles::button::ClassName::ICON_BUTTON, " ",
+                            crate::styles::button::ClassName::ICON_BUTTON_DANGER,
+                        )
                         title="Remove share"
                         data-init=(format!(
                             "this.fetch = fetch('{}', {{ method: 'POST' }})",

@@ -1,0 +1,91 @@
+@import "vars";
+
+.ContextMenu {
+    inset: unset;
+    width: 200px;
+    background: rgba(20, 20, 20, 0.97);
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4);
+    padding: 0.5rem;
+    flex-direction: column;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.15s ease, transform 0.15s ease, display 0.15s allow-discrete, overlay 0.15s allow-discrete;
+
+    &:popover-open {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+
+        @starting-style {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+
+    &.AnchorTopLeft {
+        margin-top: 0.25rem;
+        top: anchor(bottom);
+        left: anchor(left);
+        background: rgba(30, 30, 30, 0.98);
+    }
+
+    &.AnchorTopRight {
+        margin-top: 0.25rem;
+        top: anchor(bottom);
+        right: anchor(right);
+        background: rgba(30, 30, 30, 0.98);
+    }
+
+    &.AnchorRightCentered {
+        margin-right: 0.25rem;
+        right: anchor(left);
+        align-self: anchor-center;
+    }
+
+    .ContextMenuItem {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        color: $text-secondary;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-decoration: none;
+        background: none;
+        border: none;
+        font-family: inherit;
+        width: 100%;
+        text-align: left;
+
+        svg {
+            width: 1.125rem;
+            height: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: $text-color;
+        }
+
+        &.ContextMenuItemDanger {
+            color: $danger-color;
+
+            &:hover {
+                background: rgba(239, 68, 68, 0.08);
+                color: $danger-color;
+            }
+        }
+    }
+
+    .ContextMenuDivider {
+        height: 1px;
+        background: $border-color;
+        margin: 0.375rem 0;
+    }
+}

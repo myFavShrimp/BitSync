@@ -18,11 +18,11 @@ body {
     .PageHint {
         margin-bottom: 1em;
     }
-    
+
     main {
         width: 100vw;
         max-width: 26rem;
-    
+
         .Form {
             position: relative;
             overflow: hidden;
@@ -53,11 +53,6 @@ body {
                 transition: 0.5s;
                 pointer-events: none;
             }
-
-            /*&:hover:before {
-                left: -70%;
-                transition: 0.7s ease-in-out;
-            }*/
 
             .InputWrapper {
                 display: flex;
@@ -106,5 +101,19 @@ body {
                 gap: 1.25rem;
             }
         }
+    }
+
+    .AuthDescription {
+        color: $text-secondary;
+        font-size: 0.9rem;
+        line-height: 1.2rem;
+    }
+
+    .AuthDivider {
+        border: none;
+        height: 1px;
+        width: 100%;
+        background-color: $border-color;
+        margin: 0;
     }
 }

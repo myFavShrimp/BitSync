@@ -8,12 +8,13 @@ impl Renderable for SuspendedPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             AuthDocument {
+                style { (crate::styles::auth_page::STYLE_SHEET) }
                 style { (crate::styles::register_page::STYLE_SHEET) }
 
-                (crate::icons::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
+                (crate::icons::Logo::with_class(crate::styles::auth_page::ClassName::LOGO))
 
                 main {
-                    div class=(crate::styles::register_page::ClassName::FORM) {
+                    div class=(crate::styles::auth_page::ClassName::FORM) {
                         div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                             h1 { "Account Suspended" }
                             p { "Your account has been suspended by an administrator. You are unable to access BitSync at this time." }

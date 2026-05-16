@@ -47,12 +47,12 @@ impl Renderable for LoginPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             AuthDocument {
-                style { (crate::styles::login_page::STYLE_SHEET) }
+                style { (crate::styles::auth_page::STYLE_SHEET) }
 
-                (crate::icons::Logo::with_class(crate::styles::login_page::ClassName::LOGO))
+                (crate::icons::Logo::with_class(crate::styles::auth_page::ClassName::LOGO))
 
                 p
-                    class=(crate::styles::login_page::ClassName::PAGE_HINT)
+                    class=(crate::styles::auth_page::ClassName::PAGE_HINT)
                 {
                     ("Sign in to access your secure storage")
                 }
@@ -86,15 +86,15 @@ impl Renderable for LoginForm {
         maud! {
             form
                 id=(self.id())
-                class=(crate::styles::login_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
                 data-hijack
                 action=(bitsync_routes::PostLoginAction.to_string())
                 method="POST"
             {
-                label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "Username"
 
-                    div class=(crate::styles::login_page::ClassName::INPUT) {
+                    div class=(crate::styles::auth_page::ClassName::INPUT) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             value=[&self.username]
@@ -103,10 +103,10 @@ impl Renderable for LoginForm {
                             required;
                     }
                 }
-                label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "Password"
 
-                    div class=(crate::styles::login_page::ClassName::INPUT) {
+                    div class=(crate::styles::auth_page::ClassName::INPUT) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             type="password"
@@ -118,7 +118,7 @@ impl Renderable for LoginForm {
 
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
-                div class=(crate::styles::login_page::ClassName::ACTIONS) {
+                div class=(crate::styles::auth_page::ClassName::ACTIONS) {
                     button
                         type="submit"
                         class=(crate::styles::button::ClassName::BUTTON)
@@ -153,15 +153,15 @@ impl Renderable for TotpForm {
         maud! {
             form
                 id=(self.id())
-                class=(crate::styles::login_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
                 data-hijack
                 action=(bitsync_routes::PostLoginTotpAuthAction.to_string())
                 method="POST"
             {
-                label class=(crate::styles::login_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
 
-                    div class=(crate::styles::login_page::ClassName::TOTP_INPUT_WRAPPER) {
+                    div class=(crate::styles::auth_page::ClassName::TOTP_INPUT_WRAPPER) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             name="totp"
@@ -170,7 +170,7 @@ impl Renderable for TotpForm {
 
                         p
                             id="totp-timer"
-                            class=(crate::styles::login_page::ClassName::TOTP_TIMER)
+                            class=(crate::styles::auth_page::ClassName::TOTP_TIMER)
                         {
                             "30"
                         }

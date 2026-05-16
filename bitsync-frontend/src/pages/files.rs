@@ -258,14 +258,14 @@ impl Renderable for FilesHomeDirectoryPage {
                                             div
                                                 id=(BREADCRUMB_COLLAPSED_POPOVER_ID)
                                                 class=(
-                                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                                    crate::styles::files_home_page::ClassName::BREADCRUMB_COLLAPSED_MENU,
+                                                    crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
+                                                    crate::styles::context_menu::ClassName::ANCHOR_TOP_LEFT,
                                                 )
                                                 popover
                                             {
                                                 @for link in hidden_links {
                                                     a
-                                                        class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                                        class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                                         href=(link.url)
                                                         onclick="closeClosestPopover(this)"
                                                     {
@@ -286,13 +286,13 @@ impl Renderable for FilesHomeDirectoryPage {
                         dialog
                             id=(self.directory_header.actions_popover_id)
                             class=(
-                                crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                crate::styles::files_home_page::ClassName::DIRECTORY_HEADER_CONTEXT_MENU,
+                                crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
+                                crate::styles::context_menu::ClassName::ANCHOR_TOP_LEFT,
                             )
                             popover
                         {
                             button
-                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                 data-init=(format!(
                                     "this.uploadInput = document.getElementById('{form_id}').querySelector('input[type=file]')",
                                     form_id = FilesHomePageElementId::FileUploadForm.to_str(),
@@ -304,7 +304,7 @@ impl Renderable for FilesHomeDirectoryPage {
                             }
 
                             button
-                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_creation_dialog_url))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 data-effect=(format!(
@@ -316,11 +316,11 @@ impl Renderable for FilesHomeDirectoryPage {
                                 span { "New Folder" }
                             }
 
-                            div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                            div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
 
                             @if !self.dir_content.is_empty() {
                                 a
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     href=(self.directory_header.download_zip_url)
                                 {
                                     (crate::icons::Download::default())
@@ -330,7 +330,7 @@ impl Renderable for FilesHomeDirectoryPage {
 
                             @if !self.directory_header.is_root_directory {
                                 button
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_header.move_dialog_url))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
@@ -344,7 +344,7 @@ impl Renderable for FilesHomeDirectoryPage {
                             }
 
                             button
-                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_header.share_dialog_url))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 data-effect=(format!(
@@ -357,12 +357,12 @@ impl Renderable for FilesHomeDirectoryPage {
                             }
 
                             @if !self.directory_header.is_root_directory {
-                                div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                                div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
 
                                 button
                                     class=(
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                     )
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.directory_header.delete_url))
                                     data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
@@ -458,13 +458,13 @@ impl Renderable for FilesHomeFilePage {
                         dialog
                             id=(self.actions_popover_id)
                             class=(
-                                crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                crate::styles::files_home_page::ClassName::FILE_HEADER_CONTEXT_MENU,
+                                crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
+                                crate::styles::context_menu::ClassName::ANCHOR_TOP_LEFT,
                             )
                             popover
                         {
                             button
-                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.move_dialog_url))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 data-effect=(format!(
@@ -476,12 +476,12 @@ impl Renderable for FilesHomeFilePage {
                                 span { "Move" }
                             }
 
-                            div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                            div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
 
                             button
                                 class=(
-                                    crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                    crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                    crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                    crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                 )
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", self.delete_url))
                                 data-on-click="this.fetch.trigger(), closeClosestDialog(this)"
@@ -522,14 +522,14 @@ impl Renderable for FilesHomeFilePage {
                                             div
                                                 id=(BREADCRUMB_COLLAPSED_POPOVER_ID)
                                                 class=(
-                                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                                    crate::styles::files_home_page::ClassName::BREADCRUMB_COLLAPSED_MENU,
+                                                    crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
+                                                    crate::styles::context_menu::ClassName::ANCHOR_TOP_LEFT,
                                                 )
                                                 popover
                                             {
                                                 @for link in hidden_links {
                                                     a
-                                                        class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                                        class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                                         href=(link.url)
                                                         onclick="closeClosestPopover(this)"
                                                     {
@@ -707,13 +707,13 @@ impl Renderable for FileStorageTable {
                                     dialog
                                         id=(dir_item.actions_popover_id)
                                         class=(
-                                            crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                            crate::styles::files_home_page::ClassName::FILE_CONTEXT_MENU,
+                                            crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
+                                            crate::styles::context_menu::ClassName::ANCHOR_RIGHT_CENTERED,
                                         )
                                         popover
                                     {
                                         button
-                                            class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                            class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.share_dialog_url))
                                             data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                             data-effect=(format!(
@@ -726,7 +726,7 @@ impl Renderable for FileStorageTable {
                                         }
 
                                         button
-                                            class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                            class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.move_dialog_url))
                                             data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                             data-effect=(format!(
@@ -739,7 +739,7 @@ impl Renderable for FileStorageTable {
                                         }
 
                                         a
-                                            class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                            class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                             href=(dir_item.download_url)
                                             onclick="closeClosestDialog(this)"
                                         {
@@ -747,12 +747,12 @@ impl Renderable for FileStorageTable {
                                             span { "Download" }
                                         }
 
-                                        div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                                        div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
 
                                         button
                                             class=(
-                                                crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                                crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                                crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                                crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                             )
                                             data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", dir_item.delete_url))
                                             data-on-click="this.fetch.trigger(), closeClosestDialog(this)"

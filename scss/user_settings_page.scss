@@ -33,17 +33,6 @@ body {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-
-                    .SessionBadge {
-                        font-size: 0.6875rem;
-                        font-weight: 600;
-                        padding: 0.25rem 0.5rem;
-                        border-radius: 9999px;
-                        background: rgba(16, 185, 129, 0.1);
-                        color: $success-color;
-                        text-transform: uppercase;
-                        letter-spacing: 0.03em;
-                    }
                 }
 
                 .SessionMeta {
@@ -55,27 +44,6 @@ body {
                 }
             }
 
-            .SessionRevoke {
-                background: none;
-                border: none;
-                color: $text-secondary;
-                cursor: pointer;
-                padding: 0.375rem;
-                border-radius: 0.375rem;
-                transition: all 0.15s ease;
-                flex-shrink: 0;
-
-                &:hover {
-                    color: $danger-color;
-                    background: rgba(239, 68, 68, 0.08);
-                }
-
-                svg {
-                    width: 1.125rem;
-                    height: 1.125rem;
-                    stroke: currentColor;
-                }
-            }
         }
     }
 
@@ -145,16 +113,6 @@ body {
         flex-direction: column;
         gap: 0.5rem;
 
-        .InviteEmpty {
-            font-size: 0.8125rem;
-            color: $text-secondary;
-            padding: 1rem;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px dashed $border-color;
-            border-radius: $border-radius-sm;
-        }
-
         .InviteItem {
             display: flex;
             justify-content: space-between;
@@ -164,18 +122,6 @@ body {
             border: 1px solid $border-color;
             border-radius: $border-radius-sm;
             gap: 0.625rem;
-
-            .InviteAdminBadge {
-                font-size: 0.6875rem;
-                font-weight: 600;
-                padding: 0.2rem 0.5rem;
-                border-radius: 9999px;
-                background: rgba(239, 68, 68, 0.12);
-                color: $danger-color;
-                text-transform: uppercase;
-                letter-spacing: 0.03em;
-                flex-shrink: 0;
-            }
 
             .InviteTokenWrapper {
                 position: relative;
@@ -213,80 +159,11 @@ body {
                 }
             }
 
-            .InviteId {
-                margin: 0;
-                padding: 0;
-                background: none;
-                border: none;
-                font-family: monospace;
-                font-size: 0.8125rem;
-                color: $text-secondary;
-                overflow-x: auto;
-                scrollbar-width: none;
-                user-select: all;
-                white-space: nowrap;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                }
-            }
-
             .InviteActionsGroup {
                 display: flex;
                 align-items: center;
                 gap: 0.25rem;
                 flex-shrink: 0;
-
-                .InviteCopy,
-                .InviteRevoke {
-                    background: none;
-                    border: none;
-                    color: $text-secondary;
-                    cursor: pointer;
-                    padding: 0.375rem;
-                    border-radius: 0.375rem;
-                    transition: all 0.15s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    svg {
-                        width: 1.125rem;
-                        height: 1.125rem;
-                        stroke: currentColor;
-                    }
-                }
-
-                .InviteCopy {
-                    &:hover {
-                        color: $text-color;
-                        background: rgba(255, 255, 255, 0.06);
-                    }
-
-                    .InviteCopyIconCopied {
-                        display: none;
-                        color: $success-color;
-                    }
-
-                    &.Copied {
-                        color: $success-color;
-
-                        .InviteCopyIconDefault {
-                            display: none;
-                        }
-
-                        .InviteCopyIconCopied {
-                            display: flex;
-                        }
-                    }
-                }
-
-                .InviteRevoke {
-                    &:hover {
-                        color: $danger-color;
-                        background: rgba(239, 68, 68, 0.08);
-                    }
-                }
             }
         }
     }
@@ -301,16 +178,6 @@ body {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-
-        .UserEmpty {
-            font-size: 0.8125rem;
-            color: $text-secondary;
-            padding: 1rem;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px dashed $border-color;
-            border-radius: $border-radius-sm;
-        }
 
         .UserItem {
             display: flex;
@@ -339,61 +206,6 @@ body {
                 align-items: center;
                 gap: 0.5rem;
                 flex-shrink: 0;
-
-                .UserSuspendedBadge {
-                    font-size: 0.6875rem;
-                    font-weight: 600;
-                    padding: 0.2rem 0.5rem;
-                    border-radius: 9999px;
-                    background: rgba(245, 158, 11, 0.12);
-                    color: #f59e0b;
-                    text-transform: uppercase;
-                    letter-spacing: 0.03em;
-                }
-
-                .UserAdminBadge {
-                    font-size: 0.6875rem;
-                    font-weight: 600;
-                    padding: 0.2rem 0.5rem;
-                    border-radius: 9999px;
-                    background: rgba(239, 68, 68, 0.12);
-                    color: $danger-color;
-                    text-transform: uppercase;
-                    letter-spacing: 0.03em;
-                }
-
-                .UserSettingsButton {
-                    background: none;
-                    border: none;
-                    color: $text-secondary;
-                    cursor: pointer;
-                    padding: 0.375rem;
-                    border-radius: 0.375rem;
-                    transition: all 0.15s ease;
-                    flex-shrink: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    &:hover {
-                        color: $text-color;
-                        background: rgba(255, 255, 255, 0.06);
-                    }
-
-                    svg {
-                        width: 1.125rem;
-                        height: 1.125rem;
-                        stroke: currentColor;
-                    }
-                }
-            }
-
-            .UserContextMenu {
-                inset: unset;
-                margin-top: 0.25rem;
-                top: anchor(bottom);
-                right: anchor(right);
-                background: rgba(30, 30, 30, 0.98);
             }
         }
     }
@@ -402,16 +214,6 @@ body {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-
-        .SharedPathEmpty {
-            font-size: 0.8125rem;
-            color: $text-secondary;
-            padding: 1rem;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px dashed $border-color;
-            border-radius: $border-radius-sm;
-        }
 
         .SharedPathItem {
             display: flex;

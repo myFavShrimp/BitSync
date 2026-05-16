@@ -147,7 +147,10 @@ impl Renderable for SessionList {
                             div class=(crate::styles::user_settings_page::ClassName::SESSION_DEVICE) {
                                 (session_display_name(session))
                                 @if is_current {
-                                    span class=(crate::styles::user_settings_page::ClassName::SESSION_BADGE) {
+                                    span class=(
+                                        crate::styles::badge::ClassName::BADGE, " ",
+                                        crate::styles::badge::ClassName::BADGE_SUCCESS,
+                                    ) {
                                         "This device"
                                     }
                                 }
@@ -160,7 +163,10 @@ impl Renderable for SessionList {
                         @if !is_current {
                             button
                                 type="button"
-                                class=(crate::styles::user_settings_page::ClassName::SESSION_REVOKE)
+                                class=(
+                                    crate::styles::button::ClassName::ICON_BUTTON, " ",
+                                    crate::styles::button::ClassName::ICON_BUTTON_DANGER,
+                                )
                                 title="Revoke session"
                                 data-init=(format!(
                                     "this.fetch = fetch('{}', {{ method: 'POST' }})",

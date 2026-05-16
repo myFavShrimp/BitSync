@@ -32,6 +32,10 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
 
                     style { (crate::styles::base::STYLE_SHEET) }
                     style { (crate::styles::button::STYLE_SHEET) }
+                    style { (crate::styles::badge::STYLE_SHEET) }
+                    style { (crate::styles::empty_state::STYLE_SHEET) }
+                    style { (crate::styles::token_box::STYLE_SHEET) }
+                    style { (crate::styles::context_menu::STYLE_SHEET) }
                     style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
@@ -112,13 +116,13 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                             div
                                 id=(NAV_MENU_ID)
                                 class=(
-                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                    crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
                                     crate::styles::base::ClassName::NAV_CONTEXT_MENU,
                                 )
                                 popover
                             {
                                 button
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
@@ -129,11 +133,11 @@ impl<R: Renderable> Renderable for LoggedInDocument<R> {
                                     (crate::icons::Bolt::default())
                                     span { "Settings" }
                                 }
-                                div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                                div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
                                 a
                                     class=(
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                     )
                                     href=(bitsync_routes::GetLogoutAction.to_string())
                                 {
@@ -231,6 +235,10 @@ impl<R: Renderable> Renderable for PublicShareDocument<R> {
 
                     style { (crate::styles::base::STYLE_SHEET) }
                     style { (crate::styles::button::STYLE_SHEET) }
+                    style { (crate::styles::badge::STYLE_SHEET) }
+                    style { (crate::styles::empty_state::STYLE_SHEET) }
+                    style { (crate::styles::token_box::STYLE_SHEET) }
+                    style { (crate::styles::context_menu::STYLE_SHEET) }
                     style { (crate::styles::modal::STYLE_SHEET) }
                     style { (crate::styles::error_modal::STYLE_SHEET) }
                     style { (crate::styles::error_banner::STYLE_SHEET) }
@@ -311,13 +319,13 @@ impl<R: Renderable> Renderable for PublicShareDocument<R> {
                             div
                                 id=(NAV_MENU_ID)
                                 class=(
-                                    crate::styles::base::ClassName::CONTEXT_MENU, " ",
+                                    crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
                                     crate::styles::base::ClassName::NAV_CONTEXT_MENU,
                                 )
                                 popover
                             {
                                 button
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUserSettingsDialog))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
@@ -328,11 +336,11 @@ impl<R: Renderable> Renderable for PublicShareDocument<R> {
                                     (crate::icons::Bolt::default())
                                     span { "Settings" }
                                 }
-                                div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                                div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
                                 a
                                     class=(
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                     )
                                     href=(bitsync_routes::GetLogoutAction.to_string())
                                 {

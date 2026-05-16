@@ -55,11 +55,12 @@ impl Renderable for RegisterPage {
     fn render_to(&self, buffer: &mut hypertext::Buffer) {
         maud! {
             AuthDocument {
+                style { (crate::styles::auth_page::STYLE_SHEET) }
                 style { (crate::styles::register_page::STYLE_SHEET) }
 
-                (crate::icons::Logo::with_class(crate::styles::register_page::ClassName::LOGO))
+                (crate::icons::Logo::with_class(crate::styles::auth_page::ClassName::LOGO))
 
-                p class=(crate::styles::register_page::ClassName::PAGE_HINT) {
+                p class=(crate::styles::auth_page::ClassName::PAGE_HINT) {
                     @match &self {
                         Self::InviteTokenInput(..) => ("Enter your invite token to register"),
                         Self::UserRegistration(..) | Self::TotpSetup(..) => ("Create an account to get started"),
@@ -109,15 +110,15 @@ impl Renderable for InviteTokenForm {
         maud! {
             form
                 id=(self.id())
-                class=(crate::styles::register_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
                 data-hijack
                 action=(bitsync_routes::PostRedeemInviteToken.to_string())
                 method="POST"
             {
-                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "Invite Token"
 
-                    div class=(crate::styles::register_page::ClassName::INPUT) {
+                    div class=(crate::styles::auth_page::ClassName::INPUT) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             name="token"
@@ -128,7 +129,7 @@ impl Renderable for InviteTokenForm {
 
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
-                div class=(crate::styles::register_page::ClassName::ACTIONS) {
+                div class=(crate::styles::auth_page::ClassName::ACTIONS) {
                     button
                         type="submit"
                         class=(crate::styles::button::ClassName::BUTTON)
@@ -166,15 +167,15 @@ impl Renderable for RegisterForm {
         maud! {
             form
                 id=(self.id())
-                class=(crate::styles::register_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
                 data-hijack
                 action=(bitsync_routes::PostRegisterAction.with_query_params(bitsync_routes::PostRegisterActionQueryParameters { token: self.token.clone() }).to_string())
                 method="POST"
             {
-                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "Username"
 
-                    div class=(crate::styles::register_page::ClassName::INPUT) {
+                    div class=(crate::styles::auth_page::ClassName::INPUT) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             value=[&self.username]
@@ -183,10 +184,10 @@ impl Renderable for RegisterForm {
                             required;
                     }
                 }
-                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "Password"
 
-                    div class=(crate::styles::register_page::ClassName::INPUT) {
+                    div class=(crate::styles::auth_page::ClassName::INPUT) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             type="password"
@@ -198,7 +199,7 @@ impl Renderable for RegisterForm {
 
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
-                div class=(crate::styles::register_page::ClassName::ACTIONS) {
+                div class=(crate::styles::auth_page::ClassName::ACTIONS) {
                     button
                         type="submit"
                         class=(crate::styles::button::ClassName::BUTTON)
@@ -239,7 +240,7 @@ impl Renderable for TotpSetupForm {
         maud! {
             form
                 id=(self.id())
-                class=(crate::styles::register_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
                 data-hijack
                 action=(bitsync_routes::PostRegisterTotpSetupAction.to_string())
                 method="POST"
@@ -258,14 +259,14 @@ impl Renderable for TotpSetupForm {
                     pre { code { (self.totp_secret) } }
                 }
 
-                hr;
+                hr class=(crate::styles::auth_page::ClassName::AUTH_DIVIDER);
 
                 OptionalErrorBanner message=(self.error.as_ref().map(|error| error.message().to_owned()));
 
-                label class=(crate::styles::register_page::ClassName::INPUT_WRAPPER) {
+                label class=(crate::styles::auth_page::ClassName::INPUT_WRAPPER) {
                     "TOTP Code"
 
-                    div class=(crate::styles::register_page::ClassName::TOTP_INPUT_WRAPPER) {
+                    div class=(crate::styles::auth_page::ClassName::TOTP_INPUT_WRAPPER) {
                         input
                             class=(crate::styles::base::ClassName::FORM_CONTROL)
                             name="totp"
@@ -274,7 +275,7 @@ impl Renderable for TotpSetupForm {
 
                         p
                             id="totp-timer"
-                            class=(crate::styles::register_page::ClassName::TOTP_TIMER)
+                            class=(crate::styles::auth_page::ClassName::TOTP_TIMER)
                         {
                             "30"
                         }
@@ -315,7 +316,7 @@ impl Renderable for TotpAlreadySetUpNotice {
         maud! {
             div
                 id=(self.id())
-                class=(crate::styles::register_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
             {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Two-Factor Authentication"}
@@ -360,22 +361,22 @@ impl Renderable for TotpRecoveryCodesPrompt {
         maud! {
             div
                 id=(self.id())
-                class=(crate::styles::register_page::ClassName::FORM)
+                class=(crate::styles::auth_page::ClassName::FORM)
             {
                 div class=(crate::styles::register_page::ClassName::TOTP_HEADER) {
                     h1 {"Save Your Recovery Codes"}
                     p {"Your two-factor authentication is now active."}
                 }
 
-                p {
+                p class=(crate::styles::auth_page::ClassName::AUTH_DESCRIPTION) {
                     ("To ensure you don't lose access to your account, please save these recovery codes in a secure location.")
                 }
 
-                p {
+                p class=(crate::styles::auth_page::ClassName::AUTH_DESCRIPTION) {
                     ("If you ever lose access to your authenticator app, you can enter any of these codes in the TOTP field when signing in. Each code works only once.")
                 }
 
-                p {
+                p class=(crate::styles::auth_page::ClassName::AUTH_DESCRIPTION) {
                     ("These codes will only be shown now. If you navigate away without saving them, you'll need to generate new ones.")
                 }
 

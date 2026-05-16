@@ -44,7 +44,7 @@ impl Renderable for UserList {
                 class=(crate::styles::user_settings_page::ClassName::USER_LIST)
             {
                 @if self.users.is_empty() {
-                    p class=(crate::styles::user_settings_page::ClassName::USER_EMPTY) {
+                    p class=(crate::styles::empty_state::ClassName::EMPTY_STATE) {
                         "No other users on this instance."
                     }
                 }
@@ -58,18 +58,24 @@ impl Renderable for UserList {
 
                         div class=(crate::styles::user_settings_page::ClassName::USER_ACTIONS_GROUP) {
                             @if user.is_admin {
-                                span class=(crate::styles::user_settings_page::ClassName::USER_ADMIN_BADGE) {
+                                span class=(
+                                    crate::styles::badge::ClassName::BADGE, " ",
+                                    crate::styles::badge::ClassName::BADGE_DANGER,
+                                ) {
                                     "Admin"
                                 }
                             }
                             @if user.is_suspended {
-                                span class=(crate::styles::user_settings_page::ClassName::USER_SUSPENDED_BADGE) {
+                                span class=(
+                                    crate::styles::badge::ClassName::BADGE, " ",
+                                    crate::styles::badge::ClassName::BADGE_WARNING,
+                                ) {
                                     "Suspended"
                                 }
                             }
 
                             button
-                                class=(crate::styles::user_settings_page::ClassName::USER_SETTINGS_BUTTON)
+                                class=(crate::styles::button::ClassName::ICON_BUTTON)
                                 popovertarget=(popover_id)
                                 title="User actions"
                             {
@@ -82,14 +88,14 @@ impl Renderable for UserList {
                         div
                             id=(popover_id)
                             class=(
-                                crate::styles::base::ClassName::CONTEXT_MENU, " ",
-                                crate::styles::user_settings_page::ClassName::USER_CONTEXT_MENU,
+                                crate::styles::context_menu::ClassName::CONTEXT_MENU, " ",
+                                crate::styles::context_menu::ClassName::ANCHOR_TOP_RIGHT,
                             )
                             popover
                         {
                             @if user.is_admin {
                                 button
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetRevokeAdminDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
@@ -101,7 +107,7 @@ impl Renderable for UserList {
                                 }
                             } @else {
                                 button
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetMakeAdminDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
@@ -113,7 +119,7 @@ impl Renderable for UserList {
                                 }
                             }
                             button
-                                class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetResetUserTotpDialog { user_id: user.id }))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                 data-effect=(format!(
@@ -124,11 +130,11 @@ impl Renderable for UserList {
                                 span { "Reset TOTP" }
                             }
 
-                            div class=(crate::styles::base::ClassName::CONTEXT_MENU_DIVIDER) {}
+                            div class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_DIVIDER) {}
 
                             @if user.is_suspended {
                                 button
-                                    class=(crate::styles::base::ClassName::CONTEXT_MENU_ITEM)
+                                    class=(crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM)
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetUnsuspendUserDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
                                     data-effect=(format!(
@@ -141,8 +147,8 @@ impl Renderable for UserList {
                             } @else {
                                 button
                                     class=(
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                        crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                        crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                     )
                                     data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetSuspendUserDialog { user_id: user.id }))
                                     data-on-click="closeClosestPopover(this), this.fetch.trigger()"
@@ -156,8 +162,8 @@ impl Renderable for UserList {
                             }
                             button
                                 class=(
-                                    crate::styles::base::ClassName::CONTEXT_MENU_ITEM, " ",
-                                    crate::styles::base::ClassName::CONTEXT_MENU_ITEM_DANGER,
+                                    crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM, " ",
+                                    crate::styles::context_menu::ClassName::CONTEXT_MENU_ITEM_DANGER,
                                 )
                                 data-init=(format!("this.triggerButton = getPopoverTrigger(this), this.fetch = fetch('{}')", bitsync_routes::GetDeleteUserDialog { user_id: user.id }))
                                 data-on-click="closeClosestPopover(this), this.fetch.trigger()"
